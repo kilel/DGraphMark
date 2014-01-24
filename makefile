@@ -22,8 +22,12 @@ ifneq ($(OPENMP), true)
 	CPPFLAGS += $(OPENMP_FLAG)
 endif
 
+SRC_DIR = src/
+SRC_BASE_DIR = $(SRC_DIR)base/
+SRC_TASKS_DIR = $(SRC_DIR)tasks/
 
-SOURCES = src/main.cpp
+SRC_BASE = Edge.cpp Graph.cpp 
+SOURCES = src/main.cpp $(addprefix $(SRC_BASE_DIR), $(SRC_BASE)) $(SRC_STUB)
 
 BUILD = dgmark	    # list of builds
 

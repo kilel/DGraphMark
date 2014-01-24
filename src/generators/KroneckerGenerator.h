@@ -14,34 +14,18 @@
  *   limitations under the License.
  */
 
-#include <cstdlib>
-#include <mpi.h>
-#include "tasks/StubTask.h"
+#ifndef KRONECKERGENERATOR_H
+#define	KRONECKERGENERATOR_H
 
+namespace dgmark {
 
-using namespace std;
-using namespace MPI;
+    class KroneckerGenerator : public GraphGenerator{
+    public:
+        KroneckerGenerator();
+        virtual ~KroneckerGenerator();
+    private:
 
-/**
- * @param argc
- * @param argv
- * @return sdf
- */
-int main(int argc, char** argv) {
-    Init();
-
-    Intracomm *comm = &COMM_WORLD;
-    int rank = comm->Get_rank();
-    int size = comm->Get_size();
-
-    StubTask task;
-    StubValidator validator;
-    Result *result = task.run();
-
-
-    if (validator.validate(result))
-        printf("%d, %d\n", rank, size);
-
-    Finalize();
-    return 0;
+    };
 }
+#endif	/* KRONECKERGENERATOR_H */
+

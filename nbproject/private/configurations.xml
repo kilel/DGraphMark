@@ -5,6 +5,29 @@
       <df name="bin">
       </df>
       <df name="src">
+        <df name="base">
+          <in>Edge.cpp</in>
+          <in>Edge.h</in>
+          <in>Graph.cpp</in>
+          <in>Graph.h</in>
+          <in>GraphGenerator.h</in>
+          <in>Task.h</in>
+        </df>
+        <df name="generators">
+          <in>KroneckerGenerator.cpp</in>
+          <in>KroneckerGenerator.h</in>
+        </df>
+        <df name="tasks">
+          <df name="tree-maker">
+            <in>BFSTask.cpp</in>
+            <in>BFSTask.h</in>
+            <in>ParentTree.cpp</in>
+            <in>ParentTree.h</in>
+            <in>ParentTreeValidator.cpp</in>
+            <in>ParentTreeValidator.h</in>
+          </df>
+          <in>StubTask.h</in>
+        </df>
         <in>main.cpp</in>
       </df>
     </df>

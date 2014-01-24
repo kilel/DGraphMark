@@ -3,6 +3,29 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="DGraphMark">
       <df name="src">
+        <df name="base">
+          <in>Edge.cpp</in>
+          <in>Edge.h</in>
+          <in>Graph.cpp</in>
+          <in>Graph.h</in>
+          <in>GraphGenerator.h</in>
+          <in>Task.h</in>
+        </df>
+        <df name="generators">
+          <in>KroneckerGenerator.cpp</in>
+          <in>KroneckerGenerator.h</in>
+        </df>
+        <df name="tasks">
+          <df name="tree-maker">
+            <in>BFSTask.cpp</in>
+            <in>BFSTask.h</in>
+            <in>ParentTree.cpp</in>
+            <in>ParentTree.h</in>
+            <in>ParentTreeValidator.cpp</in>
+            <in>ParentTreeValidator.h</in>
+          </df>
+          <in>StubTask.h</in>
+        </df>
         <in>main.cpp</in>
       </df>
     </df>
@@ -45,9 +68,54 @@
           </ccTool>
         </makeTool>
       </makefileType>
+      <item path="src/base/Edge.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/base/Edge.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/base/Graph.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/base/Graph.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/base/GraphGenerator.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/base/Task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/generators/KroneckerGenerator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/generators/KroneckerGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="8">
         <ccTool>
         </ccTool>
+      </item>
+      <item path="src/tasks/StubTask.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/BFSTask.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/BFSTask.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/ParentTree.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/ParentTree.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/ParentTreeValidator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/ParentTreeValidator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
     </conf>
   </confs>

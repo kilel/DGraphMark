@@ -14,34 +14,16 @@
  *   limitations under the License.
  */
 
-#include <cstdlib>
-#include <mpi.h>
-#include "tasks/StubTask.h"
+#include "ParentTree.h"
+namespace dgmark {
 
+    ParentTree::ParentTree() {
+    }
 
-using namespace std;
-using namespace MPI;
+    ParentTree::ParentTree(const ParentTree& orig) {
+    }
 
-/**
- * @param argc
- * @param argv
- * @return sdf
- */
-int main(int argc, char** argv) {
-    Init();
-
-    Intracomm *comm = &COMM_WORLD;
-    int rank = comm->Get_rank();
-    int size = comm->Get_size();
-
-    StubTask task;
-    StubValidator validator;
-    Result *result = task.run();
-
-
-    if (validator.validate(result))
-        printf("%d, %d\n", rank, size);
-
-    Finalize();
-    return 0;
+    ParentTree::~ParentTree() {
+    }
 }
+

@@ -14,34 +14,26 @@
  *   limitations under the License.
  */
 
-#include <cstdlib>
-#include <mpi.h>
-#include "tasks/StubTask.h"
+#ifndef GRAPHGENERATOR_H
+#define	GRAPHGENERATOR_H
 
+#include "Graph.h"
 
-using namespace std;
-using namespace MPI;
+namespace dgmark {
 
-/**
- * @param argc
- * @param argv
- * @return sdf
- */
-int main(int argc, char** argv) {
-    Init();
+    /**
+     * Generates Graphs.<br />
+     * Parameters for generation passes with constructor.
+     */
+    class GraphGenerator {
+    public:
+        virtual ~GraphGenerator(){
+        }
+        
+        virtual Graph generate() = 0;
+    };
 
-    Intracomm *comm = &COMM_WORLD;
-    int rank = comm->Get_rank();
-    int size = comm->Get_size();
-
-    StubTask task;
-    StubValidator validator;
-    Result *result = task.run();
-
-
-    if (validator.validate(result))
-        printf("%d, %d\n", rank, size);
-
-    Finalize();
-    return 0;
 }
+
+#endif	/* GRAPHGENERATOR_H */
+

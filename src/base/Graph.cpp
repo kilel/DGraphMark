@@ -14,34 +14,24 @@
  *   limitations under the License.
  */
 
-#include <cstdlib>
-#include <mpi.h>
-#include "tasks/StubTask.h"
+#include "Graph.h"
 
+namespace dgmark {
 
-using namespace std;
-using namespace MPI;
+    Graph::Graph() {
+        edges = new vector<Edge>();
+    }
 
-/**
- * @param argc
- * @param argv
- * @return sdf
- */
-int main(int argc, char** argv) {
-    Init();
+    Graph::Graph(vector<Edge> *edgesList) : edges(edgesList) {
+    }
 
-    Intracomm *comm = &COMM_WORLD;
-    int rank = comm->Get_rank();
-    int size = comm->Get_size();
+    Graph::Graph(const Graph& orig) : edges(orig.edges) {
+    }
 
-    StubTask task;
-    StubValidator validator;
-    Result *result = task.run();
+    Graph::~Graph() {
+    }
 
-
-    if (validator.validate(result))
-        printf("%d, %d\n", rank, size);
-
-    Finalize();
-    return 0;
+    void Graph::clear() {
+        edges->clear();
+    }
 }

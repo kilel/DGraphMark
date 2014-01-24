@@ -14,34 +14,45 @@
  *   limitations under the License.
  */
 
-#include <cstdlib>
-#include <mpi.h>
-#include "tasks/StubTask.h"
+#include "../base/Task.h"
 
+class StubResult : public Result {
+public:
 
-using namespace std;
-using namespace MPI;
+    virtual ~StubResult() {
+    }
 
-/**
- * @param argc
- * @param argv
- * @return sdf
- */
-int main(int argc, char** argv) {
-    Init();
+    virtual TaskType getTaskType() {
+        return STUB;
+    }
+};
 
-    Intracomm *comm = &COMM_WORLD;
-    int rank = comm->Get_rank();
-    int size = comm->Get_size();
+class StubValidator : public Validator {
+public:
 
-    StubTask task;
-    StubValidator validator;
-    Result *result = task.run();
+    virtual ~StubValidator() {
+    }
 
+    TaskType getTaskType() {
+        return STUB;
+    }
 
-    if (validator.validate(result))
-        printf("%d, %d\n", rank, size);
+    bool validate(Result *result) {
+        return true;
+    }
+};
 
-    Finalize();
-    return 0;
-}
+class StubTask : public Task {
+public:
+
+    virtual ~StubTask() {
+    }
+
+    TaskType getTaskType() {
+        return STUB;
+    }
+
+    StubResult* run() {
+        return new StubResult();
+    }
+};
