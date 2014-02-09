@@ -30,7 +30,11 @@ namespace dgmark {
         virtual ~GraphGenerator(){
         }
         
-        virtual Graph generate() = 0;
+        /**
+         * Generates graph with specified parameters.
+         * @return Graph.
+         */
+        virtual Graph* generate() = 0;
     };
 
 }

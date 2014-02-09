@@ -14,6 +14,8 @@
         <df name="generators">
           <in>KroneckerGenerator.cpp</in>
           <in>KroneckerGenerator.h</in>
+          <in>SimpleGenerator.cpp</in>
+          <in>SimpleGenerator.h</in>
         </df>
         <df name="tasks">
           <df name="tree-maker">
@@ -89,6 +91,10 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src/generators/SimpleGenerator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/generators/SimpleGenerator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="8">
         <ccTool>

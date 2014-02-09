@@ -15,12 +15,24 @@
  */
 
 #include <cstdlib>
+#include <time.h>
 #include <mpi.h>
-#include "tasks/StubTask.h"
-
+#include "generators/SimpleGenerator.h"
 
 using namespace std;
 using namespace MPI;
+using namespace dgmark;
+
+
+void printGraph(Graph *graph, Intracomm *comm) {
+    vector<Edge*> *edges = graph->edges;
+    int rank = comm->Get_rank();
+    
+    for(size_t i = 0; i < edges->size(); ++i) {
+        Edge *edge = edges->at(i);
+        printf("%d: %ld -> %ld\n", rank, edge->from, edge->to);
+    }
+}
 
 /**
  * @param argc
@@ -29,18 +41,16 @@ using namespace MPI;
  */
 int main(int argc, char** argv) {
     Init();
-
+    
     Intracomm *comm = &COMM_WORLD;
-    int rank = comm->Get_rank();
-    int size = comm->Get_size();
-
-    StubTask task;
-    StubValidator validator;
-    Result *result = task.run();
-
-
-    if (validator.validate(result))
-        printf("%d, %d\n", rank, size);
+    srand(time(0) + comm->Get_rank());
+    
+    int grade = 2;
+    int density = 3;
+    
+    SimpleGenerator *gen = new SimpleGenerator(comm, grade, density);
+    Graph* graph = gen->generate();
+    printGraph(graph, comm);
 
     Finalize();
     return 0;

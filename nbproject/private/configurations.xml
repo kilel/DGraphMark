@@ -3,6 +3,14 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="DGraphMark">
       <df name="bin">
+        <df name="obj">
+          <df name="base">
+          </df>
+          <df name="generators">
+          </df>
+          <df name="tasks">
+          </df>
+        </df>
       </df>
       <df name="src">
         <df name="base">
@@ -16,6 +24,8 @@
         <df name="generators">
           <in>KroneckerGenerator.cpp</in>
           <in>KroneckerGenerator.h</in>
+          <in>SimpleGenerator.cpp</in>
+          <in>SimpleGenerator.h</in>
         </df>
         <df name="tasks">
           <df name="tree-maker">

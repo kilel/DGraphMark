@@ -44,6 +44,11 @@ public:
 
     virtual ~Result() {
     }
+    
+    /**
+     * @return performance mark of the result.
+     */
+    virtual double getMark() = 0;
 };
 
 /**

@@ -19,10 +19,10 @@
 namespace dgmark {
 
     Graph::Graph() {
-        edges = new vector<Edge>();
+        edges = new vector<Edge*>();
     }
 
-    Graph::Graph(vector<Edge> *edgesList) : edges(edgesList) {
+    Graph::Graph(vector<Edge*> *edgesList) : edges(edgesList) {
     }
 
     Graph::Graph(const Graph& orig) : edges(orig.edges) {

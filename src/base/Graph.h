@@ -29,7 +29,7 @@ namespace dgmark {
      */
     class Graph {
     public:
-        vector<Edge> *edges;
+        vector<Edge*> *edges;
 
         /**
          * Creates graph with no edges.
@@ -40,7 +40,7 @@ namespace dgmark {
          * Creates graph from edges list. 
          * @param edgesList list of edges to initialize with.
          */
-        Graph(vector<Edge> *edgesList);
+        Graph(vector<Edge*> *edgesList);
 
         /**
          * Copying graph. 

@@ -18,7 +18,7 @@
 
 namespace dgmark {
 
-    Edge::Edge(Vertex fromVertex, Vertex toVertex) : from(fromVertex), to(to) {
+    Edge::Edge(Vertex fromVertex, Vertex toVertex) : from(fromVertex), to(toVertex) {
     };
 
     Edge::Edge(const Edge& orig) : from(orig.from), to(orig.to) {

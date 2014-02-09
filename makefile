@@ -23,20 +23,38 @@ ifneq ($(OPENMP), true)
 endif
 
 SRC_DIR = src/
-SRC_BASE_DIR = $(SRC_DIR)base/
-SRC_TASKS_DIR = $(SRC_DIR)tasks/
+BIN_DIR = bin/
+OBJ_DIR = $(BIN_DIR)obj/
+BASE_DIR = base/
+TASKS_DIR = tasks/
+GENERATOR_DIR = generators/
 
-SRC_BASE = Edge.cpp Graph.cpp 
-SOURCES = src/main.cpp $(addprefix $(SRC_BASE_DIR), $(SRC_BASE)) $(SRC_STUB)
+DIRECTORIES = $(BIN_DIR) $(OBJ_DIR) $(OBJ_DIR)$(BASE_DIR) \
+	      $(OBJ_DIR)$(TASKS_DIR) $(OBJ_DIR)$(GENERATOR_DIR) 
+
+BASE = Edge Graph 
+GENERATORS = SimpleGenerator
+TASKS = 
+FILES_LIST = main \
+	    $(addprefix $(BASE_DIR), $(BASE)) \
+	    $(addprefix $(GENERATOR_DIR), $(GENERATORS)) \
+	    $(addprefix $(TASKS_DIR), $(TASKS)) \
+
+SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))
+OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
 
 BUILD = dgmark	    # list of builds
 
 all: $(BUILD)
-bin:		    # preparing bin catalogue
-	mkdir bin
+
+$(DIRECTORIES):			    # prepairing directories.
+	mkdir $@
 	
-dgmark: bin	    # std build
-	$(MPICPP) $(CPPFLAGS) $(SOURCES) -o $(addprefix bin/, $@)
+dgmark: $(DIRECTORIES) $(OBJECTS)   # basic build
+	$(MPICPP) $(CPPFLAGS) $(OBJECTS) -o $(addprefix bin/, $@)
 	
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp	    # building of resource
+	$(MPICPP) $(CPPFLAGS) -c $< -o $@
+
 clean:
-	#rm -f bin/*
+	rm -rf $(BIN_DIR)*

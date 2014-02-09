@@ -25,6 +25,10 @@ public:
     virtual TaskType getTaskType() {
         return STUB;
     }
+    
+    virtual double getMark() {
+        return 0;
+    }
 };
 
 class StubValidator : public Validator {
