@@ -26,19 +26,22 @@ SRC_DIR = src/
 BIN_DIR = bin/
 OBJ_DIR = $(BIN_DIR)obj/
 BASE_DIR = base/
-TASKS_DIR = tasks/
+TASKS_DIR = tasks/tree-maker/
 GENERATOR_DIR = generators/
+CONTROLLER_DIR = controllers/
 
-DIRECTORIES = $(BIN_DIR) $(OBJ_DIR) $(OBJ_DIR)$(BASE_DIR) \
-	      $(OBJ_DIR)$(TASKS_DIR) $(OBJ_DIR)$(GENERATOR_DIR) 
+DIRECTORIES = $(OBJ_DIR)$(BASE_DIR) $(OBJ_DIR)$(TASKS_DIR) \
+	      $(OBJ_DIR)$(GENERATOR_DIR) $(OBJ_DIR)$(CONTROLLER_DIR)
 
 BASE = Edge Graph 
 GENERATORS = SimpleGenerator
-TASKS = 
+TASKS = BFSTask ParentTree ParentTreeValidator TreeMakerTask
+CONTROLLERS = TreeMakerController
 FILES_LIST = main \
 	    $(addprefix $(BASE_DIR), $(BASE)) \
 	    $(addprefix $(GENERATOR_DIR), $(GENERATORS)) \
 	    $(addprefix $(TASKS_DIR), $(TASKS)) \
+	    $(addprefix $(CONTROLLER_DIR), $(CONTROLLERS)) 
 
 SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))
 OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
@@ -48,7 +51,7 @@ BUILD = dgmark	    # list of builds
 all: $(BUILD)
 
 $(DIRECTORIES):			    # prepairing directories.
-	mkdir $@
+	mkdir -p $@
 	
 dgmark: $(DIRECTORIES) $(OBJECTS)   # basic build
 	$(MPICPP) $(CPPFLAGS) $(OBJECTS) -o $(addprefix bin/, $@)

@@ -14,30 +14,33 @@
  *   limitations under the License.
  */
 
-#include <vector>
+#ifndef CONTROLLER_H
+#define	CONTROLLER_H
 
-#include "ParentTree.h"
+#include "GraphGenerator.h"
+
 namespace dgmark {
 
-    ParentTree::ParentTree(Intracomm *comm, vector<Vertex> *parent, double duration) {
-        this->comm = comm;
-        this->parent = parent;
-        calculateMark(duration);
-    }
+    class Controller {
+    public:
 
-    ParentTree::ParentTree(const ParentTree& orig) {
-        this->comm = orig.comm;
-        this->parent = orig.parent;
-        this->mark = orig.mark;
-    }
+        Controller(GraphGenerator *generator) : generator(generator) {
+        }
 
-    ParentTree::~ParentTree() {
-        parent->clear();
-        delete parent;
-    }
-    
-    double ParentTree::calculateMark(double duration) {
-        //TODO
-    }
+        Controller(const Controller& orig) : generator(orig.generator) {
+        }
+
+        virtual ~Controller() {
+        }
+
+        virtual void runBenchmark() = 0;
+        virtual void printStatistics() = 0;
+
+    protected:
+        GraphGenerator *generator;
+
+    };
 }
+
+#endif	/* CONTROLLER_H */
 

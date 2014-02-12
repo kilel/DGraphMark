@@ -4,12 +4,17 @@
     <df root="." name="DGraphMark">
       <df name="src">
         <df name="base">
+          <in>Controller.h</in>
           <in>Edge.cpp</in>
           <in>Edge.h</in>
           <in>Graph.cpp</in>
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
           <in>Task.h</in>
+        </df>
+        <df name="controllers">
+          <in>TreeMakerController.cpp</in>
+          <in>TreeMakerController.h</in>
         </df>
         <df name="generators">
           <in>KroneckerGenerator.cpp</in>
@@ -25,6 +30,8 @@
             <in>ParentTree.h</in>
             <in>ParentTreeValidator.cpp</in>
             <in>ParentTreeValidator.h</in>
+            <in>TreeMakerTask.cpp</in>
+            <in>TreeMakerTask.h</in>
           </df>
           <in>StubTask.h</in>
         </df>
@@ -70,6 +77,8 @@
           </ccTool>
         </makeTool>
       </makefileType>
+      <item path="src/base/Controller.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/base/Edge.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/base/Edge.h" ex="false" tool="3" flavor2="0">
@@ -81,6 +90,16 @@
       <item path="src/base/GraphGenerator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/base/Task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/controllers/TreeMakerController.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/controllers/TreeMakerController.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="src/generators/KroneckerGenerator.cpp"
             ex="false"
@@ -119,6 +138,16 @@
             flavor2="0">
       </item>
       <item path="src/tasks/tree-maker/ParentTreeValidator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/TreeMakerTask.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/TreeMakerTask.h"
             ex="false"
             tool="3"
             flavor2="0">

@@ -16,15 +16,24 @@
 
 #ifndef PARENTTREEVALIDATOR_H
 #define	PARENTTREEVALIDATOR_H
+
+#include "../../base/Task.h"
+#include "ParentTree.h"
 namespace dgmark {
 
-    class ParentTreeValidator {
+    class ParentTreeValidator :public Validator{
     public:
-        ParentTreeValidator();
+        ParentTreeValidator(Intracomm *comm);
         ParentTreeValidator(const ParentTreeValidator& orig);
         virtual ~ParentTreeValidator();
+        
+        virtual TaskType getTaskType() {
+            return TaskType::PARENT_TREE;
+        }
+        
+        virtual bool validate(Result *taskResult);
     private:
-
+        Intracomm *comm;
     };
 }
 #endif	/* PARENTTREEVALIDATOR_H */

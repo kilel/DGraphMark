@@ -14,28 +14,32 @@
  *   limitations under the License.
  */
 
-#ifndef BFSTASK_H
-#define	BFSTASK_H
+#ifndef TREEMAKERCONTROLLER_H
+#define	TREEMAKERCONTROLLER_H
 
 #include <mpi.h>
-#include "../../base/Graph.h"
-#include "ParentTree.h"
-#include "TreeMakerTask.h"
+#include "../base/Controller.h"
+#include "../tasks/tree-maker/TreeMakerTask.h"
+#include "../tasks/tree-maker/ParentTreeValidator.h"
+
 
 namespace dgmark {
-
+    
     using namespace MPI;
 
-    class BFSTask : public TreeMakerTask {
+    class TreeMakerController : public Controller {
     public:
-        BFSTask(Intracomm *comm, Graph *graph, Vertex root);
-        BFSTask(const BFSTask& orig);
-        virtual ~BFSTask();
+        TreeMakerController(Intracomm *comm, GraphGenerator *generator, TreeMakerTask *task);
+        TreeMakerController(const TreeMakerController& orig);
+        virtual ~TreeMakerController();
 
-        virtual ParentTree* run();
-
+        virtual void runBenchmark();
+        virtual void printStatistics();
+    private:
+        Intracomm *comm;
+        TreeMakerTask *task;
     };
 }
 
-#endif	/* BFSTASK_H */
+#endif	/* TREEMAKERCONTROLLER_H */
 

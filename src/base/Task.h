@@ -18,7 +18,7 @@
 #define	GRAPHTASK_H
 
 enum TaskType {
-    STUB, BFS
+    STUB, PARENT_TREE
 };
 
 /**

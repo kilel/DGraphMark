@@ -17,15 +17,52 @@
 #ifndef PARENTTREE_H
 #define	PARENTTREE_H
 
-namespace dgmark {
+#include <vector>
+#include <mpi.h>
 
-    class ParentTree {
+#include "../../base/Edge.h"
+#include "../../base/Task.h"
+
+
+namespace dgmark {
+    
+    using namespace std;
+    using namespace MPI;
+
+    class ParentTree : public Result{
     public:
-        ParentTree();
+        /**
+         * Creates parent tree (result for tree-makers).
+         * @param comm Communacator to work with.
+         * @param parent Array of parents to verticies.
+         * @param duration Duration of tree-making task in seconds (MPI::Wtime)
+         */
+        ParentTree(Intracomm *comm, vector<Vertex> *parent, double duration);
         ParentTree(const ParentTree& orig);
         virtual ~ParentTree();
-    private:
 
+        vector<Vertex>* getParent() {
+            return parent;
+        }
+        
+        virtual double getMark() {
+            return mark;
+        }
+        
+        virtual TaskType getTaskType() {
+            return TaskType::PARENT_TREE;
+        }
+    private:
+        Intracomm *comm;
+        vector<Vertex> *parent;
+        double mark;
+        
+        /**
+         * Calculates mark for thos result.
+         * @param duration duration of task.
+         * @return mark.
+         */
+        double calculateMark(double duration);
     };
 }
 

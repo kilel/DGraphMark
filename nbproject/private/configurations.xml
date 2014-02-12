@@ -6,20 +6,29 @@
         <df name="obj">
           <df name="base">
           </df>
+          <df name="controllers">
+          </df>
           <df name="generators">
           </df>
           <df name="tasks">
+            <df name="tree-maker">
+            </df>
           </df>
         </df>
       </df>
       <df name="src">
         <df name="base">
+          <in>Controller.h</in>
           <in>Edge.cpp</in>
           <in>Edge.h</in>
           <in>Graph.cpp</in>
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
           <in>Task.h</in>
+        </df>
+        <df name="controllers">
+          <in>TreeMakerController.cpp</in>
+          <in>TreeMakerController.h</in>
         </df>
         <df name="generators">
           <in>KroneckerGenerator.cpp</in>
@@ -35,6 +44,8 @@
             <in>ParentTree.h</in>
             <in>ParentTreeValidator.cpp</in>
             <in>ParentTreeValidator.h</in>
+            <in>TreeMakerTask.cpp</in>
+            <in>TreeMakerTask.h</in>
           </df>
           <in>StubTask.h</in>
         </df>

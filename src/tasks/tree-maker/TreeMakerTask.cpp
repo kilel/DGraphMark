@@ -14,29 +14,20 @@
  *   limitations under the License.
  */
 
-#include "ParentTreeValidator.h"
+#include "TreeMakerTask.h"
+
 namespace dgmark {
 
-    ParentTreeValidator::ParentTreeValidator(Intracomm *comm) {
-        this->comm = comm;
+    TreeMakerTask::TreeMakerTask(Intracomm *comm, Graph *graph, Vertex root) :
+    comm(comm), graph(graph), root(root) {
     }
 
-    ParentTreeValidator::ParentTreeValidator(const ParentTreeValidator& orig) {
-        this->comm = orig.comm;
+    TreeMakerTask::TreeMakerTask(const TreeMakerTask& orig) :
+    comm(orig.comm), graph(orig.graph), root(orig.root) {
     }
 
-    ParentTreeValidator::~ParentTreeValidator() {
+    TreeMakerTask::~TreeMakerTask() {
     }
-    
-    bool ParentTreeValidator::validate(Result *taskResult) {
-            if(taskResult->getTaskType() != getTaskType()) {
-                return false;
-            }
-            ParentTree *parentTreeResult = (ParentTree*) taskResult;
-            bool isValid = true;
-            
-            //TODO do valudation
-            
-            return isValid;
-        }
+
 }
+

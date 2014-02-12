@@ -18,6 +18,10 @@
 #include <time.h>
 #include <mpi.h>
 #include "generators/SimpleGenerator.h"
+#include "tasks/tree-maker/BFSTask.h"
+#include "tasks/tree-maker/TreeMakerTask.h"
+#include "tasks/tree-maker/ParentTreeValidator.h"
+#include "controllers/TreeMakerController.h"
 
 using namespace std;
 using namespace MPI;
@@ -43,14 +47,17 @@ int main(int argc, char** argv) {
     Init();
     
     Intracomm *comm = &COMM_WORLD;
-    srand(time(0) + comm->Get_rank());
+    srand(time(0) + comm->Get_rank()*3); 
     
-    int grade = 2;
-    int density = 3;
+    int grade = 10;
+    int density = 6;
     
     SimpleGenerator *gen = new SimpleGenerator(comm, grade, density);
-    Graph* graph = gen->generate();
-    printGraph(graph, comm);
+    TreeMakerTask *task = new BFSTask(comm, 0, 0);
+    Controller *controller = new TreeMakerController(comm, gen, task);
+    controller->runBenchmark();
+    controller->printStatistics();
+    
 
     Finalize();
     return 0;

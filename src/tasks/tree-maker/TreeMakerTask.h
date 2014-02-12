@@ -14,30 +14,38 @@
  *   limitations under the License.
  */
 
-#include <vector>
+#ifndef TREEMAKERTASK_H
+#define	TREEMAKERTASK_H
 
+#include <mpi.h>
+#include "../../base/Task.h"
+#include "../../base/Graph.h"
 #include "ParentTree.h"
+
 namespace dgmark {
 
-    ParentTree::ParentTree(Intracomm *comm, vector<Vertex> *parent, double duration) {
-        this->comm = comm;
-        this->parent = parent;
-        calculateMark(duration);
-    }
+    class TreeMakerTask : public Task {
+    public:
+        TreeMakerTask(Intracomm *comm, Graph *graph, Vertex root);
+        TreeMakerTask(const TreeMakerTask& orig);
+        virtual ~TreeMakerTask();
 
-    ParentTree::ParentTree(const ParentTree& orig) {
-        this->comm = orig.comm;
-        this->parent = orig.parent;
-        this->mark = orig.mark;
-    }
+        virtual TaskType getTaskType() {
+            return TaskType::PARENT_TREE;
+        }
 
-    ParentTree::~ParentTree() {
-        parent->clear();
-        delete parent;
-    }
-    
-    double ParentTree::calculateMark(double duration) {
-        //TODO
-    }
+        void setRoot(Vertex newRoot) {
+            root = newRoot;
+        }
+
+    protected:
+        Intracomm *comm;
+        Graph *graph;
+        Vertex root;
+
+    };
+
 }
+
+#endif	/* TREEMAKERTASK_H */
 

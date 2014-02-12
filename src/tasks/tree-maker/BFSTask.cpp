@@ -18,12 +18,25 @@
 
 namespace dgmark {
 
-    BFSTask::BFSTask() {
+    BFSTask::BFSTask(Intracomm *comm, Graph *graph, Vertex root) :
+    TreeMakerTask(comm, graph, root) {
     }
 
-    BFSTask::BFSTask(const BFSTask& orig) {
+    BFSTask::BFSTask(const BFSTask& orig) :
+    TreeMakerTask(orig.comm, orig.graph, orig.root) {
     }
 
     BFSTask::~BFSTask() {
+    }
+
+    ParentTree* BFSTask::run() {
+        vector<Vertex> *parent = new vector<Vertex>();
+        double startTime = Wtime();
+
+
+        double duration = Wtime() - startTime;
+
+        ParentTree *parentTree = new ParentTree(comm, parent, duration);
+        return parentTree;
     }
 }
