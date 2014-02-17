@@ -17,7 +17,7 @@
 #ifndef PARENTTREEVALIDATOR_H
 #define	PARENTTREEVALIDATOR_H
 
-#include "../../base/Task.h"
+#include "../../base/Validator.h"
 #include "ParentTree.h"
 namespace dgmark {
 
@@ -33,7 +33,6 @@ namespace dgmark {
         
         virtual bool validate(Result *taskResult);
     private:
-        Intracomm *comm;
     };
 }
 #endif	/* PARENTTREEVALIDATOR_H */

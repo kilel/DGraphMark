@@ -4,13 +4,17 @@
     <df root="." name="DGraphMark">
       <df name="src">
         <df name="base">
+          <in>Communicable.h</in>
           <in>Controller.h</in>
           <in>Edge.cpp</in>
           <in>Edge.h</in>
           <in>Graph.cpp</in>
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
+          <in>Log.h</in>
+          <in>Result.h</in>
           <in>Task.h</in>
+          <in>Validator.h</in>
         </df>
         <df name="controllers">
           <in>TreeMakerController.cpp</in>
@@ -77,6 +81,8 @@
           </ccTool>
         </makeTool>
       </makefileType>
+      <item path="src/base/Communicable.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/base/Controller.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/base/Edge.cpp" ex="false" tool="1" flavor2="0">
@@ -89,7 +95,13 @@
       </item>
       <item path="src/base/GraphGenerator.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/base/Log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/base/Result.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/base/Task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/base/Validator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/controllers/TreeMakerController.cpp"
             ex="false"

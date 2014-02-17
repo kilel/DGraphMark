@@ -14,27 +14,28 @@
  *   limitations under the License.
  */
 
-#include "BFSTask.h"
+#ifndef VALIDATOR_H
+#define	VALIDATOR_H
+
+#include "Result.h"
 
 namespace dgmark {
 
-    BFSTask::BFSTask(Intracomm *comm) : TreeMakerTask(comm) {
-    }
+    /**
+     * Validates result of the task.
+     */
+    class Validator : public Classifieble, public Communicable {
+    public:
 
-    BFSTask::BFSTask(const BFSTask& orig) : TreeMakerTask(orig.comm) {
-    }
+        Validator(Intracomm *comm) : Communicable(comm) {
+        }
 
-    BFSTask::~BFSTask() {
-    }
+        virtual ~Validator() {
+        }
 
-    ParentTree* BFSTask::run() {
-        vector<Vertex> *parent = new vector<Vertex>();
-        double startTime = Wtime();
-
-
-        double duration = Wtime() - startTime;
-
-        ParentTree *parentTree = new ParentTree(comm, parent, duration);
-        return parentTree;
-    }
+        virtual bool validate(Result *result) = 0;
+    };
 }
+
+#endif	/* VALIDATOR_H */
+

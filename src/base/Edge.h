@@ -18,13 +18,17 @@
 #define	EDGE_H
 
 #include <inttypes.h>
+#include <mpi.h>
 
 namespace dgmark {
 
+    using namespace MPI;
     /**
      * Represents index of vertex of the graph.
      */
     typedef uint64_t Vertex;
+
+    const Datatype VERTEX_TYPE(MPI_UINT64_T);
 
     /**
      * Represents directed edge of the graph.

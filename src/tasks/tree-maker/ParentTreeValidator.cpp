@@ -17,26 +17,25 @@
 #include "ParentTreeValidator.h"
 namespace dgmark {
 
-    ParentTreeValidator::ParentTreeValidator(Intracomm *comm) {
-        this->comm = comm;
+    ParentTreeValidator::ParentTreeValidator(Intracomm *comm) : Validator(comm) {
     }
 
-    ParentTreeValidator::ParentTreeValidator(const ParentTreeValidator& orig) {
-        this->comm = orig.comm;
+    ParentTreeValidator::ParentTreeValidator(const ParentTreeValidator& orig) :
+    Validator(orig.comm) {
     }
 
     ParentTreeValidator::~ParentTreeValidator() {
     }
-    
+
     bool ParentTreeValidator::validate(Result *taskResult) {
-            if(taskResult->getTaskType() != getTaskType()) {
-                return false;
-            }
-            ParentTree *parentTreeResult = (ParentTree*) taskResult;
-            bool isValid = true;
-            
-            //TODO do valudation
-            
-            return isValid;
+        if (taskResult->getTaskType() != getTaskType()) {
+            return false;
         }
+        ParentTree *parentTreeResult = (ParentTree*) taskResult;
+        bool isValid = true;
+
+        //TODO do valudation
+
+        return isValid;
+    }
 }

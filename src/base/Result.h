@@ -14,35 +14,51 @@
  *   limitations under the License.
  */
 
-#ifndef GRAPHGENERATOR_H
-#define	GRAPHGENERATOR_H
+#ifndef RESULT_H
+#define	RESULT_H
 
-#include "Graph.h"
 #include "Communicable.h"
+
 
 namespace dgmark {
 
+    enum TaskType {
+        STUB, PARENT_TREE
+    };
+
     /**
-     * Generates Graphs.<br />
-     * Parameters for generation passes with constructor.
+     * Shows, that object can be classified to some task type.
      */
-    class GraphGenerator : public Communicable {
+    class Classifieble {
     public:
 
-        GraphGenerator(Intracomm *comm) : Communicable(comm) {
-        }
-
-        virtual ~GraphGenerator() {
+        virtual ~Classifieble() {
         }
 
         /**
-         * Generates graph with specified parameters.
-         * @return Graph.
+         * @return Task type, in which  this object is classified.
          */
-        virtual Graph* generate() = 0;
+        virtual TaskType getTaskType() = 0;
     };
 
+    /**
+     * Represents result of the task.
+     */
+    class Result : public Classifieble, public Communicable {
+    public:
+
+        Result(Intracomm *comm) : Communicable(comm) {
+        }
+
+        virtual ~Result() {
+        }
+
+        /**
+         * @return performance mark of the result.
+         */
+        virtual double getMark() = 0;
+    };
 }
 
-#endif	/* GRAPHGENERATOR_H */
+#endif	/* RESULT_H */
 

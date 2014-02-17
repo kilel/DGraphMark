@@ -26,7 +26,7 @@ namespace dgmark {
 
     class TreeMakerTask : public Task {
     public:
-        TreeMakerTask(Intracomm *comm, Graph *graph, Vertex root);
+        TreeMakerTask(Intracomm *comm);
         TreeMakerTask(const TreeMakerTask& orig);
         virtual ~TreeMakerTask();
 
@@ -34,15 +34,23 @@ namespace dgmark {
             return TaskType::PARENT_TREE;
         }
 
+        virtual void open(Graph *newGraph) {
+            graph = newGraph;
+        }
+
+        virtual void close() {
+
+        }
+
         void setRoot(Vertex newRoot) {
             root = newRoot;
         }
+        
+        virtual ParentTree *run() = 0;
 
     protected:
-        Intracomm *comm;
         Graph *graph;
         Vertex root;
-
     };
 
 }

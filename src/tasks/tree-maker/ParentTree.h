@@ -21,7 +21,7 @@
 #include <mpi.h>
 
 #include "../../base/Edge.h"
-#include "../../base/Task.h"
+#include "../../base/Result.h"
 
 
 namespace dgmark {
@@ -53,7 +53,6 @@ namespace dgmark {
             return TaskType::PARENT_TREE;
         }
     private:
-        Intracomm *comm;
         vector<Vertex> *parent;
         double mark;
         

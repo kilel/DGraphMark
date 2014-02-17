@@ -18,12 +18,10 @@
 
 namespace dgmark {
 
-    TreeMakerTask::TreeMakerTask(Intracomm *comm, Graph *graph, Vertex root) :
-    comm(comm), graph(graph), root(root) {
+    TreeMakerTask::TreeMakerTask(Intracomm *comm) : Task(comm) {
     }
 
-    TreeMakerTask::TreeMakerTask(const TreeMakerTask& orig) :
-    comm(orig.comm), graph(orig.graph), root(orig.root) {
+    TreeMakerTask::TreeMakerTask(const TreeMakerTask& orig) : Task(orig.comm) {
     }
 
     TreeMakerTask::~TreeMakerTask() {

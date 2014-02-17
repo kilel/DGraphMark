@@ -19,10 +19,8 @@
 
 namespace dgmark {
 
-    SimpleGenerator::SimpleGenerator(Intracomm *comm, int grade, int density) {
-        this->comm = comm;
-        this->grade = grade;
-        this->density = density;
+    SimpleGenerator::SimpleGenerator(Intracomm *comm, int grade, int density) :
+    GraphGenerator(comm), grade(grade), density(density) {
     }
 
     SimpleGenerator::~SimpleGenerator() {

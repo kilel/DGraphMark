@@ -14,27 +14,31 @@
  *   limitations under the License.
  */
 
-#include "BFSTask.h"
+#ifndef COMMUNICABLE_H
+#define	COMMUNICABLE_H
+
+#include <mpi.h>
 
 namespace dgmark {
 
-    BFSTask::BFSTask(Intracomm *comm) : TreeMakerTask(comm) {
-    }
+    using namespace MPI;
 
-    BFSTask::BFSTask(const BFSTask& orig) : TreeMakerTask(orig.comm) {
-    }
+    class Communicable {
+    public:
 
-    BFSTask::~BFSTask() {
-    }
+        Communicable(Intracomm *comm) : comm(comm) {
+        }
 
-    ParentTree* BFSTask::run() {
-        vector<Vertex> *parent = new vector<Vertex>();
-        double startTime = Wtime();
+        Communicable(const Communicable& orig) : comm(orig.comm) {
+        }
 
+        virtual ~Communicable() {
+        }
 
-        double duration = Wtime() - startTime;
-
-        ParentTree *parentTree = new ParentTree(comm, parent, duration);
-        return parentTree;
-    }
+    protected:
+        Intracomm *comm;
+    };
 }
+
+#endif	/* COMMUNICABLE_H */
+

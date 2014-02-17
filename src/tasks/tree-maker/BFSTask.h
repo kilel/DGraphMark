@@ -28,7 +28,7 @@ namespace dgmark {
 
     class BFSTask : public TreeMakerTask {
     public:
-        BFSTask(Intracomm *comm, Graph *graph, Vertex root);
+        BFSTask(Intracomm *comm);
         BFSTask(const BFSTask& orig);
         virtual ~BFSTask();
 

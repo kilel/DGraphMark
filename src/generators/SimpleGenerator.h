@@ -39,7 +39,6 @@ namespace dgmark {
         virtual Graph* generate();
 
     private:
-        Intracomm *comm;
         int grade;
         int density;
     };

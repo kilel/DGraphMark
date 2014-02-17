@@ -17,63 +17,42 @@
 #ifndef GRAPHTASK_H
 #define	GRAPHTASK_H
 
-enum TaskType {
-    STUB, PARENT_TREE
-};
+#include "Graph.h"
+#include "Result.h"
 
-/**
- * Shows, that object can be classified to some task type.
- */
-class Classifieble {
-public:
-
-    virtual ~Classifieble() {
-    }
+namespace dgmark {
 
     /**
-     * @return Task type, in which  this object is classified.
+     * Represents the task.
      */
-    virtual TaskType getTaskType() = 0;
-};
+    class Task : public Classifieble, public Communicable {
+    public:
 
-/**
- * Represents result of the task.
- */
-class Result : public Classifieble {
-public:
+        Task(Intracomm *comm) : Communicable(comm) {
+        }
 
-    virtual ~Result() {
-    }
-    
-    /**
-     * @return performance mark of the result.
-     */
-    virtual double getMark() = 0;
-};
+        virtual ~Task() {
+        }
 
-/**
- * Validates result of the task.
- */
-class Validator : public Classifieble {
-public:
+        /**
+         * Opens task for graph.
+         * @param graph Graph to run task on.
+         */
+        virtual void open(Graph *graph) = 0;
 
-    virtual ~Validator() {
-    }
+        /**
+         * Run task on graph. Be sure to initialize all parameters before run.
+         * @return 
+         */
+        virtual Result* run() = 0;
 
-    bool validate(Result *result);
-};
+        /**
+         * Close task for graph.
+         */
+        virtual void close() = 0;
+    };
 
-/**
- * Represents the task. Parameters should be passed through constructor.
- */
-class Task : public Classifieble {
-public:
-
-    virtual ~Task() {
-    }
-
-    Result* run();
-};
+}
 
 #endif	/* GRAPHTASK_H */
 

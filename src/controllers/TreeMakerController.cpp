@@ -15,39 +15,88 @@
  */
 
 #include "TreeMakerController.h"
+#include <cstdlib>
 
 namespace dgmark {
 
-    TreeMakerController::TreeMakerController(Intracomm *comm, GraphGenerator *generator, TreeMakerTask *task) :
-    Controller(generator), comm(comm), task(task) {
+    TreeMakerController::TreeMakerController(Intracomm *comm, GraphGenerator *generator, TreeMakerTask *task, int numStarts) :
+    Controller(comm, generator), task(task), numStarts(numStarts) {
+        validator = new ParentTreeValidator(comm);
+        log = new Log(comm);
     }
 
     TreeMakerController::TreeMakerController(const TreeMakerController& orig) :
-    Controller(orig.generator), comm(orig.comm), task(orig.task) {
+    Controller(orig.comm, orig.generator), task(orig.task), numStarts(orig.numStarts) {
+        validator = new ParentTreeValidator(comm);
+        log = new Log(comm);
     }
 
     TreeMakerController::~TreeMakerController() {
+        delete validator;
+        delete log;
+    }
+
+    Vertex* TreeMakerController::generateStartRoots() {
+        Vertex* startRoots = new Vertex[numStarts];
+        if (comm->Get_rank() == 0) {
+            for (int i = 0; i < numStarts; ++i) {
+                startRoots[i] = rand() % comm->Get_size();
+            }
+        }
+
+        comm->Bcast(startRoots, numStarts, VERTEX_TYPE, 0);
+        return startRoots;
     }
 
     void TreeMakerController::runBenchmark() {
-        /*Graph* graph = generator->generate();
-        
-        ParentTreeValidator *validator = new ParentTreeValidator(comm);
-        ParentTree *result = (ParentTree *) task->run();
-        printf("%d", validator->validate(result));
-        
-        delete graph; */
-        
-        if(comm->Get_rank() == 0) {
-            printf("\nRunning benchmark\n");
+        int rank = comm->Get_rank();
+        *log << "Running benchmark\n";
+
+
+        Graph* graph = generator->generate();
+        *log << "Graph generated\n";
+
+        task->open(graph);
+        *log << "Task openned\n";
+
+        Vertex* startRoots = generateStartRoots();
+        *log << "Roots generated\n\n";
+
+        for (int i = 0; i < numStarts; ++i) {
+            task->setRoot(startRoots[i]);
+
+            *log << "Running BFS from " << startRoots[i] << "...\n";
+
+            ParentTree *result = task->run();
+            *log << "BFS mark: " << result->getMark() << "\n";
+
+            *log << "Validating...";
+            bool isValid = validator->validate(result);
+
+            if (isValid) {
+                *log << "Success\n\n";
+            } else {
+                *log << "\nError validating";
+                delete result;
+                delete graph;
+                return;
+            }
+
+            delete result;
+
         }
+        
+        *log << "Task work is done\n";
+        
+        task->close();
+        delete graph;
+        
+        comm->Barrier();
     }
 
     void TreeMakerController::printStatistics() {
-        if(comm->Get_rank() == 0) {
-            printf("\nStatistics\n");
-        }
-
+        //logString("Statistics:");
     }
+
 }
 

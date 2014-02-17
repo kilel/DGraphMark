@@ -18,16 +18,18 @@
 #define	CONTROLLER_H
 
 #include "GraphGenerator.h"
+#include "Task.h"
+#include "Communicable.h"
 
 namespace dgmark {
 
-    class Controller {
+    class Controller : public Communicable {
     public:
 
-        Controller(GraphGenerator *generator) : generator(generator) {
+        Controller(Intracomm *comm, GraphGenerator *generator) : Communicable(comm), generator(generator) {
         }
 
-        Controller(const Controller& orig) : generator(orig.generator) {
+        Controller(const Controller& orig) : Communicable(orig.comm), generator(orig.generator) {
         }
 
         virtual ~Controller() {

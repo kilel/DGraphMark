@@ -21,23 +21,32 @@
 #include "../base/Controller.h"
 #include "../tasks/tree-maker/TreeMakerTask.h"
 #include "../tasks/tree-maker/ParentTreeValidator.h"
-
+#include "../base/Log.h"
+#include <vector>
+#include <cstdio>
 
 namespace dgmark {
     
     using namespace MPI;
+    using namespace std;
 
     class TreeMakerController : public Controller {
     public:
-        TreeMakerController(Intracomm *comm, GraphGenerator *generator, TreeMakerTask *task);
+        TreeMakerController(Intracomm *comm, GraphGenerator *generator, TreeMakerTask *task, int numStarts);
         TreeMakerController(const TreeMakerController& orig);
         virtual ~TreeMakerController();
 
         virtual void runBenchmark();
         virtual void printStatistics();
+        
+        Vertex* generateStartRoots();
+        
     private:
-        Intracomm *comm;
         TreeMakerTask *task;
+        int numStarts;
+        Validator *validator;
+        Log *log;
+               
     };
 }
 

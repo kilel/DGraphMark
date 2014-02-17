@@ -18,13 +18,17 @@
       </df>
       <df name="src">
         <df name="base">
+          <in>Communicable.h</in>
           <in>Controller.h</in>
           <in>Edge.cpp</in>
           <in>Edge.h</in>
           <in>Graph.cpp</in>
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
+          <in>Log.h</in>
+          <in>Result.h</in>
           <in>Task.h</in>
+          <in>Validator.h</in>
         </df>
         <df name="controllers">
           <in>TreeMakerController.cpp</in>

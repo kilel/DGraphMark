@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <time.h>
 #include <mpi.h>
+#include <vector>
 #include "generators/SimpleGenerator.h"
 #include "tasks/tree-maker/BFSTask.h"
 #include "tasks/tree-maker/TreeMakerTask.h"
@@ -27,12 +28,11 @@ using namespace std;
 using namespace MPI;
 using namespace dgmark;
 
-
 void printGraph(Graph *graph, Intracomm *comm) {
     vector<Edge*> *edges = graph->edges;
     int rank = comm->Get_rank();
-    
-    for(size_t i = 0; i < edges->size(); ++i) {
+
+    for (size_t i = 0; i < edges->size(); ++i) {
         Edge *edge = edges->at(i);
         printf("%d: %ld -> %ld\n", rank, edge->from, edge->to);
     }
@@ -45,19 +45,20 @@ void printGraph(Graph *graph, Intracomm *comm) {
  */
 int main(int argc, char** argv) {
     Init();
-    
+
     Intracomm *comm = &COMM_WORLD;
-    srand(time(0) + comm->Get_rank()*3); 
-    
+    srand(time(0) + comm->Get_rank()*3);
+
     int grade = 10;
     int density = 6;
-    
+
     SimpleGenerator *gen = new SimpleGenerator(comm, grade, density);
-    TreeMakerTask *task = new BFSTask(comm, 0, 0);
-    Controller *controller = new TreeMakerController(comm, gen, task);
+    TreeMakerTask *task = new BFSTask(comm);
+    Controller *controller = new TreeMakerController(comm, gen, task, 5);
+
     controller->runBenchmark();
+
     controller->printStatistics();
-    
 
     Finalize();
     return 0;
