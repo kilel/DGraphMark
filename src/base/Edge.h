@@ -18,11 +18,10 @@
 #define	EDGE_H
 
 #include <inttypes.h>
-#include <mpi.h>
+#include "Communicable.h"
 
 namespace dgmark {
 
-    using namespace MPI;
     /**
      * Represents index of vertex of the graph.
      */
@@ -43,13 +42,18 @@ namespace dgmark {
          * @param from Start vertex.
          * @param to End vertex.
          */
-        Edge(Vertex from, Vertex to);
+        Edge(Vertex from, Vertex to) : from(from), to(to) {
+        };
+
         /**
          * Copying edge from other.
          * @param orig Original edge.
          */
-        Edge(const Edge& orig);
-        virtual ~Edge();
+        Edge(const Edge& orig) : from(orig.from), to(orig.to) {
+        }
+
+        virtual ~Edge() {
+        }
     };
 
 }

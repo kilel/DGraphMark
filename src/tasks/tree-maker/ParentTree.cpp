@@ -20,12 +20,11 @@
 namespace dgmark {
 
     ParentTree::ParentTree(Intracomm *comm, vector<Vertex> *parent, double duration) :
-    Result(comm), parent(parent) {
-        calculateMark(duration);
+    Result(comm), parent(parent), taskRunTime(duration) {
     }
 
     ParentTree::ParentTree(const ParentTree& orig) :
-    Result(orig.comm), parent(orig.parent), mark(orig.mark) {
+    Result(orig.comm), parent(orig.parent), taskRunTime(orig.taskRunTime) {
     }
 
     ParentTree::~ParentTree() {
@@ -33,8 +32,28 @@ namespace dgmark {
         delete parent;
     }
 
-    double ParentTree::calculateMark(double duration) {
-        //TODO
+    vector<Vertex>* ParentTree::getParent() {
+        return parent;
+    }
+
+    double ParentTree::getMark() {
+        return traversedEdges / taskRunTime;
+    }
+
+    double ParentTree::getTaskRunTime() {
+        return taskRunTime;
+    }
+
+    TaskType ParentTree::getTaskType() {
+        return TaskType::PARENT_TREE;
+    }
+
+    void ParentTree::setTraversedEdges(size_t newTraversedEdges) {
+        traversedEdges = newTraversedEdges;
+    }
+
+    double ParentTree::getTraversedEdges() {
+        return traversedEdges;
     }
 }
 

@@ -20,13 +20,16 @@
 namespace dgmark {
 
     SimpleGenerator::SimpleGenerator(Intracomm *comm, int grade, int density) :
-    GraphGenerator(comm), grade(grade), density(density) {
+    GraphGenerator(comm), grade(grade), density(density), log(comm) {
     }
 
     SimpleGenerator::~SimpleGenerator() {
     }
 
     Graph* SimpleGenerator::generate() {
+        log << "Generating graph... ";
+        double startTime = Wtime();
+
         int size = comm->Get_size();
         int rank = comm->Get_rank();
         int commSize = size;
@@ -65,7 +68,21 @@ namespace dgmark {
             }
         }
 
+        generationTime = Wtime() - startTime;
+        log << generationTime << " s\n";
         return graph;
+    }
+
+    double SimpleGenerator::getGenerationTime() {
+        return generationTime;
+    }
+
+    int SimpleGenerator::getGrade() {
+        return grade;
+    }
+
+    int SimpleGenerator::getDensity() {
+        return density;
     }
 
 }

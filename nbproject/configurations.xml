@@ -6,9 +6,7 @@
         <df name="base">
           <in>Communicable.h</in>
           <in>Controller.h</in>
-          <in>Edge.cpp</in>
           <in>Edge.h</in>
-          <in>Graph.cpp</in>
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
           <in>Log.h</in>
@@ -85,11 +83,7 @@
       </item>
       <item path="src/base/Controller.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/base/Edge.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="src/base/Edge.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/base/Graph.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/base/Graph.h" ex="false" tool="3" flavor2="0">
       </item>

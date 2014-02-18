@@ -18,13 +18,37 @@
 
 namespace dgmark {
 
-    TreeMakerTask::TreeMakerTask(Intracomm *comm) : Task(comm) {
+    TreeMakerTask::TreeMakerTask(Intracomm *comm) : Task(comm), log(comm) {
     }
 
-    TreeMakerTask::TreeMakerTask(const TreeMakerTask& orig) : Task(orig.comm) {
+    TreeMakerTask::TreeMakerTask(const TreeMakerTask& orig) : Task(orig.comm), log(orig.comm) {
     }
 
     TreeMakerTask::~TreeMakerTask() {
+    }
+
+    TaskType TreeMakerTask::getTaskType() {
+        return TaskType::PARENT_TREE;
+    }
+
+    void TreeMakerTask::open(Graph *newGraph) {
+        log << "Opening task... ";
+        double startTime = Wtime();
+        graph = newGraph;
+        taskOpeningTime = Wtime() - startTime;
+        log << taskOpeningTime << " s\n";
+    }
+
+    void TreeMakerTask::close() {
+        log << "Closing task... \n";
+    }
+
+    double TreeMakerTask::getTaskOpeningTime() {
+        return taskOpeningTime;
+    }
+
+    void TreeMakerTask::setRoot(Vertex newRoot) {
+        root = newRoot;
     }
 
 }

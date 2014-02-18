@@ -16,12 +16,8 @@
 
 #include <cstdlib>
 #include <time.h>
-#include <mpi.h>
-#include <vector>
 #include "generators/SimpleGenerator.h"
 #include "tasks/tree-maker/BFSTask.h"
-#include "tasks/tree-maker/TreeMakerTask.h"
-#include "tasks/tree-maker/ParentTreeValidator.h"
 #include "controllers/TreeMakerController.h"
 
 using namespace std;

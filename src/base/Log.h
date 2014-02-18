@@ -17,11 +17,11 @@
 #ifndef LOG_H
 #define	LOG_H
 
-#include "Communicable.h"
-#include "Edge.h"
 #include <cstdio>
 #include <iostream>
-
+#include <string>
+#include "Communicable.h"
+#include "Edge.h"
 
 namespace dgmark {
     using namespace std;
@@ -29,13 +29,22 @@ namespace dgmark {
     class Log : public Communicable {
     public:
 
+        Log() : Communicable(0), rank(0) {
+        }
+
         Log(Intracomm *comm) : Communicable(comm), rank(comm->Get_rank()) {
         }
 
-        Log(const Log& orig) : Communicable(orig.comm), rank(orig.comm->Get_rank()) {
+        Log(const Log& orig) : Communicable(orig.comm), rank(orig.rank) {
         }
 
         virtual ~Log() {
+        }
+        
+        Log& operator<<(string data) {
+            if (rank == 0)
+                cout << data;
+            return *this;
         }
 
         Log& operator<<(char* data) {
@@ -43,7 +52,7 @@ namespace dgmark {
                 cout << data;
             return *this;
         }
-        
+
         Log& operator<<(const char data[]) {
             if (rank == 0)
                 cout << data;
@@ -68,12 +77,9 @@ namespace dgmark {
             return *this;
         }
 
-
     private:
         int rank;
-
     };
-
 }
 
 #endif	/* LOG_H */

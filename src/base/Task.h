@@ -39,6 +39,11 @@ namespace dgmark {
          * @param graph Graph to run task on.
          */
         virtual void open(Graph *graph) = 0;
+        
+        /**
+         * @return Time of opening current or last task.
+         */
+        virtual double getTaskOpeningTime() = 0;
 
         /**
          * Run task on graph. Be sure to initialize all parameters before run.

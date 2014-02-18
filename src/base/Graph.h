@@ -18,7 +18,6 @@
 #define	GRAPH_H
 
 #include <vector>
-#include <set>
 #include "Edge.h"
 
 namespace dgmark {
@@ -34,27 +33,34 @@ namespace dgmark {
         /**
          * Creates graph with no edges.
          */
-        Graph();
+        Graph() {
+            edges = new vector<Edge*>();
+        }
 
         /**
          * Creates graph from edges list. 
          * @param edgesList list of edges to initialize with.
          */
-        Graph(vector<Edge*> *edgesList);
+        Graph(vector<Edge*> *edgesList) : edges(edgesList) {
+        }
 
         /**
          * Copying graph. 
          * Note, that graph copies reference to original edgelist.
          * @param orig Original graph.
          */
-        Graph(const Graph& orig);
+        Graph(const Graph& orig) : edges(orig.edges) {
+        }
 
-        virtual ~Graph();
+        virtual ~Graph() {
+        }
 
         /**
          * Clears edgelist.
          */
-        void clear();
+        void clear() {
+            edges->clear();
+        }
     };
 }
 

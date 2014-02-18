@@ -17,9 +17,8 @@
 #ifndef SIMPLEGENERATOR_H
 #define	SIMPLEGENERATOR_H
 
-#include "mpi.h"
 #include "../base/GraphGenerator.h"
-
+#include "../base/Log.h"
 
 namespace dgmark {
 
@@ -37,12 +36,17 @@ namespace dgmark {
         virtual ~SimpleGenerator();
 
         virtual Graph* generate();
+        virtual double getGenerationTime();
+        
+        virtual int getGrade();
+        virtual int getDensity();
 
     private:
         int grade;
         int density;
+        double generationTime;
+        Log log;
     };
-
 }
 
 #endif	/* SIMPLEGENERATOR_H */

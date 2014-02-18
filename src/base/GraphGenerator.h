@@ -17,8 +17,8 @@
 #ifndef GRAPHGENERATOR_H
 #define	GRAPHGENERATOR_H
 
-#include "Graph.h"
 #include "Communicable.h"
+#include "Graph.h"
 
 namespace dgmark {
 
@@ -40,6 +40,10 @@ namespace dgmark {
          * @return Graph.
          */
         virtual Graph* generate() = 0;
+        virtual double getGenerationTime() = 0;
+        
+        virtual int getGrade() = 0;
+        virtual int getDensity() = 0;
     };
 
 }

@@ -17,9 +17,10 @@
 #ifndef CONTROLLER_H
 #define	CONTROLLER_H
 
+#include <string>
+#include "Communicable.h"
 #include "GraphGenerator.h"
 #include "Task.h"
-#include "Communicable.h"
 
 namespace dgmark {
 
@@ -36,11 +37,11 @@ namespace dgmark {
         }
 
         virtual void runBenchmark() = 0;
+        virtual string getStatistics() = 0;
         virtual void printStatistics() = 0;
 
     protected:
         GraphGenerator *generator;
-
     };
 }
 

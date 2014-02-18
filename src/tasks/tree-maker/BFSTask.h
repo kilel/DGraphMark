@@ -33,7 +33,6 @@ namespace dgmark {
         virtual ~BFSTask();
 
         virtual ParentTree* run();
-
     };
 }
 

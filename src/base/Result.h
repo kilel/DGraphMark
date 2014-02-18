@@ -19,7 +19,6 @@
 
 #include "Communicable.h"
 
-
 namespace dgmark {
 
     enum TaskType {
@@ -57,6 +56,11 @@ namespace dgmark {
          * @return performance mark of the result.
          */
         virtual double getMark() = 0;
+        
+        /**
+         * @return Time of running task for this result.
+         */
+        virtual double getTaskRunTime() = 0;
     };
 }
 

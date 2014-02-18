@@ -17,18 +17,12 @@
 #ifndef TREEMAKERCONTROLLER_H
 #define	TREEMAKERCONTROLLER_H
 
-#include <mpi.h>
 #include "../base/Controller.h"
-#include "../tasks/tree-maker/TreeMakerTask.h"
-#include "../tasks/tree-maker/ParentTreeValidator.h"
 #include "../base/Log.h"
-#include <vector>
-#include <cstdio>
+#include "../tasks/tree-maker/ParentTreeValidator.h"
+#include "../tasks/tree-maker/TreeMakerTask.h"
 
 namespace dgmark {
-    
-    using namespace MPI;
-    using namespace std;
 
     class TreeMakerController : public Controller {
     public:
@@ -37,16 +31,32 @@ namespace dgmark {
         virtual ~TreeMakerController();
 
         virtual void runBenchmark();
+        virtual string getStatistics();
         virtual void printStatistics();
-        
-        Vertex* generateStartRoots();
-        
+
+
     private:
+        Log log;
         TreeMakerTask *task;
-        int numStarts;
         Validator *validator;
-        Log *log;
-               
+        int numStarts;
+
+        Vertex* generateStartRoots();
+
+        bool isLastRunValid;
+
+        //statistics data
+        double generationTime;
+        double taskOpeningTime;
+        double rootsGenerationTime;
+
+        vector<double> *taskRunningTimes;
+        vector<double> *traversedEdges;
+        vector<double> *validationTimes;
+        vector<double> *marks;
+        
+        string getStatistics(vector<double> *data, string name);
+
     };
 }
 

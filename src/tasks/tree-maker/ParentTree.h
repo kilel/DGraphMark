@@ -25,11 +25,11 @@
 
 
 namespace dgmark {
-    
+
     using namespace std;
     using namespace MPI;
 
-    class ParentTree : public Result{
+    class ParentTree : public Result {
     public:
         /**
          * Creates parent tree (result for tree-makers).
@@ -41,27 +41,21 @@ namespace dgmark {
         ParentTree(const ParentTree& orig);
         virtual ~ParentTree();
 
-        vector<Vertex>* getParent() {
-            return parent;
-        }
-        
-        virtual double getMark() {
-            return mark;
-        }
-        
-        virtual TaskType getTaskType() {
-            return TaskType::PARENT_TREE;
-        }
+        /**
+         * Traversed egdes per second is a 
+         * @return 
+         */
+        virtual double getMark();
+        virtual double getTaskRunTime();
+        virtual TaskType getTaskType();
+
+        vector<Vertex>* getParent();
+        void setTraversedEdges(size_t newTraversedEdges);
+        double getTraversedEdges();
     private:
         vector<Vertex> *parent;
-        double mark;
-        
-        /**
-         * Calculates mark for thos result.
-         * @param duration duration of task.
-         * @return mark.
-         */
-        double calculateMark(double duration);
+        double taskRunTime;
+        size_t traversedEdges;
     };
 }
 

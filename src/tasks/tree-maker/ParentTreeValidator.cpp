@@ -17,24 +17,44 @@
 #include "ParentTreeValidator.h"
 namespace dgmark {
 
-    ParentTreeValidator::ParentTreeValidator(Intracomm *comm) : Validator(comm) {
+    ParentTreeValidator::ParentTreeValidator(Intracomm *comm) : Validator(comm), log(comm) {
     }
 
     ParentTreeValidator::ParentTreeValidator(const ParentTreeValidator& orig) :
-    Validator(orig.comm) {
+    Validator(orig.comm), log(orig.comm) {
     }
 
     ParentTreeValidator::~ParentTreeValidator() {
     }
 
+    TaskType ParentTreeValidator::getTaskType() {
+        return TaskType::PARENT_TREE;
+    }
+
+    double ParentTreeValidator::getValidationTime() {
+        return validationTime;
+    }
+
     bool ParentTreeValidator::validate(Result *taskResult) {
+        log << "Validating result... ";
+        double startTime = Wtime();
+
         if (taskResult->getTaskType() != getTaskType()) {
+            log << "Error.\nInvalid taskType for result!\n";
             return false;
         }
         ParentTree *parentTreeResult = (ParentTree*) taskResult;
         bool isValid = true;
 
         //TODO do valudation
+
+        validationTime = Wtime() - startTime;
+        if (isValid) {
+            log << "Sucess\n";
+        } else {
+            log << "Error\n";
+        }
+        log << "Validation time: " << validationTime << " s\n";
 
         return isValid;
     }

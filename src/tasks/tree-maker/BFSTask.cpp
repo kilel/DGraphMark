@@ -28,13 +28,15 @@ namespace dgmark {
     }
 
     ParentTree* BFSTask::run() {
+        log << "Running BFS from " << root << "\n";
         vector<Vertex> *parent = new vector<Vertex>();
         double startTime = Wtime();
 
 
-        double duration = Wtime() - startTime;
+        double taskRunTime = Wtime() - startTime;
 
-        ParentTree *parentTree = new ParentTree(comm, parent, duration);
+        ParentTree *parentTree = new ParentTree(comm, parent, taskRunTime);
+        log << "BFS time: " << taskRunTime << " s\n";
         return parentTree;
     }
 }

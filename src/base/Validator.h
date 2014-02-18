@@ -33,7 +33,17 @@ namespace dgmark {
         virtual ~Validator() {
         }
 
+        /**
+         * Validates result.
+         * @param result result of task.
+         * @return true, if result is valid, false otherwise.
+         */
         virtual bool validate(Result *result) = 0;
+        
+        /**
+         * @return Validation time.
+         */
+        virtual double getValidationTime() = 0;
     };
 }
 

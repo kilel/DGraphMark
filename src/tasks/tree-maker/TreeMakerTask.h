@@ -20,6 +20,7 @@
 #include <mpi.h>
 #include "../../base/Task.h"
 #include "../../base/Graph.h"
+#include "../../base/Log.h"
 #include "ParentTree.h"
 
 namespace dgmark {
@@ -30,27 +31,21 @@ namespace dgmark {
         TreeMakerTask(const TreeMakerTask& orig);
         virtual ~TreeMakerTask();
 
-        virtual TaskType getTaskType() {
-            return TaskType::PARENT_TREE;
-        }
+        virtual TaskType getTaskType();
 
-        virtual void open(Graph *newGraph) {
-            graph = newGraph;
-        }
-
-        virtual void close() {
-
-        }
-
-        void setRoot(Vertex newRoot) {
-            root = newRoot;
-        }
-        
+        virtual void open(Graph *newGraph);
+        virtual double getTaskOpeningTime();
         virtual ParentTree *run() = 0;
+        virtual void close();
+
+        void setRoot(Vertex newRoot);
 
     protected:
         Graph *graph;
         Vertex root;
+        Log log;
+    private:
+        double taskOpeningTime;
     };
 
 }
