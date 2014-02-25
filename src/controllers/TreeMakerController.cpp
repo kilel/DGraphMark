@@ -18,6 +18,7 @@
 #include <cmath>
 #include <algorithm>
 #include "TreeMakerController.h"
+#include "../base/SortedGraph.h"
 
 namespace dgmark {
 
@@ -54,7 +55,7 @@ namespace dgmark {
         log << "Generating roots... ";
         double startTime = Wtime();
         Vertex* startRoots = new Vertex[numStarts];
-        if (comm->Get_rank() == 0) {
+        if (rank == 0) {
             for (int i = 0; i < numStarts; ++i) {
                 startRoots[i] = rand() % comm->Get_size();
             }
@@ -66,12 +67,24 @@ namespace dgmark {
         return startRoots;
     }
 
+    void printGraph(Graph *graph, Intracomm *comm) {
+        vector<Edge*> *edges = graph->edges;
+        int rank = comm->Get_rank();
+
+        for (size_t i = 0; i < edges->size(); ++i) {
+            Edge *edge = edges->at(i);
+            printf("%d: %ld -> %ld\n", rank, edge->from, edge->to);
+        }
+    }
+
     void TreeMakerController::runBenchmark() {
         log << "Running benchmark\n";
         isLastRunValid = true;
 
         Graph* graph = generator->generate();
+        
         task->open(graph);
+
         Vertex* startRoots = generateStartRoots();
 
         for (int i = 0; i < numStarts; ++i) {
@@ -102,7 +115,11 @@ namespace dgmark {
         generationTime = generator->getGenerationTime();
         taskOpeningTime = task->getTaskOpeningTime();
 
+        comm->Barrier();
+        
         task->close();
+        graph->clear();
+
         delete graph;
 
         comm->Barrier();
@@ -174,9 +191,6 @@ namespace dgmark {
         out << statName << ".median = " << median << "\n";
         out << statName << ".thirdQuertile = " << thirdQuartile << "\n";
         out << statName << ".max = " << maximum << "\n";
-
-
-
 
         return out.str();
     }

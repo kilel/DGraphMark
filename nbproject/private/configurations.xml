@@ -25,7 +25,10 @@
           <in>GraphGenerator.h</in>
           <in>Log.h</in>
           <in>Result.h</in>
+          <in>SortedGraph.cpp</in>
+          <in>SortedGraph.h</in>
           <in>Task.h</in>
+          <in>Utils.h</in>
           <in>Validator.h</in>
         </df>
         <df name="controllers">

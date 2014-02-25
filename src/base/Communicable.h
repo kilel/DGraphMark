@@ -27,9 +27,21 @@ namespace dgmark {
     public:
 
         Communicable(Intracomm *comm) : comm(comm) {
+            if (comm != 0) {
+                rank = comm->Get_rank();
+                size = comm->Get_size();
+            } else {
+                rank = size = 0;
+            }
         }
 
         Communicable(const Communicable& orig) : comm(orig.comm) {
+            if (comm != 0) {
+                rank = comm->Get_rank();
+                size = comm->Get_size();
+            } else {
+                rank = size = 0;
+            }
         }
 
         virtual ~Communicable() {
@@ -37,6 +49,8 @@ namespace dgmark {
 
     protected:
         Intracomm *comm;
+        int rank;
+        int size;
     };
 }
 

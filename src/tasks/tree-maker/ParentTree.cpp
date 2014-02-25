@@ -19,8 +19,8 @@
 #include "ParentTree.h"
 namespace dgmark {
 
-    ParentTree::ParentTree(Intracomm *comm, vector<Vertex> *parent, double duration) :
-    Result(comm), parent(parent), taskRunTime(duration) {
+    ParentTree::ParentTree(Intracomm *comm, vector<Vertex> *parent, double taskRunTime) :
+    Result(comm), parent(parent), taskRunTime(taskRunTime) {
     }
 
     ParentTree::ParentTree(const ParentTree& orig) :

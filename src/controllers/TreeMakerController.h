@@ -54,7 +54,7 @@ namespace dgmark {
         vector<double> *traversedEdges;
         vector<double> *validationTimes;
         vector<double> *marks;
-        
+
         string getStatistics(vector<double> *data, string name);
 
     };

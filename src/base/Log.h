@@ -29,18 +29,18 @@ namespace dgmark {
     class Log : public Communicable {
     public:
 
-        Log() : Communicable(0), rank(0) {
+        Log() : Communicable(0) {
         }
 
-        Log(Intracomm *comm) : Communicable(comm), rank(comm->Get_rank()) {
+        Log(Intracomm *comm) : Communicable(comm) {
         }
 
-        Log(const Log& orig) : Communicable(orig.comm), rank(orig.rank) {
+        Log(const Log& orig) : Communicable(orig.comm) {
         }
 
         virtual ~Log() {
         }
-        
+
         Log& operator<<(string data) {
             if (rank == 0)
                 cout << data;
@@ -78,7 +78,6 @@ namespace dgmark {
         }
 
     private:
-        int rank;
     };
 }
 

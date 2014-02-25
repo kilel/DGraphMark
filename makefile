@@ -33,7 +33,7 @@ CONTROLLER_DIR = controllers/
 DIRECTORIES = $(OBJ_DIR)$(BASE_DIR) $(OBJ_DIR)$(TASKS_DIR) \
 	      $(OBJ_DIR)$(GENERATOR_DIR) $(OBJ_DIR)$(CONTROLLER_DIR)
 
-BASE =
+BASE = SortedGraph
 GENERATORS = SimpleGenerator
 TASKS = BFSTask ParentTree ParentTreeValidator TreeMakerTask
 CONTROLLERS = TreeMakerController

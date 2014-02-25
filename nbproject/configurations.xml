@@ -11,7 +11,10 @@
           <in>GraphGenerator.h</in>
           <in>Log.h</in>
           <in>Result.h</in>
+          <in>SortedGraph.cpp</in>
+          <in>SortedGraph.h</in>
           <in>Task.h</in>
+          <in>Utils.h</in>
           <in>Validator.h</in>
         </df>
         <df name="controllers">
@@ -93,7 +96,13 @@
       </item>
       <item path="src/base/Result.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/base/SortedGraph.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/base/SortedGraph.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/base/Task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/base/Utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/base/Validator.h" ex="false" tool="3" flavor2="0">
       </item>

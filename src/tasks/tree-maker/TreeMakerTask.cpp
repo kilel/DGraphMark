@@ -33,14 +33,19 @@ namespace dgmark {
 
     void TreeMakerTask::open(Graph *newGraph) {
         log << "Opening task... ";
+        comm->Barrier();
         double startTime = Wtime();
-        graph = newGraph;
+        graph = new SortedGraph(newGraph);
+        comm->Barrier();
         taskOpeningTime = Wtime() - startTime;
         log << taskOpeningTime << " s\n";
     }
 
     void TreeMakerTask::close() {
+        comm->Barrier();
         log << "Closing task... \n";
+        delete graph;
+        comm->Barrier();
     }
 
     double TreeMakerTask::getTaskOpeningTime() {

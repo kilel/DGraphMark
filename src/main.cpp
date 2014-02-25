@@ -24,15 +24,7 @@ using namespace std;
 using namespace MPI;
 using namespace dgmark;
 
-void printGraph(Graph *graph, Intracomm *comm) {
-    vector<Edge*> *edges = graph->edges;
-    int rank = comm->Get_rank();
-
-    for (size_t i = 0; i < edges->size(); ++i) {
-        Edge *edge = edges->at(i);
-        printf("%d: %ld -> %ld\n", rank, edge->from, edge->to);
-    }
-}
+Utils* Utils::instance;
 
 /**
  * @param argc
@@ -47,6 +39,8 @@ int main(int argc, char** argv) {
 
     int grade = 10;
     int density = 6;
+    
+    Utils::initialize(comm, grade);
 
     SimpleGenerator *gen = new SimpleGenerator(comm, grade, density);
     TreeMakerTask *task = new BFSTask(comm);

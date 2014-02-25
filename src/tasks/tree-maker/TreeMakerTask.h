@@ -19,7 +19,7 @@
 
 #include <mpi.h>
 #include "../../base/Task.h"
-#include "../../base/Graph.h"
+#include "../../base/SortedGraph.h"
 #include "../../base/Log.h"
 #include "ParentTree.h"
 
@@ -41,7 +41,7 @@ namespace dgmark {
         void setRoot(Vertex newRoot);
 
     protected:
-        Graph *graph;
+        SortedGraph *graph;
         Vertex root;
         Log log;
     private:

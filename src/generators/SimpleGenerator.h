@@ -19,6 +19,7 @@
 
 #include "../base/GraphGenerator.h"
 #include "../base/Log.h"
+#include "../base/Utils.h"
 
 namespace dgmark {
 

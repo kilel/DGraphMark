@@ -18,6 +18,7 @@
 #define	GRAPH_H
 
 #include <vector>
+#include <algorithm>
 #include "Edge.h"
 
 namespace dgmark {
@@ -29,11 +30,12 @@ namespace dgmark {
     class Graph {
     public:
         vector<Edge*> *edges;
+        size_t numLocalVertex;
 
         /**
          * Creates graph with no edges.
          */
-        Graph() {
+        Graph(size_t numLocalVertex) : numLocalVertex(numLocalVertex) {
             edges = new vector<Edge*>();
         }
 
@@ -41,7 +43,8 @@ namespace dgmark {
          * Creates graph from edges list. 
          * @param edgesList list of edges to initialize with.
          */
-        Graph(vector<Edge*> *edgesList) : edges(edgesList) {
+        Graph(vector<Edge*> *edgesList, size_t numLocalVertex) :
+        edges(edgesList), numLocalVertex(numLocalVertex) {
         }
 
         /**
@@ -49,7 +52,15 @@ namespace dgmark {
          * Note, that graph copies reference to original edgelist.
          * @param orig Original graph.
          */
-        Graph(const Graph& orig) : edges(orig.edges) {
+        Graph(const Graph& orig) : edges(orig.edges), numLocalVertex(orig.numLocalVertex) {
+        }
+        
+        /**
+         * Copying graph. 
+         * Note, that graph copies reference to original edgelist.
+         * @param orig Original graph.
+         */
+        Graph(const Graph *orig) : edges(orig->edges), numLocalVertex(orig->numLocalVertex) {
         }
 
         virtual ~Graph() {
@@ -58,9 +69,11 @@ namespace dgmark {
         /**
          * Clears edgelist.
          */
-        void clear() {
+        virtual void clear() {
             edges->clear();
+            delete edges;
         }
+
     };
 }
 

@@ -28,37 +28,25 @@ namespace dgmark {
 
     Graph* SimpleGenerator::generate() {
         log << "Generating graph... ";
+        comm->Barrier();
         double startTime = Wtime();
 
-        int size = comm->Get_size();
-        int rank = comm->Get_rank();
-        int commSize = size;
-
-        //check later, that size is 2^n; and not zero.
-        int commGrade = 0;
-        while (size != 1) {
-            size >>= 1;
-            ++commGrade;
-        }
-        //check, that commGrade > grade
-
-        Vertex numLocalVertex = 1 << (grade - commGrade); //number of vertex in current node.
-        //Vertex numGlobalVertex = 1 << (grade); //number of vertex globally.
-
-        Graph* graph = new Graph();
+        Vertex numLocalVertex = Utils::getNumLocalVertex();
+        Graph* graph = new Graph(numLocalVertex);
         vector<Edge*> *edges = graph->edges;
 
         int numEdgesPerVertex = density / 2;
         int additionalEdgeFlag = density % 2;
 
         for (Vertex vertex = 0; vertex < numLocalVertex; ++vertex) {
-            Vertex globalVertexFrom = rank << (grade - commGrade) | vertex;
+            Vertex globalVertexFrom = Utils::vertexToGlobal(vertex);
             int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
 
             for (int i = 0; i < numEdges; ++i) {
-                uint64_t rankTo = rand() % commSize;
+                uint64_t rankTo = rand() % size;
                 uint64_t localVertexTo = rand() % numLocalVertex;
-                Vertex globalVertexTo = rankTo << (grade - commGrade) | localVertexTo;
+
+                Vertex globalVertexTo = Utils::vertexToGlobal(rankTo, localVertexTo);
                 if (globalVertexFrom != globalVertexTo) {
                     edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
                 } else {
@@ -67,7 +55,7 @@ namespace dgmark {
                 }
             }
         }
-
+        comm->Barrier();
         generationTime = Wtime() - startTime;
         log << generationTime << " s\n";
         return graph;
