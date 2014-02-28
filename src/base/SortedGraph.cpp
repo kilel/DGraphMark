@@ -25,7 +25,7 @@ namespace dgmark {
     }
 
     SortedGraph::SortedGraph(const SortedGraph& orig) :
-    Graph(orig.edges, orig.numLocalVertex), startIndex(orig.startIndex) {
+    Graph(orig), startIndex(orig.startIndex) {
     }
 
     SortedGraph::~SortedGraph() {

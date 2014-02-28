@@ -24,7 +24,19 @@ namespace dgmark {
     class Utils : Communicable {
     public:
 
-        Utils(Intracomm *comm) : Communicable(comm) {
+        Utils(Intracomm *comm, int grade) : Communicable(comm), grade(grade) {
+            //check later, that size is 2^n; and not zero.
+            int commSize = size;
+            commGrade = 0;
+            while (commSize != 1) {
+                commSize >>= 1;
+                ++commGrade;
+            }
+            //check, that commGrade > grade
+            diffGrade = grade - commGrade;
+
+            numLocalVertex = 1 << (diffGrade);
+            numGlobalVertex = 1 << (grade); //number of vertex globally.
         }
 
         Utils(const Utils& orig) : Communicable(orig.comm) {
@@ -34,46 +46,41 @@ namespace dgmark {
         }
 
         static void initialize(Intracomm *comm, int grade) {
-            instance = new Utils(comm);
-            instance->grade = grade;
-
-            //check later, that size is 2^n; and not zero.
-            int commSize = instance->size;
-            instance->commGrade = 0;
-            while (commSize != 1) {
-                commSize >>= 1;
-                ++instance->commGrade;
-            }
-            //check, that commGrade > grade
-            instance->diffGrade = instance->grade - instance->commGrade;
-
-            instance->numLocalVertex = 1 << (instance->diffGrade);
-            instance->numGlobalVertex = 1 << (instance->grade); //number of vertex globally.
+            instance = new Utils(comm, grade);
         }
 
-        static Vertex vertexToLocal(Vertex globalVertex) {
-            int rank = globalVertex >> instance->diffGrade;
+        static void printGraph(Graph *graph) {
+            vector<Edge*> *edges = graph->edges;
+
+            for (size_t i = 0; i < edges->size(); ++i) {
+                Edge *edge = edges->at(i);
+                printf("%d: %ld -> %ld\n", instance->rank, edge->from, edge->to);
+            }
+        }
+
+        static inline Vertex vertexToLocal(Vertex globalVertex) {
+            int rank = getVertexRank(globalVertex);
             return (rank << instance->diffGrade) ^ globalVertex;
         }
 
-        static Vertex vertexToGlobal(Vertex localVertex) {
+        static inline Vertex vertexToGlobal(Vertex localVertex) {
             return vertexToGlobal(instance->rank, localVertex);
         }
 
-        static Vertex vertexToGlobal(int rank, Vertex localVertex) {
+        static inline Vertex vertexToGlobal(int rank, Vertex localVertex) {
             return (rank << instance->diffGrade) | localVertex;
         }
 
-        static Vertex getNumLocalVertex() {
-            return instance->numLocalVertex;
-        }
-
-        static Vertex getNumGlobalVertex() {
-            return instance->numGlobalVertex;
+        static inline Vertex getVertexRank(Vertex globalVertex) {
+            return globalVertex >> instance->diffGrade;
         }
         
-        static int getRank() {
-            return instance->rank;
+        Vertex getNumLocalVertex() {
+            return numLocalVertex;
+        }
+
+        Vertex getNumGlobalVertex() {
+            return numGlobalVertex;
         }
 
     private:

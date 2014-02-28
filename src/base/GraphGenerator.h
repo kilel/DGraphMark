@@ -41,6 +41,7 @@ namespace dgmark {
          */
         virtual Graph* generate() = 0;
         virtual double getGenerationTime() = 0;
+        virtual double getDistributionTime() = 0;
         
         virtual int getGrade() = 0;
         virtual int getDensity() = 0;

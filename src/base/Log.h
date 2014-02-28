@@ -43,37 +43,37 @@ namespace dgmark {
 
         Log& operator<<(string data) {
             if (rank == 0)
-                cout << data;
+                printf("%s", data.c_str());//cout << data;
             return *this;
         }
 
         Log& operator<<(char* data) {
             if (rank == 0)
-                cout << data;
+                printf("%s", data);//cout << data;
             return *this;
         }
 
         Log& operator<<(const char data[]) {
             if (rank == 0)
-                cout << data;
+                printf("%s", &data[0]);//cout << data;
             return *this;
         }
 
         Log& operator<<(Vertex data) {
             if (rank == 0)
-                cout << data;
+                printf("%ld", data);//cout << data;
             return *this;
         }
 
         Log& operator<<(int data) {
             if (rank == 0)
-                cout << data;
+                printf("%d", data);//cout << data;
             return *this;
         }
 
         Log& operator<<(double data) {
             if (rank == 0)
-                cout << data;
+                printf("%.5lf", data);//cout << data;
             return *this;
         }
 

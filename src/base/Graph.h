@@ -27,53 +27,69 @@ namespace dgmark {
     /**
      * Describes an oriented graph.
      */
-    class Graph {
+    class Graph : public Communicable {
     public:
         vector<Edge*> *edges;
-        size_t numLocalVertex;
+        const int grade;
+        const int density;
+        Vertex numLocalVertex;
+        Vertex numGlobalVertex;
 
         /**
          * Creates graph with no edges.
          */
-        Graph(size_t numLocalVertex) : numLocalVertex(numLocalVertex) {
-            edges = new vector<Edge*>();
-        }
-
-        /**
-         * Creates graph from edges list. 
-         * @param edgesList list of edges to initialize with.
-         */
-        Graph(vector<Edge*> *edgesList, size_t numLocalVertex) :
-        edges(edgesList), numLocalVertex(numLocalVertex) {
-        }
+        Graph(Intracomm *comm, int grade, int density);
 
         /**
          * Copying graph. 
          * Note, that graph copies reference to original edgelist.
          * @param orig Original graph.
          */
-        Graph(const Graph& orig) : edges(orig.edges), numLocalVertex(orig.numLocalVertex) {
-        }
-        
+        Graph(const Graph& orig);
+
         /**
          * Copying graph. 
          * Note, that graph copies reference to original edgelist.
          * @param orig Original graph.
          */
-        Graph(const Graph *orig) : edges(orig->edges), numLocalVertex(orig->numLocalVertex) {
-        }
+        Graph(const Graph *orig);
 
-        virtual ~Graph() {
-        }
+        virtual ~Graph();
 
         /**
          * Clears edgelist.
          */
-        virtual void clear() {
-            edges->clear();
-            delete edges;
-        }
-
+        virtual void clear();
+        
+        /**
+         * Distributes graph. 
+         * Each edge (myRank|localNode -> hisRank|hisLocal) sends to hisRank as
+         * (hisRank|hisLocal -> myRank|localNode).
+         */
+        virtual void distribute();
+        
+        /**
+         * Finds, if graph is distributed, or not;
+         * @return true, is graph is distribuded.
+         */
+        bool isDistributed();
+        
+    private:
+        size_t distributedEdges = 0;
+        
+        /**
+         * Transfers edge to it's destination.
+         * @param edge Edge
+         * @param memory allocated memory to send edge.
+         */
+        void sendEdge(Edge *edge, Vertex *memory);
+        
+        /**
+         * Tries to read edge from communicator.
+         * @param memory allocated memory to read edge.
+         * @return true, if edge is readed, false if there are nothig to read.
+         */
+        bool probeReadEdge(Vertex *memory);
     };
 }
 
