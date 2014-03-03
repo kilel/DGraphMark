@@ -67,24 +67,12 @@ namespace dgmark {
         return startRoots;
     }
 
-    void printGraph(Graph *graph, Intracomm *comm) {
-        vector<Edge*> *edges = graph->edges;
-        int rank = comm->Get_rank();
-
-        for (size_t i = 0; i < edges->size(); ++i) {
-            Edge *edge = edges->at(i);
-            printf("%d: %ld -> %ld\n", rank, edge->from, edge->to);
-        }
-    }
-
     void TreeMakerController::runBenchmark() {
         log << "Running benchmark\n";
         isLastRunValid = true;
 
         Graph* graph = generator->generate();
-        
         task->open(graph);
-
         Vertex* startRoots = generateStartRoots();
 
         for (int i = 0; i < numStarts; ++i) {
@@ -113,10 +101,11 @@ namespace dgmark {
 
         //filling statistics parameters
         generationTime = generator->getGenerationTime();
+        distributionTime = generator->getDistributionTime();
         taskOpeningTime = task->getTaskOpeningTime();
 
         comm->Barrier();
-        
+
         task->close();
         graph->clear();
 
@@ -127,6 +116,8 @@ namespace dgmark {
 
     string TreeMakerController::getStatistics() {
         stringstream out;
+        out.precision(CONTROLLER_PRECISION);
+        out.setf(std::ios::fixed, std::ios::floatfield);
 
         if (isLastRunValid) {
             out << "\n#Statistics\n";
@@ -139,7 +130,8 @@ namespace dgmark {
             out << "#\n";
             out << "#Duration of processes\n";
             out << "#\n";
-            out << "time.generation.graph = " << generationTime << "\n";
+            out << "time.graph.generation = " << generationTime << "\n";
+            out << "time.graph.distribution = " << distributionTime << "\n";
             out << "time.generation.roots = " << rootsGenerationTime << "\n";
             out << "time.taskOpening = " << taskOpeningTime << "\n";
             out << "#\n";
@@ -184,6 +176,9 @@ namespace dgmark {
         delete sortedData;
 
         stringstream out;
+        out.precision(CONTROLLER_PRECISION);
+        out.setf(std::ios::fixed, std::ios::floatfield);
+
         out << statName << ".mean = " << mean << "\n";
         out << statName << ".stdDeviation = " << stdDeviation << "\n";
         out << statName << ".min = " << minimum << "\n";

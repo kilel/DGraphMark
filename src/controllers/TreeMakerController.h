@@ -36,6 +36,8 @@ namespace dgmark {
 
 
     private:
+        const int CONTROLLER_PRECISION = 5;
+
         Log log;
         TreeMakerTask *task;
         Validator *validator;
@@ -47,6 +49,7 @@ namespace dgmark {
 
         //statistics data
         double generationTime;
+        double distributionTime;
         double taskOpeningTime;
         double rootsGenerationTime;
 

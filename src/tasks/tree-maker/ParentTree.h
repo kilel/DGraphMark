@@ -37,7 +37,7 @@ namespace dgmark {
          * @param parent Array of parents to verticies.
          * @param duration Duration of tree-making task in seconds (MPI::Wtime)
          */
-        ParentTree(Intracomm *comm, vector<Vertex> *parent, double duration);
+        ParentTree(Intracomm *comm, Vertex *parent, size_t parentSize, double duration);
         ParentTree(const ParentTree& orig);
         virtual ~ParentTree();
 
@@ -49,11 +49,12 @@ namespace dgmark {
         virtual double getTaskRunTime();
         virtual TaskType getTaskType();
 
-        vector<Vertex>* getParent();
+        Vertex* getParent();
         void setTraversedEdges(size_t newTraversedEdges);
         double getTraversedEdges();
     private:
-        vector<Vertex> *parent;
+        Vertex *parent;
+        size_t parentSize;
         double taskRunTime;
         size_t traversedEdges;
     };

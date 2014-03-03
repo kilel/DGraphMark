@@ -38,6 +38,7 @@ namespace dgmark {
 
         virtual Graph* generate();
         virtual double getGenerationTime();
+        virtual double getDistributionTime();
         
         virtual int getGrade();
         virtual int getDensity();
@@ -46,6 +47,7 @@ namespace dgmark {
         int grade;
         int density;
         double generationTime;
+        double distributionTime;
         Log log;
     };
 }

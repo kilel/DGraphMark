@@ -19,20 +19,20 @@
 #include "ParentTree.h"
 namespace dgmark {
 
-    ParentTree::ParentTree(Intracomm *comm, vector<Vertex> *parent, double taskRunTime) :
-    Result(comm), parent(parent), taskRunTime(taskRunTime) {
+    ParentTree::ParentTree(Intracomm *comm, Vertex *parent, size_t parentSize, double taskRunTime) :
+    Result(comm), parent(parent), parentSize(parentSize), taskRunTime(taskRunTime) {
     }
 
     ParentTree::ParentTree(const ParentTree& orig) :
-    Result(orig.comm), parent(orig.parent), taskRunTime(orig.taskRunTime) {
+    Result(orig.comm), parent(orig.parent), parentSize(orig.parentSize), taskRunTime(orig.taskRunTime) {
     }
 
     ParentTree::~ParentTree() {
-        parent->clear();
-        delete parent;
+        //delete parent;
+        Free_mem(parent);
     }
 
-    vector<Vertex>* ParentTree::getParent() {
+    Vertex* ParentTree::getParent() {
         return parent;
     }
 

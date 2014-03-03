@@ -16,6 +16,7 @@
 
 #include "SimpleGenerator.h"
 #include <cstdlib>
+#include <assert.h>
 
 namespace dgmark {
 
@@ -31,13 +32,15 @@ namespace dgmark {
         comm->Barrier();
         double startTime = Wtime();
 
-        Vertex numLocalVertex = Utils::getNumLocalVertex();
-        Graph* graph = new Graph(numLocalVertex);
+
+        Graph* graph = new Graph(comm, grade, density);
         vector<Edge*> *edges = graph->edges;
+        Vertex numLocalVertex = graph->numLocalVertex;
 
         int numEdgesPerVertex = density / 2;
         int additionalEdgeFlag = density % 2;
 
+        //Here we create density/2 oriented edges from each of local
         for (Vertex vertex = 0; vertex < numLocalVertex; ++vertex) {
             Vertex globalVertexFrom = Utils::vertexToGlobal(vertex);
             int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
@@ -56,13 +59,24 @@ namespace dgmark {
             }
         }
         comm->Barrier();
-        generationTime = Wtime() - startTime;
-        log << generationTime << " s\n";
+        generationTime = Wtime();
+        log << generationTime - startTime << " s\n";
+        
+        log << "Distributing graph... ";
+        //Here we make graph unoriended, by transfering edges between nodes.
+        graph->distribute();
+
+        distributionTime = Wtime() - generationTime;
+        generationTime = generationTime - startTime;
+        log << distributionTime << " s\n";
         return graph;
     }
 
     double SimpleGenerator::getGenerationTime() {
         return generationTime;
+    }
+    double SimpleGenerator::getDistributionTime() {
+        return distributionTime;
     }
 
     int SimpleGenerator::getGrade() {

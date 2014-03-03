@@ -47,6 +47,10 @@ namespace dgmark {
         bool isValid = true;
 
         //TODO do valudation
+        //
+        ParentTree* result = (ParentTree*) taskResult;
+        result->setTraversedEdges(1);
+        //
 
         validationTime = Wtime() - startTime;
         if (isValid) {

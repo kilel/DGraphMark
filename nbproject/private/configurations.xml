@@ -21,6 +21,7 @@
           <in>Communicable.h</in>
           <in>Controller.h</in>
           <in>Edge.h</in>
+          <in>Graph.cpp</in>
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
           <in>Log.h</in>

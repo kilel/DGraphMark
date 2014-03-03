@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     srand(time(0) + comm->Get_rank()*3);
 
     int grade = 10;
-    int density = 6;
+    int density = 16;
     
     Utils::initialize(comm, grade);
 
