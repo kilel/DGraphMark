@@ -32,7 +32,7 @@ namespace dgmark {
 
     private:
         void sort();
-        vector<size_t> *startIndex;
+        Vertex *startIndex;
 
     };
 }

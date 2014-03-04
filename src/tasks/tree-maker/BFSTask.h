@@ -33,6 +33,11 @@ namespace dgmark {
         virtual ~BFSTask();
 
         virtual ParentTree* run();
+    private:
+        bool performBFS(Vertex *queue, Vertex *parent, Win qWin, Win pWin);
+        bool setVertexLocally(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
+        bool setVertexGlobally(Vertex *queue, Vertex *parent, Win qWin, Win pWin, Vertex currVertex, Vertex child);
+        void alignQueue(Vertex *queue);
     };
 }
 

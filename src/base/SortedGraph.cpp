@@ -20,7 +20,7 @@
 namespace dgmark {
 
     SortedGraph::SortedGraph(Graph *graph) : Graph(graph) {
-        startIndex = new vector<size_t>(numLocalVertex + 1); // the last one is numLocalVertex.
+        startIndex = new Vertex[numLocalVertex + 1]; // the last one is numLocalVertex.
         sort();
     }
 
@@ -29,7 +29,6 @@ namespace dgmark {
     }
 
     SortedGraph::~SortedGraph() {
-        startIndex->clear();
         delete startIndex;
     }
 
@@ -51,26 +50,25 @@ namespace dgmark {
         Vertex prev = 0;
         for (size_t index = 0; index < edges->size();) {
             Vertex localVertex = Utils::vertexToLocal(edges->at(index)->from);
-            //printf("%d: v = %ld, size = %ld\n", Utils::getRank(), localVertex, startIndex->size());
 
             for (Vertex skipped = prev + 1; skipped < localVertex; ++skipped) {
-                startIndex->at(skipped) = startIndex->at(prev);
+                startIndex[skipped] = startIndex[prev];
             }
 
-            startIndex->at(localVertex) = index;
+            startIndex[localVertex] = index;
             while (index < edges->size() && Utils::vertexToLocal(edges->at(index)->from) == localVertex) {
                 ++index;
             }
             prev = localVertex;
         }
-        startIndex->at(numLocalVertex) = numLocalVertex;
+        startIndex[numLocalVertex] = numLocalVertex;
     }
 
     size_t SortedGraph::getStartIndex(Vertex localVertex) {
-        return startIndex->at(localVertex);
+        return startIndex[localVertex];
     }
 
     size_t SortedGraph::getEndIndex(Vertex localVertex) {
-        startIndex->at(localVertex + 1);
+        return startIndex[localVertex + 1];
     }
 }

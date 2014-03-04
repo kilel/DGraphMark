@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
     Intracomm *comm = &COMM_WORLD;
     srand(time(0) + comm->Get_rank()*3);
 
-    int grade = 10;
-    int density = 16;
+    int grade = 4;
+    int density = 3;
     
     Utils::initialize(comm, grade);
 
