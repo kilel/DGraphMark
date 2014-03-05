@@ -24,8 +24,6 @@
 
 namespace dgmark {
 
-    using namespace MPI;
-
     class BFSTask : public TreeMakerTask {
     public:
         BFSTask(Intracomm *comm);
@@ -34,10 +32,90 @@ namespace dgmark {
 
         virtual ParentTree* run();
     private:
+        const int RMA_SYNCH_TAG = 45782;
+        /**
+         * Performes one BSF step for all nodes.
+         * 
+         * @param queue queue of local vertices.
+         * @param parent parents of vertices.
+         * @param qWin queue RMA window
+         * @param pWin parent RMA window
+         * @return true, if more steps are required.
+         */
         bool performBFS(Vertex *queue, Vertex *parent, Win qWin, Win pWin);
-        bool setVertexLocally(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
-        bool setVertexGlobally(Vertex *queue, Vertex *parent, Win qWin, Win pWin, Vertex currVertex, Vertex child);
+
+        /**
+         * Performs actual BFS step. 
+         * Traverses endges from all queued vertices, and processes childs.
+         * 
+         * @param queue queue of local vertices.
+         * @param parent parents of vertices.
+         * @param qWin queue RMA window
+         * @param pWin parent RMA window
+         * @return true, if local or global queue is enlarged.
+         */
+        bool performBFSActualStep(Vertex *queue, Vertex *parent, Win qWin, Win pWin);
+
+        /**
+         * Performs RMA synchronization.
+         * Purpose is to allow main process in queue to perform actual BFS.
+         * @param qWin queue RMA window
+         * @param pWin parent RMA window
+         */
+        void performBFSSynchRMA(Win qWin, Win pWin);
+
+        /**
+         * Processes local child. 
+         * Adds it to local queue and sets it's parent, if it was not set.
+         * 
+         * @param queue queue of local vertices.
+         * @param parent parents of vertices.
+         * @param currVertex current vertex (parent of child) (local notation)
+         * @param child Child of current vertex (global notation)
+         * @return true, if local queue is enlarged.
+         */
+        bool processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
+
+        /**
+         * 
+         * @param queue queue of local vertices.
+         * @param parent parents of vertices.
+         * @param qWin queue RMA window
+         * @param pWin parent RMA window
+         * @param currVertex current vertex (parent of child) (local notation)
+         * @param child Child of current vertex (global notation)
+         * @return true, if global queue is enlarged.
+         */
+        bool processGlobalChild(Vertex *queue, Vertex *parent, Win qWin, Win pWin, Vertex currVertex, Vertex child);
+
+        /**
+         * Aligns queue.
+         * Just moves elements to the start of array.
+         * 
+         * @param queue queue of local vertices.
+         */
         void alignQueue(Vertex *queue);
+
+        /**
+         * Sends synchronization bit.
+         * 
+         * @param value synchronization bit.
+         */
+        void sendIsFenceNeeded(bool value);
+
+        /**
+         * Recieves synchronization bit.
+         * 
+         * @return synchronization bit.
+         */
+        bool recvIsFenceNeeded();
+
+        /**
+         * Function to calculate queue size.
+         * 
+         * @return queue size.
+         */
+        Vertex getQueueSize();
     };
 }
 

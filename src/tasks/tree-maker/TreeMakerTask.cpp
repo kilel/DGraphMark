@@ -39,6 +39,8 @@ namespace dgmark {
         comm->Barrier();
         taskOpeningTime = Wtime() - startTime;
         log << taskOpeningTime << " s\n";
+        
+        numLocalVertex = graph->numLocalVertex;
     }
 
     void TreeMakerTask::close() {

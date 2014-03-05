@@ -18,25 +18,29 @@
 #define	UTILS_H
 
 #include "Edge.h"
+#include <assert.h>
 
 namespace dgmark {
 
     class Utils : Communicable {
     public:
 
-        Utils(Intracomm *comm, int grade) : Communicable(comm), grade(grade) {
-            //check later, that size is 2^n; and not zero.
+        Utils(Intracomm *comm) : Communicable(comm) {
+            size = comm->Get_size();
+            rank = comm->Get_rank();
+            if (((size - 1) & size) != 0) {
+                if (rank == 0) {
+                    printf("Number of MPI nodes must be 2^n. %d is not.\n", size);
+                }
+                assert(false);
+            }
             int commSize = size;
             commGrade = 0;
             while (commSize != 1) {
                 commSize >>= 1;
                 ++commGrade;
             }
-            //check, that commGrade > grade
-            diffGrade = grade - commGrade;
 
-            numLocalVertex = 1 << (diffGrade);
-            numGlobalVertex = 1 << (grade); //number of vertex globally.
         }
 
         Utils(const Utils& orig) : Communicable(orig.comm) {
@@ -45,8 +49,32 @@ namespace dgmark {
         virtual ~Utils() {
         }
 
-        static void initialize(Intracomm *comm, int grade) {
-            instance = new Utils(comm, grade);
+        static void initialize(Intracomm *comm) {
+            instance = new Utils(comm);
+        }
+
+        static void parseArguments(int *grade, int *density, int *numStarts, int argc, char** argv) {
+            if (instance->rank == 0) {
+                *grade = 8;
+                *density = 16;
+                *numStarts = 16;
+
+                if (argc >= 2) {
+                    *grade = atoi(argv[1]);
+                }
+                if (argc >= 3) {
+                    *density = atoi(argv[2]);
+                }
+                if (argc >= 4) {
+                    *numStarts = atoi(argv[3]);
+                }
+            }
+
+            instance->comm->Bcast(grade, 1, INT, 0);
+            instance->comm->Bcast(density, 1, INT, 0);
+            instance->comm->Bcast(numStarts, 1, INT, 0);
+
+            instance->setGrade(*grade);
         }
 
         static void printGraph(Graph *graph) {
@@ -74,13 +102,23 @@ namespace dgmark {
         static inline Vertex getVertexRank(Vertex globalVertex) {
             return globalVertex >> instance->diffGrade;
         }
-        
+
         Vertex getNumLocalVertex() {
             return numLocalVertex;
         }
 
         Vertex getNumGlobalVertex() {
             return numGlobalVertex;
+        }
+
+        void setGrade(int newGrade) {
+            assert(commGrade < newGrade);
+
+            grade = newGrade;
+            diffGrade = grade - commGrade;
+
+            numLocalVertex = 1 << (diffGrade);
+            numGlobalVertex = 1 << (grade); //number of vertex globally.
         }
 
     private:

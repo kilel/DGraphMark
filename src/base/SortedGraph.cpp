@@ -16,6 +16,7 @@
 
 #include "SortedGraph.h"
 #include "Utils.h"
+#include "Log.h"
 
 namespace dgmark {
 

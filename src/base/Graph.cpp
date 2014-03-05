@@ -22,7 +22,8 @@ namespace dgmark {
 
     Graph::Graph(Intracomm *comm, int grade, int density) : Communicable(comm),
     grade(grade), density(density) {
-        Utils util(comm, grade);
+        Utils util(comm);
+        util.setGrade(grade);
         numLocalVertex = util.getNumLocalVertex();
         numGlobalVertex = util.getNumGlobalVertex();
         distributedEdges = 0;

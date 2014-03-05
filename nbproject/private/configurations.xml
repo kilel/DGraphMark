@@ -44,6 +44,8 @@
         </df>
         <df name="tasks">
           <df name="tree-maker">
+            <in>BFSGraph500.cpp</in>
+            <in>BFSGraph500.h</in>
             <in>BFSTask.cpp</in>
             <in>BFSTask.h</in>
             <in>ParentTree.cpp</in>
@@ -55,7 +57,8 @@
           </df>
           <in>StubTask.h</in>
         </df>
-        <in>main.cpp</in>
+        <in>main_dgmark.cpp</in>
+        <in>main_dgmark_graph500.cpp</in>
       </df>
     </df>
   </logicalFolder>

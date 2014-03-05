@@ -46,6 +46,8 @@ namespace dgmark {
         Log log;
     private:
         double taskOpeningTime;
+    protected:
+        Vertex numLocalVertex;
     };
 
 }

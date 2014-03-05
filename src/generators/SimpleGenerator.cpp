@@ -61,7 +61,7 @@ namespace dgmark {
         comm->Barrier();
         generationTime = Wtime();
         log << generationTime - startTime << " s\n";
-        
+
         log << "Distributing graph... ";
         //Here we make graph unoriended, by transfering edges between nodes.
         graph->distribute();
@@ -75,6 +75,7 @@ namespace dgmark {
     double SimpleGenerator::getGenerationTime() {
         return generationTime;
     }
+
     double SimpleGenerator::getDistributionTime() {
         return distributionTime;
     }

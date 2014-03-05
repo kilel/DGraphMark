@@ -30,6 +30,8 @@
         </df>
         <df name="tasks">
           <df name="tree-maker">
+            <in>BFSGraph500.cpp</in>
+            <in>BFSGraph500.h</in>
             <in>BFSTask.cpp</in>
             <in>BFSTask.h</in>
             <in>ParentTree.cpp</in>
@@ -41,7 +43,8 @@
           </df>
           <in>StubTask.h</in>
         </df>
-        <in>main.cpp</in>
+        <in>main_dgmark.cpp</in>
+        <in>main_dgmark_graph500.cpp</in>
       </df>
     </df>
     <logicalFolder name="ExternalFiles"
@@ -133,11 +136,22 @@
       </item>
       <item path="src/generators/SimpleGenerator.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/main.cpp" ex="false" tool="1" flavor2="8">
+      <item path="src/main_dgmark.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool>
+        </ccTool>
+      </item>
+      <item path="src/main_dgmark_graph500.cpp" ex="false" tool="1" flavor2="8">
         <ccTool>
         </ccTool>
       </item>
       <item path="src/tasks/StubTask.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/BFSGraph500.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/BFSGraph500.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/tasks/tree-maker/BFSTask.cpp" ex="false" tool="1" flavor2="0">
       </item>
