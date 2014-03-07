@@ -17,14 +17,15 @@
 #include <vector>
 
 #include "ParentTree.h"
+
 namespace dgmark {
 
-    ParentTree::ParentTree(Intracomm *comm, Vertex *parent, size_t parentSize, double taskRunTime) :
-    Result(comm), parent(parent), parentSize(parentSize), taskRunTime(taskRunTime) {
+    ParentTree::ParentTree(Intracomm *comm, Vertex root, Vertex *parent, Graph *graph, double taskRunTime) :
+    Result(comm), root(root), parent(parent), graph(graph), taskRunTime(taskRunTime) {
     }
 
     ParentTree::ParentTree(const ParentTree& orig) :
-    Result(orig.comm), parent(orig.parent), parentSize(orig.parentSize), taskRunTime(orig.taskRunTime) {
+    Result(orig.comm), root(orig.root), parent(orig.parent), graph(orig.graph), taskRunTime(orig.taskRunTime) {
     }
 
     ParentTree::~ParentTree() {
@@ -32,8 +33,20 @@ namespace dgmark {
         Free_mem(parent);
     }
 
+    Vertex ParentTree::getRoot() {
+        return root;
+    }
+
     Vertex* ParentTree::getParent() {
         return parent;
+    }
+
+    size_t ParentTree::getParentSize() {
+        return graph->numLocalVertex;
+    }
+    
+    Graph* ParentTree::getInitialGraph() {
+        return graph;
     }
 
     double ParentTree::getMark() {

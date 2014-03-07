@@ -36,6 +36,13 @@ namespace dgmark {
     private:
         Log log;
         double validationTime;
+        
+        bool doValidate(ParentTree *parentTree);
+        bool validateRanges(ParentTree *parentTree);
+        bool validateParents(ParentTree *parentTree);
+        bool validateDepth(ParentTree *parentTree, Vertex *depth);
+        Vertex* buildDepth(ParentTree *parentTree);
+        
     };
 }
 #endif	/* PARENTTREEVALIDATOR_H */

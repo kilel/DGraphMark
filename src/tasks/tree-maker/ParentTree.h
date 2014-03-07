@@ -20,7 +20,7 @@
 #include <vector>
 #include <mpi.h>
 
-#include "../../base/Edge.h"
+#include "../../base/Graph.h"
 #include "../../base/Result.h"
 
 
@@ -34,10 +34,12 @@ namespace dgmark {
         /**
          * Creates parent tree (result for tree-makers).
          * @param comm Communacator to work with.
+         * @param root global root vertex.
          * @param parent Array of parents to verticies.
+         * @param graph initial graph os result.
          * @param duration Duration of tree-making task in seconds (MPI::Wtime)
          */
-        ParentTree(Intracomm *comm, Vertex *parent, size_t parentSize, double duration);
+        ParentTree(Intracomm *comm, Vertex root, Vertex *parent, Graph *graph, double duration);
         ParentTree(const ParentTree& orig);
         virtual ~ParentTree();
 
@@ -49,12 +51,16 @@ namespace dgmark {
         virtual double getTaskRunTime();
         virtual TaskType getTaskType();
 
+        Vertex getRoot();
         Vertex* getParent();
+        size_t getParentSize();
+        Graph* getInitialGraph();
         void setTraversedEdges(size_t newTraversedEdges);
         double getTraversedEdges();
     private:
+        Vertex root;
         Vertex *parent;
-        size_t parentSize;
+        Graph *graph;
         double taskRunTime;
         size_t traversedEdges;
     };

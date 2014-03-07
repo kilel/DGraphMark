@@ -29,7 +29,7 @@ namespace dgmark {
         run_bfs(root, parent);
 
         double taskRunTime = Wtime() - startTime;
-        ParentTree *parentTree = new ParentTree(comm, parent, numLocalVertex, taskRunTime);
+        ParentTree *parentTree = new ParentTree(comm, root, parent, graph, taskRunTime);
         log << "BFS time: " << taskRunTime << " s\n";
         return parentTree;
     }

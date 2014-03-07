@@ -55,22 +55,23 @@ namespace dgmark {
         queue[1] = 2;
 
         /**
-         * parent is an array, which associates vertex with it parent in tree.
+         * parent is an array, which associates vertex with it parent (global) in tree.
          * parent[root] is always must be root.
-         * parent[visited] >= 0 and \<= numLocalVertex
-         * parent[initially] == numLocalVertex
+         * parent[visited] >= 0 and \<= numGlobalVertex
+         * parent[initially] == numGlobalVertex
          * Note: contains local vertex only.
          */
         Vertex *parent = (Vertex*) Alloc_mem(parentBytesSize, INFO_NULL);
         Win parentWin = MPI::Win::Create(parent, parentBytesSize, vertexBytesSize, INFO_NULL, *comm);
         memset(parent, 0, parentBytesSize);
         for (size_t i = 0; i < numLocalVertex; ++i) {
-            parent[i] = numLocalVertex;
+            parent[i] = graph->numGlobalVertex;
         }
 
         if (Utils::getVertexRank(root) == rank) {
             //root is my vertex, put it into queue.
             queue[queue[1]] = Utils::vertexToLocal(root);
+            parent[Utils::vertexToLocal(root)] = root;
             ++queue[1];
         }
 
@@ -82,7 +83,7 @@ namespace dgmark {
         Free_mem(queue);
 
         double taskRunTime = Wtime() - startTime;
-        ParentTree *parentTree = new ParentTree(comm, parent, numLocalVertex, taskRunTime);
+        ParentTree *parentTree = new ParentTree(comm, root, parent, graph, taskRunTime);
         log << "BFS time: " << taskRunTime << " s\n";
         return parentTree;
     }
@@ -121,10 +122,10 @@ namespace dgmark {
                 //printf("%d: currVert = %ld, child = %ld (in %d), qLen = %ld\n", rank, currVertex, Utils::vertexToLocal(child), childRank, queue[1]);
                 if (childRank == rank) {
                     //vertex is mine
-                    isQueueEnlarged |= processLocalChild(queue, parent, currVertex, child);
+                    isQueueEnlarged |= processLocalChild(queue, parent, Utils::vertexToGlobal(currVertex), child);
                 } else {
                     //vertex is in the other process
-                    isQueueEnlarged |= processGlobalChild(queue, parent, qWin, pWin, currVertex, child);
+                    isQueueEnlarged |= processGlobalChild(queue, parent, qWin, pWin, Utils::vertexToGlobal(currVertex), child);
                 }
             }
             ++queue[0]; // shrinking queue.
@@ -158,7 +159,7 @@ namespace dgmark {
 
     bool BFSTask::processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child) {
         Vertex childLocal = Utils::vertexToLocal(child);
-        if (parent[childLocal] == numLocalVertex) {
+        if (parent[childLocal] == graph->numGlobalVertex) {
             parent[childLocal] = currVertex;
             queue[queue[1]] = childLocal;
             ++queue[1];
@@ -180,16 +181,16 @@ namespace dgmark {
         pWin.Fence(MODE_NOSUCCEED);
 
         //printf("%d: Parent of child is %ld\n", rank, parentOfChild, numLocalVertex);
-        assert(0 <= parentOfChild && parentOfChild <= numLocalVertex);
+        assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
 
 
-        bool isInnerFenceNeeded = (parentOfChild == numLocalVertex);
+        bool isInnerFenceNeeded = (parentOfChild == graph->numGlobalVertex);
         sendIsFenceNeeded(isInnerFenceNeeded); // call for inner fence if it is needed
 
         if (isInnerFenceNeeded) {
             //printf("%d: Putting child to the parent\n", rank);
             pWin.Fence(MODE_NOPRECEDE);
-            pWin.Put(&childLocal, 1, VERTEX_TYPE, childRank, childLocal, 1, VERTEX_TYPE);
+            pWin.Put(&currVertex, 1, VERTEX_TYPE, childRank, childLocal, 1, VERTEX_TYPE);
             pWin.Fence(MODE_NOSUCCEED | MODE_NOSTORE);
 
             //Updating queue

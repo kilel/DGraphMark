@@ -15,6 +15,7 @@
  */
 
 #include "ParentTreeValidator.h"
+#include "../../base/Utils.h"
 namespace dgmark {
 
     ParentTreeValidator::ParentTreeValidator(Intracomm *comm) : Validator(comm), log(comm) {
@@ -43,23 +44,93 @@ namespace dgmark {
             log << "Error.\nInvalid taskType for result!\n";
             return false;
         }
-        ParentTree *parentTreeResult = (ParentTree*) taskResult;
-        bool isValid = true;
 
-        //TODO do valudation
-        //
-        ParentTree* result = (ParentTree*) taskResult;
-        result->setTraversedEdges(1);
-        //
+        ParentTree *parentTree = (ParentTree*) taskResult;
+        bool isValid = doValidate(parentTree);
 
         validationTime = Wtime() - startTime;
         if (isValid) {
             log << "Sucess\n";
-        } else {
-            log << "Error\n";
         }
         log << "Validation time: " << validationTime << " s\n";
 
         return isValid;
+    }
+
+    bool ParentTreeValidator::doValidate(ParentTree *parentTree) {
+        if (!validateRanges(parentTree)) {
+            return false;
+        }
+
+        if (!validateParents(parentTree)) {
+            return false;
+        }
+
+        Vertex *depths = buildDepth(parentTree);
+        bool isValid = validateDepth(parentTree, depths);
+        delete[] depths;
+
+        return isValid;
+    }
+
+    bool ParentTreeValidator::validateRanges(ParentTree *parentTree) {
+        bool isValid = true;
+        size_t parentSize = parentTree->getParentSize();
+        Vertex *parent = parentTree->getParent();
+        Graph *graph = parentTree->getInitialGraph();
+
+        for (size_t i = 0; i < parentSize; ++i) {
+            isValid &= (0 <= parent[i] && parent[i] < graph->numGlobalVertex);
+        }
+
+        comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
+
+        if (!isValid) {
+            log << "\nError validating: some vertices are out of tree\n";
+        }
+
+        return isValid;
+    }
+
+    bool ParentTreeValidator::validateParents(ParentTree *parentTree) {
+        bool isValid = true;
+        size_t parentSize = parentTree->getParentSize();
+        Vertex *parent = parentTree->getParent();
+        Vertex root = parentTree->getRoot();
+        Vertex rootLocal = Utils::vertexToLocal(root);
+
+        if (Utils::getVertexRank(root) == rank) {
+            if (root != parent[rootLocal]) {
+                isValid = false;
+                log << "\nError validating: root parent is not root\n";
+            }
+        }
+
+        if (isValid) {
+            for (size_t i = 0; i < parentSize; ++i) {
+                isValid &= (parent[i] != Utils::vertexToGlobal(i) || i == rootLocal);
+            }
+        }
+
+        comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
+        
+        if (!isValid) {
+            log << "\nError validating: some vertices are self parents, or root is not a parent it itself\n";
+        }
+        
+        return isValid;
+    }
+
+    bool ParentTreeValidator::validateDepth(ParentTree *parentTree, Vertex *depth) {
+        bool isValid = true;
+
+        return isValid;
+    }
+
+    Vertex* ParentTreeValidator::buildDepth(ParentTree *parentTree) {
+        Vertex *depths = new Vertex[parentTree->getParentSize()];
+
+
+        return depths;
     }
 }
