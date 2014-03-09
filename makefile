@@ -16,7 +16,7 @@
 OPENMP = false	    # true of false to use or not of OpenMP in compilation
 OPENMP_FLAG = -fopenmp
 MPICPP = mpic++
-CPPFLAGS = -std=c++11
+CPPFLAGS = -std=c++11 -Ofast
 
 ifneq ($(OPENMP), true)
 	CPPFLAGS += $(OPENMP_FLAG)

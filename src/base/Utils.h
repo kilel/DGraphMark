@@ -42,7 +42,7 @@ namespace dgmark {
             if (instance->rank == 0) {
                 *grade = 8;
                 *density = 16;
-                *numStarts = 16;
+                *numStarts = 32;
 
                 if (argc >= 2) {
                     *grade = atoi(argv[1]);

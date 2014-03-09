@@ -32,7 +32,7 @@ namespace dgmark {
 
         virtual ParentTree* run();
     private:
-        const int RMA_SYNCH_TAG = 45782;
+        const int BFS_SYNCH_TAG = 45782;
         /**
          * Performes one BSF step for all nodes.
          * 
@@ -91,20 +91,6 @@ namespace dgmark {
          * @param queue queue of local vertices.
          */
         void alignQueue(Vertex *queue);
-
-        /**
-         * Sends synchronization bit.
-         * 
-         * @param value synchronization bit.
-         */
-        void sendIsFenceNeeded(bool value);
-
-        /**
-         * Recieves synchronization bit.
-         * 
-         * @return synchronization bit.
-         */
-        bool recvIsFenceNeeded();
 
         /**
          * Function to calculate queue size.

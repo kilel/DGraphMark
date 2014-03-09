@@ -17,6 +17,8 @@
 #include <sstream>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <ctime>
 #include "TreeMakerController.h"
 #include "../base/SortedGraph.h"
 
@@ -51,13 +53,13 @@ namespace dgmark {
         delete marks;
     }
 
-    Vertex* TreeMakerController::generateStartRoots() {
+    Vertex* TreeMakerController::generateStartRoots(size_t maxStartRoot) {
         log << "Generating roots... ";
         double startTime = Wtime();
         Vertex* startRoots = new Vertex[numStarts];
         if (rank == 0) {
             for (int i = 0; i < numStarts; ++i) {
-                startRoots[i] = rand() % comm->Get_size();
+                startRoots[i] = rand() % maxStartRoot;
             }
         }
 
@@ -73,7 +75,7 @@ namespace dgmark {
 
         Graph* graph = generator->generate();
         task->open(graph);
-        Vertex* startRoots = generateStartRoots();
+        Vertex* startRoots = generateStartRoots(graph->numGlobalVertex);
 
         for (int i = 0; i < numStarts; ++i) {
             task->setRoot(startRoots[i]);
@@ -163,6 +165,8 @@ namespace dgmark {
         }
         stdDeviation = sqrt(stdDeviation / (data->size() - 1));
 
+        double relStdDeviation = stdDeviation / mean;
+
         vector<double> *sortedData = new vector<double>();
         sortedData->insert(sortedData->begin(), data->begin(), data->end());
         sort(sortedData->begin(), sortedData->end());
@@ -181,6 +185,7 @@ namespace dgmark {
 
         out << statName << ".mean = " << mean << "\n";
         out << statName << ".stdDeviation = " << stdDeviation << "\n";
+        out << statName << ".relativeStdDeviation = " << relStdDeviation << "\n";
         out << statName << ".min = " << minimum << "\n";
         out << statName << ".firstQuartile = " << firstQuartile << "\n";
         out << statName << ".median = " << median << "\n";
@@ -191,7 +196,28 @@ namespace dgmark {
     }
 
     void TreeMakerController::printStatistics() {
-        log << getStatistics();
+        string statistics = getStatistics();
+        log << statistics;
+
+        time_t datetime = time(0);
+        tm *date = localtime(&datetime);
+
+        int mkdirResult = system("mkdir -p dgmarkStatistics");
+
+        stringstream fileName;
+        fileName << "dgmarkStatistics/dgmark_stat_" 
+                << (date->tm_year + 1900) << "-"
+                << (date->tm_mon + 1) << "-"
+                << date->tm_mday << "_"
+                << date->tm_hour << "-"
+                << date->tm_min << "-"
+                << date->tm_sec
+                << ".properties";
+
+        ofstream fileOut;
+        fileOut.open(fileName.str());
+        fileOut << statistics;
+        fileOut.close();
     }
 
 }

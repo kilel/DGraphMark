@@ -62,7 +62,7 @@ namespace dgmark {
             }
             prev = localVertex;
         }
-        startIndex[numLocalVertex] = numLocalVertex;
+        startIndex[numLocalVertex] = edges->size();
     }
 
     size_t SortedGraph::getStartIndex(Vertex localVertex) {

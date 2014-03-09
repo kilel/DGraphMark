@@ -43,7 +43,7 @@ namespace dgmark {
         Validator *validator;
         int numStarts;
 
-        Vertex* generateStartRoots();
+        Vertex* generateStartRoots(size_t maxStartRoot);
 
         bool isLastRunValid;
 

@@ -13,4 +13,5 @@
 *.a
 
 # Ignore all binaries files
-/bin/
+/bin/*
+/bin/**/*

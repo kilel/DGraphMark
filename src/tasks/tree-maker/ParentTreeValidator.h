@@ -35,6 +35,9 @@ namespace dgmark {
         virtual bool validate(Result *taskResult);
 
     private:
+        const Vertex DEPTHS_MAX_VALUE = UINT64_MAX;
+        const int VALIDATOR_SYNCH_TAG = 28952;
+        
         Log log;
         double validationTime;
 
@@ -43,6 +46,7 @@ namespace dgmark {
         bool validateParents(ParentTree *parentTree);
         bool validateDepth(ParentTree *parentTree, RMAWindow<Vertex> *dWin);
         RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
+        void calculateTraversedEdges(ParentTree *parentTree);
 
     };
 }

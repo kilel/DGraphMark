@@ -14,6 +14,7 @@
  *   limitations under the License.
  */
 
+#include <assert.h>
 #include "ParentTreeValidator.h"
 #include "../../base/RMAWindow.cpp" //to prevent link errors
 #include "../../base/Utils.h"
@@ -50,6 +51,7 @@ namespace dgmark {
 
         ParentTree *parentTree = (ParentTree*) taskResult;
         bool isValid = doValidate(parentTree);
+        calculateTraversedEdges(parentTree);
 
         validationTime = Wtime() - startTime;
         if (isValid) {
@@ -69,10 +71,9 @@ namespace dgmark {
             return false;
         }
 
-
         RMAWindow<Vertex> *dWin = buildDepth(parentTree);
         bool isValid = validateDepth(parentTree, dWin);
-        
+
         dWin->clean();
         delete dWin;
 
@@ -131,14 +132,93 @@ namespace dgmark {
     bool ParentTreeValidator::validateDepth(ParentTree *parentTree, RMAWindow<Vertex> *dWin) {
         bool isValid = true;
 
+        Graph *graph = parentTree->getInitialGraph();
+        Vertex root = parentTree->getRoot();
+        Vertex *parent = parentTree->getParent();
+        size_t parentSize = parentTree->getParentSize();
+        Vertex *depths = dWin->getData();
+
+        for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
+            if (depths[localVertex] >= DEPTHS_MAX_VALUE) {
+                printf("\nError: depths builded not for all verticies\n");
+                return false; // not all depths builded.
+            }
+        }
+
         return isValid;
     }
 
     RMAWindow<Vertex>* ParentTreeValidator::buildDepth(ParentTree *parentTree) {
+        Graph *graph = parentTree->getInitialGraph();
+        Vertex root = parentTree->getRoot();
+        Vertex *parent = parentTree->getParent();
         size_t parentSize = parentTree->getParentSize();
+
         RMAWindow<Vertex> *dWin = new RMAWindow<Vertex>(comm, parentSize, VERTEX_TYPE);
+        Vertex *depths = dWin->getData();
 
+        for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
+            depths[localVertex] = DEPTHS_MAX_VALUE;
+        }
+        if (graph->vertexRank(root) == rank) {
+            depths[graph->vertexToLocal(root)] = 0;
+        }
 
+        while (true) {
+            bool isDepthsChanged = false;
+
+            //synchroPhase
+            for (int node = 0; node < size; ++node) {
+                if (node == rank) {
+                    for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
+                        Vertex currParent = parent[localVertex];
+                        Vertex currParentRank = graph->vertexRank(currParent);
+                        Vertex currParentLocal = graph->vertexToLocal(currParent);
+                        Vertex parentDepth;
+
+                        if (graph->vertexRank(currParent) == rank) {
+                            parentDepth = depths[currParentLocal];
+                        } else {
+                            dWin->sendIsFenceNeeded(true, VALIDATOR_SYNCH_TAG);
+                            dWin->fenceOpen(MODE_NOPUT);
+                            dWin->get(&parentDepth, 1, currParentRank, currParentLocal);
+                            dWin->fenceClose(0);
+                            assert(0 <= parentDepth && parentDepth <= DEPTHS_MAX_VALUE);
+                        }
+
+                        if (depths[localVertex] == DEPTHS_MAX_VALUE && parentDepth != DEPTHS_MAX_VALUE) {
+                            depths[localVertex] = parentDepth + 1;
+                            isDepthsChanged = true;
+                        }
+                    }
+                    dWin->sendIsFenceNeeded(false, VALIDATOR_SYNCH_TAG);
+                } else {
+                    while (true) {
+                        if (dWin->recvIsFenceNeeded(VALIDATOR_SYNCH_TAG)) {
+                            dWin->fenceOpen(MODE_NOPUT);
+                            dWin->fenceClose(MODE_NOSTORE);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                comm->Barrier();
+            }
+
+            comm->Allreduce(IN_PLACE, &isDepthsChanged, 1, BOOL, LOR);
+
+            if (!isDepthsChanged) {
+                break;
+            }
+        }
         return dWin;
+    }
+
+    void ParentTreeValidator::calculateTraversedEdges(ParentTree *parentTree) {
+        Graph *graph = parentTree->getInitialGraph();
+        size_t traversedEdges = graph->edges->size();
+
+        comm->Allreduce(IN_PLACE, &traversedEdges, 1, MPI_UINT64_T, SUM);
+        parentTree->setTraversedEdges(traversedEdges);
     }
 }
