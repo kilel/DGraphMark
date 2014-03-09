@@ -17,8 +17,8 @@
 #ifndef BFSTASK_H
 #define	BFSTASK_H
 
-#include <mpi.h>
 #include "../../base/Graph.h"
+#include "../../base/RMAWindow.h"
 #include "ParentTree.h"
 #include "TreeMakerTask.h"
 
@@ -36,25 +36,21 @@ namespace dgmark {
         /**
          * Performes one BSF step for all nodes.
          * 
-         * @param queue queue of local vertices.
-         * @param parent parents of vertices.
          * @param qWin queue RMA window
          * @param pWin parent RMA window
          * @return true, if more steps are required.
          */
-        bool performBFS(Vertex *queue, Vertex *parent, Win qWin, Win pWin);
+        bool performBFS(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin);
 
         /**
          * Performs actual BFS step. 
          * Traverses endges from all queued vertices, and processes childs.
          * 
-         * @param queue queue of local vertices.
-         * @param parent parents of vertices.
          * @param qWin queue RMA window
          * @param pWin parent RMA window
          * @return true, if local or global queue is enlarged.
          */
-        bool performBFSActualStep(Vertex *queue, Vertex *parent, Win qWin, Win pWin);
+        bool performBFSActualStep(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin);
 
         /**
          * Performs RMA synchronization.
@@ -62,31 +58,31 @@ namespace dgmark {
          * @param qWin queue RMA window
          * @param pWin parent RMA window
          */
-        void performBFSSynchRMA(Win qWin, Win pWin);
+        void performBFSSynchRMA(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin);
 
         /**
          * Processes local child. 
          * Adds it to local queue and sets it's parent, if it was not set.
          * 
-         * @param queue queue of local vertices.
-         * @param parent parents of vertices.
-         * @param currVertex current vertex (parent of child) (local notation)
+         * @param qWin queue RMA window
+         * @param pWin parent RMA window
+         * @param currVertex current vertex (parent of child) (global notation)
          * @param child Child of current vertex (global notation)
          * @return true, if local queue is enlarged.
          */
-        bool processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
+        bool processLocalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child);
 
         /**
+         * Processes global child. 
+         * Adds it to other nodes queue and sets it's parent, if it was not set.
          * 
-         * @param queue queue of local vertices.
-         * @param parent parents of vertices.
          * @param qWin queue RMA window
          * @param pWin parent RMA window
-         * @param currVertex current vertex (parent of child) (local notation)
+         * @param currVertex current vertex (parent of child) (global notation)
          * @param child Child of current vertex (global notation)
          * @return true, if global queue is enlarged.
          */
-        bool processGlobalChild(Vertex *queue, Vertex *parent, Win qWin, Win pWin, Vertex currVertex, Vertex child);
+        bool processGlobalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child);
 
         /**
          * Aligns queue.

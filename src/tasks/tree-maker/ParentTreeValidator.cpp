@@ -15,7 +15,10 @@
  */
 
 #include "ParentTreeValidator.h"
+#include "../../base/RMAWindow.cpp" //to prevent link errors
 #include "../../base/Utils.h"
+#include "../../base/RMAWindow.h"
+
 namespace dgmark {
 
     ParentTreeValidator::ParentTreeValidator(Intracomm *comm) : Validator(comm), log(comm) {
@@ -66,9 +69,12 @@ namespace dgmark {
             return false;
         }
 
-        Vertex *depths = buildDepth(parentTree);
-        bool isValid = validateDepth(parentTree, depths);
-        delete[] depths;
+
+        RMAWindow<Vertex> *dWin = buildDepth(parentTree);
+        bool isValid = validateDepth(parentTree, dWin);
+        
+        dWin->clean();
+        delete dWin;
 
         return isValid;
     }
@@ -86,7 +92,7 @@ namespace dgmark {
         comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
 
         if (!isValid) {
-            log << "\nError validating: some vertices are out of tree\n";
+            log << "\nError validating: some vertices are out of tree (perhabs graph is not connected)\n";
         }
 
         return isValid;
@@ -96,10 +102,11 @@ namespace dgmark {
         bool isValid = true;
         size_t parentSize = parentTree->getParentSize();
         Vertex *parent = parentTree->getParent();
+        Graph *graph = parentTree->getInitialGraph();
         Vertex root = parentTree->getRoot();
-        Vertex rootLocal = Utils::vertexToLocal(root);
+        Vertex rootLocal = graph->vertexToLocal(root);
 
-        if (Utils::getVertexRank(root) == rank) {
+        if (graph->vertexRank(root) == rank) {
             if (root != parent[rootLocal]) {
                 isValid = false;
                 log << "\nError validating: root parent is not root\n";
@@ -108,29 +115,30 @@ namespace dgmark {
 
         if (isValid) {
             for (size_t i = 0; i < parentSize; ++i) {
-                isValid &= (parent[i] != Utils::vertexToGlobal(i) || i == rootLocal);
+                isValid &= (parent[i] != graph->vertexToGlobal(i) || i == rootLocal);
             }
         }
 
         comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
-        
+
         if (!isValid) {
             log << "\nError validating: some vertices are self parents, or root is not a parent it itself\n";
         }
-        
+
         return isValid;
     }
 
-    bool ParentTreeValidator::validateDepth(ParentTree *parentTree, Vertex *depth) {
+    bool ParentTreeValidator::validateDepth(ParentTree *parentTree, RMAWindow<Vertex> *dWin) {
         bool isValid = true;
 
         return isValid;
     }
 
-    Vertex* ParentTreeValidator::buildDepth(ParentTree *parentTree) {
-        Vertex *depths = new Vertex[parentTree->getParentSize()];
+    RMAWindow<Vertex>* ParentTreeValidator::buildDepth(ParentTree *parentTree) {
+        size_t parentSize = parentTree->getParentSize();
+        RMAWindow<Vertex> *dWin = new RMAWindow<Vertex>(comm, parentSize, VERTEX_TYPE);
 
 
-        return depths;
+        return dWin;
     }
 }

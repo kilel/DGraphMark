@@ -26,21 +26,6 @@ namespace dgmark {
     public:
 
         Utils(Intracomm *comm) : Communicable(comm) {
-            size = comm->Get_size();
-            rank = comm->Get_rank();
-            if (((size - 1) & size) != 0) {
-                if (rank == 0) {
-                    printf("Number of MPI nodes must be 2^n. %d is not.\n", size);
-                }
-                assert(false);
-            }
-            int commSize = size;
-            commGrade = 0;
-            while (commSize != 1) {
-                commSize >>= 1;
-                ++commGrade;
-            }
-
         }
 
         Utils(const Utils& orig) : Communicable(orig.comm) {
@@ -73,8 +58,6 @@ namespace dgmark {
             instance->comm->Bcast(grade, 1, INT, 0);
             instance->comm->Bcast(density, 1, INT, 0);
             instance->comm->Bcast(numStarts, 1, INT, 0);
-
-            instance->setGrade(*grade);
         }
 
         static void printGraph(Graph *graph) {
@@ -86,49 +69,8 @@ namespace dgmark {
             }
         }
 
-        static inline Vertex vertexToLocal(Vertex globalVertex) {
-            int rank = getVertexRank(globalVertex);
-            return (rank << instance->diffGrade) ^ globalVertex;
-        }
-
-        static inline Vertex vertexToGlobal(Vertex localVertex) {
-            return vertexToGlobal(instance->rank, localVertex);
-        }
-
-        static inline Vertex vertexToGlobal(int rank, Vertex localVertex) {
-            return (rank << instance->diffGrade) | localVertex;
-        }
-
-        static inline Vertex getVertexRank(Vertex globalVertex) {
-            return globalVertex >> instance->diffGrade;
-        }
-
-        Vertex getNumLocalVertex() {
-            return numLocalVertex;
-        }
-
-        Vertex getNumGlobalVertex() {
-            return numGlobalVertex;
-        }
-
-        void setGrade(int newGrade) {
-            assert(commGrade < newGrade);
-
-            grade = newGrade;
-            diffGrade = grade - commGrade;
-
-            numLocalVertex = 1 << (diffGrade);
-            numGlobalVertex = 1 << (grade); //number of vertex globally.
-        }
-
     private:
         static Utils *instance;
-        int grade;
-        int commGrade;
-        int diffGrade;
-        Vertex numLocalVertex;
-        Vertex numGlobalVertex;
-
     };
 
 }

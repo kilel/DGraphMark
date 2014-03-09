@@ -14,8 +14,8 @@
  *   limitations under the License.
  */
 
-#ifndef BFSGRAPH500_H
-#define	BFSGRAPH500_H
+#ifndef BFSGRAPH500_OPTIMIZED_H
+#define	BFSGRAPH500_OPTIMIZED_H
 
 #include <mpi.h>
 #include <inttypes.h>
@@ -28,11 +28,11 @@
 
 namespace dgmark {
 
-    class BFSGraph500 : public TreeMakerTask {
+    class BFSGraph500Optimized : public TreeMakerTask {
     public:
-        BFSGraph500(Intracomm *comm);
-        BFSGraph500(const BFSGraph500& orig);
-        virtual ~BFSGraph500();
+        BFSGraph500Optimized(Intracomm *comm);
+        BFSGraph500Optimized(const BFSGraph500Optimized& orig);
+        virtual ~BFSGraph500Optimized();
 
         virtual ParentTree* run();
     private:
@@ -41,5 +41,5 @@ namespace dgmark {
     };
 }
 
-#endif	/* BFSGRAPH500_H */
+#endif	/* BFSGRAPH500_OPTIMIZED_H */
 

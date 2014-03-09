@@ -11,6 +11,8 @@
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
           <in>Log.h</in>
+          <in>RMAWindow.cpp</in>
+          <in>RMAWindow.h</in>
           <in>Result.h</in>
           <in>SortedGraph.cpp</in>
           <in>SortedGraph.h</in>
@@ -32,6 +34,8 @@
           <df name="tree-maker">
             <in>BFSGraph500.cpp</in>
             <in>BFSGraph500.h</in>
+            <in>BFSGraph500Optimized.cpp</in>
+            <in>BFSGraph500Optimized.h</in>
             <in>BFSTask.cpp</in>
             <in>BFSTask.h</in>
             <in>ParentTree.cpp</in>
@@ -45,6 +49,7 @@
         </df>
         <in>main_dgmark.cpp</in>
         <in>main_dgmark_graph500.cpp</in>
+        <in>main_dgmark_graph500_opt.cpp</in>
       </df>
     </df>
     <logicalFolder name="ExternalFiles"
@@ -100,6 +105,10 @@
       </item>
       <item path="src/base/Log.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/base/RMAWindow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/base/RMAWindow.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/base/Result.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/base/SortedGraph.cpp" ex="false" tool="1" flavor2="0">
@@ -144,6 +153,10 @@
         <ccTool>
         </ccTool>
       </item>
+      <item path="src/main_dgmark_graph500_opt.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool>
+        </ccTool>
+      </item>
       <item path="src/tasks/StubTask.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/tasks/tree-maker/BFSGraph500.cpp"
@@ -152,6 +165,16 @@
             flavor2="0">
       </item>
       <item path="src/tasks/tree-maker/BFSGraph500.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/BFSGraph500Optimized.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/tasks/tree-maker/BFSGraph500Optimized.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="src/tasks/tree-maker/BFSTask.cpp" ex="false" tool="1" flavor2="0">
       </item>

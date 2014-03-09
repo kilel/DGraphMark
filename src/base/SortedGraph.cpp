@@ -50,14 +50,14 @@ namespace dgmark {
 
         Vertex prev = 0;
         for (size_t index = 0; index < edges->size();) {
-            Vertex localVertex = Utils::vertexToLocal(edges->at(index)->from);
+            Vertex localVertex = vertexToLocal(edges->at(index)->from);
 
             for (Vertex skipped = prev + 1; skipped < localVertex; ++skipped) {
                 startIndex[skipped] = startIndex[prev];
             }
 
             startIndex[localVertex] = index;
-            while (index < edges->size() && Utils::vertexToLocal(edges->at(index)->from) == localVertex) {
+            while (index < edges->size() && vertexToLocal(edges->at(index)->from) == localVertex) {
                 ++index;
             }
             prev = localVertex;

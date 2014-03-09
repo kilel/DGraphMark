@@ -36,13 +36,17 @@ namespace dgmark {
         Vertex numGlobalVertex;
 
         /**
-         * Creates graph with no edges.
+         * Creates graph.
+         * @param comm communicator.
+         * @param grade grade of graph (log[2] numGlobalVertices)
+         * @param density density of graph (mean num of edges per vertice)
          */
         Graph(Intracomm *comm, int grade, int density);
 
         /**
          * Copying graph. 
          * Note, that graph copies reference to original edgelist.
+         * 
          * @param orig Original graph.
          */
         Graph(const Graph& orig);
@@ -50,6 +54,7 @@ namespace dgmark {
         /**
          * Copying graph. 
          * Note, that graph copies reference to original edgelist.
+         * 
          * @param orig Original graph.
          */
         Graph(const Graph *orig);
@@ -60,30 +65,66 @@ namespace dgmark {
          * Clears edgelist.
          */
         virtual void clear();
-        
+
         /**
          * Distributes graph. 
          * Each edge (myRank|localNode -> hisRank|hisLocal) sends to hisRank as
          * (hisRank|hisLocal -> myRank|localNode).
          */
         virtual void distribute();
-        
+
         /**
          * Finds, if graph is distributed, or not;
+         * 
          * @return true, is graph is distribuded.
          */
         bool isDistributed();
+
+        /**
+         * Converts global vertex to local one.
+         * 
+         * @param globalVertex Global vertex
+         * @return local vertex
+         */
+        Vertex vertexToLocal(Vertex globalVertex);
+
+        /**
+         * Converts local vertex to global one. (Assumes, that vertex from current process).
+         * 
+         * @param localVertex local vertex from current process
+         * @return global vertex.
+         */
+        Vertex vertexToGlobal(Vertex localVertex);
+
+        /**
+         * Converts local vertex to global one.
+         * 
+         * @param rank rank of process.
+         * @param localVertex local vertex of the process.
+         * @return global vertex.
+         */
+        Vertex vertexToGlobal(int rank, Vertex localVertex);
         
+        /**
+         * Returns rank of the global vertex.
+         * @param globalVertex global vertex.
+         * @return rank of the global vertex.
+         */
+        Vertex vertexRank(Vertex globalVertex);
+
     private:
+        int diffGrade;
         size_t distributedEdges = 0;
-        
+
+        void initialize();
+
         /**
          * Transfers edge to it's destination.
          * @param edge Edge
          * @param memory allocated memory to send edge.
          */
         void sendEdge(Edge *edge, Vertex *memory);
-        
+
         /**
          * Tries to read edge from communicator.
          * @param memory allocated memory to read edge.

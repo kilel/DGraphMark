@@ -14,10 +14,10 @@
  *   limitations under the License.
  */
 
-#include <string.h>
 #include <assert.h>
 
 #include "BFSTask.h"
+#include "../../base/RMAWindow.cpp" //to prevent link errors
 #include "../../base/Utils.h"
 
 namespace dgmark {
@@ -37,7 +37,6 @@ namespace dgmark {
 
         Vertex queueSize = getQueueSize();
         size_t vertexBytesSize = sizeof (Vertex);
-        size_t queueBytesSize = queueSize * vertexBytesSize;
         size_t parentBytesSize = (numLocalVertex + 1) * vertexBytesSize;
 
         /**
@@ -48,9 +47,8 @@ namespace dgmark {
          * queue[1] is an index after the end.
          */
 
-        Vertex *queue = (Vertex*) Alloc_mem(queueBytesSize, INFO_NULL);
-        Win queueWin = Win::Create(queue, queueBytesSize, vertexBytesSize, INFO_NULL, *comm);
-        memset(queue, 0, queueBytesSize);
+        RMAWindow<Vertex> *qWin = new RMAWindow<Vertex>(comm, queueSize, VERTEX_TYPE);
+        Vertex *queue = qWin->getData();
         queue[0] = 2;
         queue[1] = 2;
 
@@ -61,26 +59,27 @@ namespace dgmark {
          * parent[initially] == numGlobalVertex
          * Note: contains local vertex only.
          */
-        Vertex *parent = (Vertex*) Alloc_mem(parentBytesSize, INFO_NULL);
-        Win parentWin = MPI::Win::Create(parent, parentBytesSize, vertexBytesSize, INFO_NULL, *comm);
-        memset(parent, 0, parentBytesSize);
+
+        RMAWindow<Vertex> *pWin = new RMAWindow<Vertex>(comm, numLocalVertex, VERTEX_TYPE);
+        Vertex *parent = pWin->getData();
         for (size_t i = 0; i < numLocalVertex; ++i) {
             parent[i] = graph->numGlobalVertex;
         }
 
-        if (Utils::getVertexRank(root) == rank) {
+        if (graph->vertexRank(root) == rank) {
             //root is my vertex, put it into queue.
-            queue[queue[1]] = Utils::vertexToLocal(root);
-            parent[Utils::vertexToLocal(root)] = root;
+            Vertex rootLocal = graph->vertexToLocal(root); 
+            queue[queue[1]] = rootLocal;
+            parent[rootLocal] = root;
             ++queue[1];
         }
 
         //main loop
-        while (performBFS(queue, parent, queueWin, parentWin));
+        while (performBFS(qWin, pWin));
 
-        parentWin.Free();
-        queueWin.Free();
-        Free_mem(queue);
+        qWin->clean();
+        delete qWin;
+        delete pWin;
 
         double taskRunTime = Wtime() - startTime;
         ParentTree *parentTree = new ParentTree(comm, root, parent, graph, taskRunTime);
@@ -88,13 +87,13 @@ namespace dgmark {
         return parentTree;
     }
 
-    bool BFSTask::performBFS(Vertex *queue, Vertex *parent, Win qWin, Win pWin) {
+    bool BFSTask::performBFS(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
         bool isQueueEnlarged = false;
 
         for (int node = 0; node < size; ++node) {
             if (rank == node) {
                 //BFS from current node
-                isQueueEnlarged = performBFSActualStep(queue, parent, qWin, pWin);
+                isQueueEnlarged = performBFSActualStep(qWin, pWin);
             } else {
                 //RMA synchronization for all other nodes
                 performBFSSynchRMA(qWin, pWin);
@@ -106,9 +105,10 @@ namespace dgmark {
         return isQueueEnlarged;
     }
 
-    bool BFSTask::performBFSActualStep(Vertex* queue, Vertex* parent, Win qWin, Win pWin) {
+    bool BFSTask::performBFSActualStep(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
         bool isQueueEnlarged = false;
         vector<Edge*> *edges = graph->edges;
+        Vertex *queue = qWin->getData();
 
         size_t queueEnd = queue[1];
         while (queue[0] < queueEnd) {
@@ -118,14 +118,14 @@ namespace dgmark {
                     childIndex < graph->getEndIndex(currVertex); ++childIndex) {
                 //iterate through all childs of queued vertex
                 Vertex child = edges->at(childIndex)->to;
-                int childRank = Utils::getVertexRank(child);
+                int childRank = graph->vertexRank(child);
                 //printf("%d: currVert = %ld, child = %ld (in %d), qLen = %ld\n", rank, currVertex, Utils::vertexToLocal(child), childRank, queue[1]);
                 if (childRank == rank) {
                     //vertex is mine
-                    isQueueEnlarged |= processLocalChild(queue, parent, Utils::vertexToGlobal(currVertex), child);
+                    isQueueEnlarged |= processLocalChild(qWin, pWin, graph->vertexToGlobal(currVertex), child);
                 } else {
                     //vertex is in the other process
-                    isQueueEnlarged |= processGlobalChild(queue, parent, qWin, pWin, Utils::vertexToGlobal(currVertex), child);
+                    isQueueEnlarged |= processGlobalChild(qWin, pWin, graph->vertexToGlobal(currVertex), child);
                 }
             }
             ++queue[0]; // shrinking queue.
@@ -135,21 +135,21 @@ namespace dgmark {
         return isQueueEnlarged;
     }
 
-    void BFSTask::performBFSSynchRMA(Win qWin, Win pWin) {
+    void BFSTask::performBFSSynchRMA(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
         while (true) {
             if (recvIsFenceNeeded()) {
-                pWin.Fence(MODE_NOPUT | MODE_NOPRECEDE); //allow read parent
-                pWin.Fence(MODE_NOSTORE | MODE_NOSUCCEED);
+                pWin->fenceOpen(MODE_NOPUT); //allow read parent
+                pWin->fenceClose(MODE_NOSTORE);
 
                 if (recvIsFenceNeeded()) {
-                    pWin.Fence(MODE_NOPUT | MODE_NOPRECEDE); //allow to write to the parent
-                    pWin.Fence(MODE_NOSTORE | MODE_NOSUCCEED);
-                    qWin.Fence(MODE_NOPUT | MODE_NOPRECEDE); //allow to read queue
-                    qWin.Fence(MODE_NOSTORE | MODE_NOSUCCEED);
-                    qWin.Fence(MODE_NOPUT | MODE_NOPRECEDE); //allow to put to the queue
-                    qWin.Fence(MODE_NOSTORE | MODE_NOSUCCEED);
-                    qWin.Fence(MODE_NOPUT | MODE_NOPRECEDE); //allow to accumulate queue
-                    qWin.Fence(MODE_NOSTORE | MODE_NOSUCCEED);
+                    pWin->fenceOpen(MODE_NOPUT); //allow to write to the parent
+                    pWin->fenceClose(MODE_NOSTORE);
+                    qWin->fenceOpen(MODE_NOPUT); //allow to read queue
+                    qWin->fenceClose(MODE_NOSTORE);
+                    qWin->fenceOpen(MODE_NOPUT); //allow to put to the queue
+                    qWin->fenceClose(MODE_NOSTORE);
+                    qWin->fenceOpen(MODE_NOPUT); //allow to accumulate queue
+                    qWin->fenceClose(MODE_NOSTORE);
                 }
             } else { //if fence is not neaded mode
                 break;
@@ -157,8 +157,11 @@ namespace dgmark {
         }
     }
 
-    bool BFSTask::processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child) {
-        Vertex childLocal = Utils::vertexToLocal(child);
+    bool BFSTask::processLocalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
+        Vertex childLocal = graph->vertexToLocal(child);
+        Vertex *queue = qWin->getData();
+        Vertex *parent = pWin->getData();
+
         if (parent[childLocal] == graph->numGlobalVertex) {
             parent[childLocal] = currVertex;
             queue[queue[1]] = childLocal;
@@ -169,16 +172,16 @@ namespace dgmark {
         }
     }
 
-    bool BFSTask::processGlobalChild(Vertex *queue, Vertex *parent, Win qWin, Win pWin, Vertex currVertex, Vertex child) {
-        Vertex childLocal = Utils::vertexToLocal(child);
-        int childRank = Utils::getVertexRank(child);
+    bool BFSTask::processGlobalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
+        Vertex childLocal = graph->vertexToLocal(child);
+        int childRank = graph->vertexRank(child);
         Vertex parentOfChild;
         //printf("%d: Getting parent of child\n", rank);
 
         sendIsFenceNeeded(true); //fence is needed now
-        pWin.Fence(MODE_NOPRECEDE | MODE_NOPUT);
-        pWin.Get(&parentOfChild, 1, VERTEX_TYPE, childRank, childLocal, 1, VERTEX_TYPE);
-        pWin.Fence(MODE_NOSUCCEED);
+        pWin->fenceOpen(MODE_NOPUT);
+        pWin->get(&parentOfChild, 1, childRank, childLocal);
+        pWin->fenceClose(0);
 
         //printf("%d: Parent of child is %ld\n", rank, parentOfChild, numLocalVertex);
         assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
@@ -189,30 +192,30 @@ namespace dgmark {
 
         if (isInnerFenceNeeded) {
             //printf("%d: Putting child to the parent\n", rank);
-            pWin.Fence(MODE_NOPRECEDE);
-            pWin.Put(&currVertex, 1, VERTEX_TYPE, childRank, childLocal, 1, VERTEX_TYPE);
-            pWin.Fence(MODE_NOSUCCEED | MODE_NOSTORE);
+            pWin->fenceOpen(0);
+            pWin->put(&currVertex, 1, childRank, childLocal);
+            pWin->fenceClose(MODE_NOSTORE);
 
             //Updating queue
             Vertex queueLastIndex;
             //printf("%d: Getting last queue index\n", rank);
-            qWin.Fence(MODE_NOPRECEDE | MODE_NOPUT);
-            qWin.Get(&queueLastIndex, 1, VERTEX_TYPE, childRank, 1, 1, VERTEX_TYPE);
-            qWin.Fence(MODE_NOSUCCEED);
+            qWin->fenceOpen(MODE_NOPUT);
+            qWin->get(&queueLastIndex, 1, childRank, 1); // get queue[1]
+            qWin->fenceClose(0);
 
             //printf("%d: Last queue index is %ld\n", rank, queueLastIndex);
             assert(0 <= queueLastIndex && queueLastIndex <= getQueueSize());
 
             //printf("%d: Putting child to the queue\n", rank);
-            qWin.Fence(MODE_NOPRECEDE);
-            qWin.Put(&childLocal, 1, VERTEX_TYPE, childRank, queueLastIndex, 1, VERTEX_TYPE);
-            qWin.Fence(MODE_NOSUCCEED | MODE_NOSTORE);
+            qWin->fenceOpen(0);
+            qWin->put(&childLocal, 1, childRank, queueLastIndex);
+            qWin->fenceClose(MODE_NOSTORE);
 
             //printf("%d: Incrementing left edge of the queue\n", rank);
             Vertex one = 1;
-            qWin.Fence(MODE_NOPRECEDE);
-            qWin.Accumulate(&one, 1, VERTEX_TYPE, childRank, 1, 1, VERTEX_TYPE, SUM);
-            qWin.Fence(MODE_NOSUCCEED);
+            qWin->fenceOpen(0);
+            qWin->accumulate(&one, 1, childRank, 1, SUM); // queue[1] += 1
+            qWin->fenceClose(0);
 
             return true; // queue is enlarged
         } else {

@@ -25,6 +25,8 @@
           <in>Graph.h</in>
           <in>GraphGenerator.h</in>
           <in>Log.h</in>
+          <in>RMAWindow.cpp</in>
+          <in>RMAWindow.h</in>
           <in>Result.h</in>
           <in>SortedGraph.cpp</in>
           <in>SortedGraph.h</in>
@@ -46,6 +48,8 @@
           <df name="tree-maker">
             <in>BFSGraph500.cpp</in>
             <in>BFSGraph500.h</in>
+            <in>BFSGraph500Optimized.cpp</in>
+            <in>BFSGraph500Optimized.h</in>
             <in>BFSTask.cpp</in>
             <in>BFSTask.h</in>
             <in>ParentTree.cpp</in>
@@ -59,6 +63,7 @@
         </df>
         <in>main_dgmark.cpp</in>
         <in>main_dgmark_graph500.cpp</in>
+        <in>main_dgmark_graph500_opt.cpp</in>
       </df>
     </df>
   </logicalFolder>

@@ -17,8 +17,9 @@
 #ifndef PARENTTREEVALIDATOR_H
 #define	PARENTTREEVALIDATOR_H
 
-#include "../../base/Validator.h"
 #include "../../base/Log.h"
+#include "../../base/RMAWindow.h"
+#include "../../base/Validator.h"
 #include "ParentTree.h"
 
 namespace dgmark {
@@ -36,13 +37,13 @@ namespace dgmark {
     private:
         Log log;
         double validationTime;
-        
+
         bool doValidate(ParentTree *parentTree);
         bool validateRanges(ParentTree *parentTree);
         bool validateParents(ParentTree *parentTree);
-        bool validateDepth(ParentTree *parentTree, Vertex *depth);
-        Vertex* buildDepth(ParentTree *parentTree);
-        
+        bool validateDepth(ParentTree *parentTree, RMAWindow<Vertex> *dWin);
+        RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
+
     };
 }
 #endif	/* PARENTTREEVALIDATOR_H */

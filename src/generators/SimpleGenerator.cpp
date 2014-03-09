@@ -42,14 +42,14 @@ namespace dgmark {
 
         //Here we create density/2 oriented edges from each of local
         for (Vertex vertex = 0; vertex < numLocalVertex; ++vertex) {
-            Vertex globalVertexFrom = Utils::vertexToGlobal(vertex);
+            Vertex globalVertexFrom = graph->vertexToGlobal(vertex);
             int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
 
             for (int i = 0; i < numEdges; ++i) {
                 uint64_t rankTo = rand() % size;
                 uint64_t localVertexTo = rand() % numLocalVertex;
 
-                Vertex globalVertexTo = Utils::vertexToGlobal(rankTo, localVertexTo);
+                Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
                 if (globalVertexFrom != globalVertexTo) {
                     edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
                 } else {

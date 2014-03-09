@@ -33,9 +33,9 @@ CONTROLLER_DIR = controllers/
 DIRECTORIES = $(OBJ_DIR)$(BASE_DIR) $(OBJ_DIR)$(TASKS_DIR) \
 	      $(OBJ_DIR)$(GENERATOR_DIR) $(OBJ_DIR)$(CONTROLLER_DIR)
 
-BASE = Graph SortedGraph
+BASE = Graph SortedGraph RMAWindow
 GENERATORS = SimpleGenerator
-TASKS = BFSGraph500 BFSTask ParentTree ParentTreeValidator TreeMakerTask
+TASKS = BFSGraph500 BFSGraph500Optimized BFSTask ParentTree ParentTreeValidator TreeMakerTask
 CONTROLLERS = TreeMakerController
 FILES_LIST = $(addprefix $(BASE_DIR), $(BASE)) \
 	    $(addprefix $(GENERATOR_DIR), $(GENERATORS)) \
@@ -45,7 +45,7 @@ FILES_LIST = $(addprefix $(BASE_DIR), $(BASE)) \
 SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))
 OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
 
-BUILD = dgmark #dgmark_graph500	    # list of builds
+BUILD = dgmark dgmark_graph500 dgmark_graph500_opt	    # list of builds
 
 all: $(BUILD)
 
@@ -55,7 +55,10 @@ $(DIRECTORIES):			    # prepairing directories.
 dgmark: $(DIRECTORIES) $(OBJECTS) $(OBJ_DIR)main_dgmark.o # basic build
 	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
 	
-dgmark_graph500: $(DIRECTORIES) $(OBJECTS) $(OBJ_DIR)main_dgmark_graph500.o # basic build
+dgmark_graph500: $(DIRECTORIES) $(OBJECTS) $(OBJ_DIR)main_dgmark_graph500.o # original graph500 build
+	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
+	
+dgmark_graph500_opt: $(DIRECTORIES) $(OBJECTS) $(OBJ_DIR)main_dgmark_graph500_opt.o # optimized graph500 build
 	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
 	
 $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp	    # building of resource
