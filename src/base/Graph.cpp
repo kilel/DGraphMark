@@ -100,7 +100,7 @@ namespace dgmark {
         }
 
         assert(commGrade < grade);
-        assert(commGrade > 0);
+        assert(commGrade >= 0);
         assert(grade > 0);
         assert(density > 0);
 

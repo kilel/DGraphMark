@@ -51,7 +51,6 @@ namespace dgmark {
 
         ParentTree *parentTree = (ParentTree*) taskResult;
         bool isValid = doValidate(parentTree);
-        calculateTraversedEdges(parentTree);
 
         validationTime = Wtime() - startTime;
         if (isValid) {
@@ -212,13 +211,5 @@ namespace dgmark {
             }
         }
         return dWin;
-    }
-
-    void ParentTreeValidator::calculateTraversedEdges(ParentTree *parentTree) {
-        Graph *graph = parentTree->getInitialGraph();
-        size_t traversedEdges = graph->edges->size();
-
-        comm->Allreduce(IN_PLACE, &traversedEdges, 1, MPI_UINT64_T, SUM);
-        parentTree->setTraversedEdges(traversedEdges);
     }
 }

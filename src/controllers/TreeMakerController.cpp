@@ -21,6 +21,7 @@
 #include <ctime>
 #include "TreeMakerController.h"
 #include "../base/SortedGraph.h"
+#include "../base/Statistics.h"
 
 namespace dgmark {
 
@@ -85,7 +86,7 @@ namespace dgmark {
             bool isValid = validator->validate(result);
 
             if (isValid) {
-                log << "Task mark: " << result->getMark() << "\n\n";
+                log << "Task mark: " << result->getMark() << " TEPS" << "\n\n";
             }
 
             taskRunningTimes->push_back(result->getTaskRunTime());
@@ -119,7 +120,7 @@ namespace dgmark {
     string TreeMakerController::getStatistics() {
         stringstream out;
         out.precision(CONTROLLER_PRECISION);
-        out.setf(std::ios::fixed, std::ios::floatfield);
+        out.setf(ios::fixed, ios::floatfield);
 
         if (isLastRunValid) {
             out << "\n#Statistics\n";
@@ -137,13 +138,13 @@ namespace dgmark {
             out << "time.generation.roots = " << rootsGenerationTime << "\n";
             out << "time.taskOpening = " << taskOpeningTime << "\n";
             out << "#\n";
-            out << getStatistics(taskRunningTimes, "time.taskRun");
+            out << getStatistics(taskRunningTimes, "time.taskRun", ios::fixed);
             out << "#\n";
-            out << getStatistics(validationTimes, "time.validation");
+            out << getStatistics(validationTimes, "time.validation", ios::fixed);
             out << "#\n";
-            out << getStatistics(traversedEdges, "traversedEdges");
+            out << getStatistics(traversedEdges, "traversedEdges", ios::boolalpha);
             out << "#\n";
-            out << getStatistics(marks, "mark");
+            out << getStatistics(marks, "mark", ios::fixed);
 
         } else {
             out << "\n#There were errors while running benchmark, no statistics available.\n";
@@ -152,45 +153,22 @@ namespace dgmark {
         return out.str();
     }
 
-    string TreeMakerController::getStatistics(vector<double> *data, string statName) {
-        double mean = 0;
-        for (auto it = data->begin(); it < data->end(); ++it) {
-            mean += *it;
-        }
-        mean /= data->size();
-
-        double stdDeviation = 0;
-        for (auto it = data->begin(); it < data->end(); ++it) {
-            stdDeviation += pow(*it - mean, 2.);
-        }
-        stdDeviation = sqrt(stdDeviation / (data->size() - 1));
-
-        double relStdDeviation = stdDeviation / mean;
-
-        vector<double> *sortedData = new vector<double>();
-        sortedData->insert(sortedData->begin(), data->begin(), data->end());
-        sort(sortedData->begin(), sortedData->end());
-
-        double minimum = sortedData->front();
-        double firstQuartile = sortedData->at(sortedData->size() / 4);
-        double median = sortedData->at(sortedData->size() / 2);
-        double thirdQuartile = sortedData->at(sortedData->size() - sortedData->size() / 4);
-        double maximum = sortedData->back();
-
-        delete sortedData;
+    string TreeMakerController::getStatistics(vector<double> *data, string statName,
+            const ios::fmtflags floatfieldFlag) {
+        Statistics* stat = new Statistics(data);
 
         stringstream out;
         out.precision(CONTROLLER_PRECISION);
-        out.setf(std::ios::fixed, std::ios::floatfield);
+        out.setf(floatfieldFlag, ios::floatfield);
 
-        out << statName << ".mean = " << mean << "\n";
-        out << statName << ".stdDeviation = " << stdDeviation << "\n";
-        out << statName << ".relativeStdDeviation = " << relStdDeviation << "\n";
-        out << statName << ".min = " << minimum << "\n";
-        out << statName << ".firstQuartile = " << firstQuartile << "\n";
-        out << statName << ".median = " << median << "\n";
-        out << statName << ".thirdQuertile = " << thirdQuartile << "\n";
-        out << statName << ".max = " << maximum << "\n";
+        out << statName << ".mean = " << stat->getMean() << "\n";
+        out << statName << ".stdDeviation = " << stat->getStdDeviation() << "\n";
+        out << statName << ".relativeStdDeviation = " << stat->getRelStdDeviation() << "\n";
+        out << statName << ".min = " << stat->getMinimum() << "\n";
+        out << statName << ".firstQuartile = " << stat->getFirstQuartile() << "\n";
+        out << statName << ".median = " << stat->getMedian() << "\n";
+        out << statName << ".thirdQuertile = " << stat->getThirdQuartile() << "\n";
+        out << statName << ".max = " << stat->getMaximum() << "\n";
 
         return out.str();
     }
@@ -205,7 +183,7 @@ namespace dgmark {
         int mkdirResult = system("mkdir -p dgmarkStatistics");
 
         stringstream fileName;
-        fileName << "dgmarkStatistics/dgmark_stat_" 
+        fileName << "dgmarkStatistics/dgmark_stat_"
                 << (date->tm_year + 1900) << "-"
                 << (date->tm_mon + 1) << "-"
                 << date->tm_mday << "_"

@@ -21,7 +21,7 @@
 #include <mpi.h>
 
 #include "../../base/Graph.h"
-#include "../../base/Result.h"
+#include "../Result.h"
 
 
 namespace dgmark {
@@ -55,7 +55,6 @@ namespace dgmark {
         Vertex* getParent();
         size_t getParentSize();
         Graph* getInitialGraph();
-        void setTraversedEdges(size_t newTraversedEdges);
         double getTraversedEdges();
     private:
         Vertex root;
@@ -63,6 +62,8 @@ namespace dgmark {
         Graph *graph;
         double taskRunTime;
         size_t traversedEdges;
+
+        double calculateTraversedEdges(Graph *graph);
     };
 }
 

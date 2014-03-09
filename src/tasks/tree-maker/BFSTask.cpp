@@ -111,7 +111,8 @@ namespace dgmark {
         Vertex *queue = qWin->getData();
 
         size_t queueEnd = queue[1];
-        while (queue[0] < queueEnd) {
+        //while (queue[0] < queue[1]) {
+        while (queue[0] < queueEnd) { //is it better?
             Vertex currVertex = queue[queue[0]];
 
             for (size_t childIndex = graph->getStartIndex(currVertex);

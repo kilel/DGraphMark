@@ -17,7 +17,7 @@
 #ifndef RESULT_H
 #define	RESULT_H
 
-#include "Communicable.h"
+#include "../base/Communicable.h"
 
 namespace dgmark {
 

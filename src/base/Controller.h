@@ -20,7 +20,7 @@
 #include <string>
 #include "Communicable.h"
 #include "GraphGenerator.h"
-#include "Task.h"
+#include "../tasks/Task.h"
 
 namespace dgmark {
 

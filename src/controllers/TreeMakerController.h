@@ -58,7 +58,7 @@ namespace dgmark {
         vector<double> *validationTimes;
         vector<double> *marks;
 
-        string getStatistics(vector<double> *data, string name);
+        string getStatistics(vector<double> *data, string name, const ios::fmtflags floatfieldFlag = ios::scientific);
 
     };
 }

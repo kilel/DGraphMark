@@ -18,7 +18,7 @@
 #define	TREEMAKERTASK_H
 
 #include <mpi.h>
-#include "../../base/Task.h"
+#include "../Task.h"
 #include "../../base/SortedGraph.h"
 #include "../../base/Log.h"
 #include "ParentTree.h"

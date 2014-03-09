@@ -21,11 +21,13 @@
 namespace dgmark {
 
     ParentTree::ParentTree(Intracomm *comm, Vertex root, Vertex *parent, Graph *graph, double taskRunTime) :
-    Result(comm), root(root), parent(parent), graph(graph), taskRunTime(taskRunTime) {
+    Result(comm), root(root), parent(parent), graph(graph),
+    taskRunTime(taskRunTime), traversedEdges(calculateTraversedEdges(graph)) {
     }
 
     ParentTree::ParentTree(const ParentTree& orig) :
-    Result(orig.comm), root(orig.root), parent(orig.parent), graph(orig.graph), taskRunTime(orig.taskRunTime) {
+    Result(orig.comm), root(orig.root), parent(orig.parent), graph(orig.graph),
+    taskRunTime(orig.taskRunTime), traversedEdges(orig.traversedEdges) {
     }
 
     ParentTree::~ParentTree() {
@@ -44,7 +46,7 @@ namespace dgmark {
     size_t ParentTree::getParentSize() {
         return graph->numLocalVertex;
     }
-    
+
     Graph* ParentTree::getInitialGraph() {
         return graph;
     }
@@ -61,12 +63,14 @@ namespace dgmark {
         return TaskType::PARENT_TREE;
     }
 
-    void ParentTree::setTraversedEdges(size_t newTraversedEdges) {
-        traversedEdges = newTraversedEdges;
-    }
-
     double ParentTree::getTraversedEdges() {
         return traversedEdges;
+    }
+
+    double ParentTree::calculateTraversedEdges(Graph *graph) {
+        double realTraversedEdges = graph->edges->size();
+        comm->Allreduce(IN_PLACE, &realTraversedEdges, 1, DOUBLE, SUM);
+        return realTraversedEdges;
     }
 }
 

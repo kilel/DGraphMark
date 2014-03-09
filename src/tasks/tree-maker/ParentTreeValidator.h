@@ -19,7 +19,7 @@
 
 #include "../../base/Log.h"
 #include "../../base/RMAWindow.h"
-#include "../../base/Validator.h"
+#include "../Validator.h"
 #include "ParentTree.h"
 
 namespace dgmark {
@@ -46,7 +46,6 @@ namespace dgmark {
         bool validateParents(ParentTree *parentTree);
         bool validateDepth(ParentTree *parentTree, RMAWindow<Vertex> *dWin);
         RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
-        void calculateTraversedEdges(ParentTree *parentTree);
 
     };
 }
