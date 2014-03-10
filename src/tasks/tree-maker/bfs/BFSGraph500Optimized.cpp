@@ -72,10 +72,22 @@ namespace dgmark {
         unsigned long *queue, *swapQueue;
         MPI_Win parentWin, swapParentWin, queueWin, swapQueueWin;
 
+        /* 
+        //MPI-3 functions
         MPI_Win_allocate(localVertBitSize, vertElementSize, MPI_INFO_NULL, MPI_COMM_WORLD, &parent, &parentWin);
         MPI_Win_allocate(localVertBitSize, vertElementSize, MPI_INFO_NULL, MPI_COMM_WORLD, &swapParent, &swapParentWin);
         MPI_Win_allocate(queueBitSize, queueWordSize, MPI_INFO_NULL, MPI_COMM_WORLD, &queue, &queueWin);
         MPI_Win_allocate(queueBitSize, queueWordSize, MPI_INFO_NULL, MPI_COMM_WORLD, &swapQueue, &swapQueueWin);
+        */
+        //MPI-2 functions
+        parent = (int64_t*) Alloc_mem(localVertBitSize, INFO_NULL);
+        swapParent = (int64_t*) Alloc_mem(localVertBitSize, INFO_NULL);
+        queue = (unsigned long*) Alloc_mem(localVertBitSize, INFO_NULL);
+        swapQueue = (unsigned long*) Alloc_mem(localVertBitSize, INFO_NULL);
+        MPI_Win_create(parent, localVertBitSize, vertElementSize, MPI_INFO_NULL, MPI_COMM_WORLD, &parentWin);
+        MPI_Win_create(swapParent, localVertBitSize, vertElementSize, MPI_INFO_NULL, MPI_COMM_WORLD, &swapParentWin);
+        MPI_Win_create(queue, queueBitSize, queueWordSize, MPI_INFO_NULL, MPI_COMM_WORLD, &queueWin);
+        MPI_Win_create(swapQueue, queueBitSize, queueWordSize, MPI_INFO_NULL, MPI_COMM_WORLD, &swapQueueWin);
 
         memset(queue, 0, queueBitSize);
 
@@ -230,6 +242,10 @@ namespace dgmark {
         MPI_Win_free(&swapParentWin);
         MPI_Win_free(&queueWin);
         MPI_Win_free(&swapQueueWin);
+        Free_mem(parent);
+        Free_mem(swapParent);
+        Free_mem(queue);
+        Free_mem(swapQueue);
         MPI_Free_mem(localToGlobal);
 
         /* Change from special coding of predecessor map to the one the benchmark
