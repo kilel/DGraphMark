@@ -17,7 +17,7 @@
 #ifndef SIMPLEGENERATOR_H
 #define	SIMPLEGENERATOR_H
 
-#include "../base/GraphGenerator.h"
+#include "GraphGenerator.h"
 #include "../base/Log.h"
 #include "../base/Utils.h"
 

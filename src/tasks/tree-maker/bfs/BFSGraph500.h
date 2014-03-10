@@ -14,13 +14,33 @@
  *   limitations under the License.
  */
 
-#include "KroneckerGenerator.h"
+#ifndef BFSGRAPH500_H
+#define	BFSGRAPH500_H
+
+#include <inttypes.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+
+#include "../../../base/Graph.h"
+#include "../../../base/Utils.h"
+#include "../ParentTree.h"
+#include "../TreeMakerTask.h"
 
 namespace dgmark {
 
-    KroneckerGenerator::KroneckerGenerator() {
-    }
+    class BFSGraph500 : public TreeMakerTask {
+    public:
+        BFSGraph500(Intracomm *comm);
+        BFSGraph500(const BFSGraph500& orig);
+        virtual ~BFSGraph500();
 
-    KroneckerGenerator::~KroneckerGenerator() {
-    }
+        virtual ParentTree* run();
+    private:
+        void run_bfs(Vertex root, int64_t* parent);
+
+    };
 }
+
+#endif	/* BFSGRAPH500_H */
+

@@ -8,8 +8,6 @@
 /*           Andrew Lumsdaine                                              */
 
 #include "BFSGraph500.h"
-#include "../../base/Utils.h"
-#include "BFSGraph500Optimized.h"
 
 namespace dgmark {
 

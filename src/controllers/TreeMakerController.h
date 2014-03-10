@@ -17,7 +17,7 @@
 #ifndef TREEMAKERCONTROLLER_H
 #define	TREEMAKERCONTROLLER_H
 
-#include "../base/Controller.h"
+#include "Controller.h"
 #include "../base/Log.h"
 #include "../tasks/tree-maker/ParentTreeValidator.h"
 #include "../tasks/tree-maker/TreeMakerTask.h"

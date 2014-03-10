@@ -27,19 +27,23 @@ BIN_DIR = bin/
 OBJ_DIR = $(BIN_DIR)obj/
 BASE_DIR = base/
 TASKS_DIR = tasks/tree-maker/
+BFS_DIR = $(TASKS_DIR)bfs/
 GENERATOR_DIR = generators/
 CONTROLLER_DIR = controllers/
 
 DIRECTORIES = $(OBJ_DIR)$(BASE_DIR) $(OBJ_DIR)$(TASKS_DIR) \
-	      $(OBJ_DIR)$(GENERATOR_DIR) $(OBJ_DIR)$(CONTROLLER_DIR)
+	      $(OBJ_DIR)$(GENERATOR_DIR) $(OBJ_DIR)$(CONTROLLER_DIR) \
+	      $(OBJ_DIR)$(BFS_DIR)
 
 BASE = Graph SortedGraph RMAWindow Statistics
 GENERATORS = SimpleGenerator
-TASKS = BFSGraph500 BFSGraph500Optimized BFSTask ParentTree ParentTreeValidator TreeMakerTask
+TASKS = ParentTree ParentTreeValidator TreeMakerTask
+BFS = BFSGraph500 BFSGraph500Optimized BFSTask
 CONTROLLERS = TreeMakerController
 FILES_LIST = $(addprefix $(BASE_DIR), $(BASE)) \
 	    $(addprefix $(GENERATOR_DIR), $(GENERATORS)) \
 	    $(addprefix $(TASKS_DIR), $(TASKS)) \
+	    $(addprefix $(BFS_DIR), $(BFS)) \
 	    $(addprefix $(CONTROLLER_DIR), $(CONTROLLERS)) 
 
 SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))

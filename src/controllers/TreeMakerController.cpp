@@ -177,25 +177,27 @@ namespace dgmark {
         string statistics = getStatistics();
         log << statistics;
 
-        time_t datetime = time(0);
-        tm *date = localtime(&datetime);
+        if (rank == 0) {
+            time_t datetime = time(0);
+            tm *date = localtime(&datetime);
 
-        int mkdirResult = system("mkdir -p dgmarkStatistics");
+            int mkdirResult = system("mkdir -p dgmarkStatistics");
 
-        stringstream fileName;
-        fileName << "dgmarkStatistics/dgmark_stat_"
-                << (date->tm_year + 1900) << "-"
-                << (date->tm_mon + 1) << "-"
-                << date->tm_mday << "_"
-                << date->tm_hour << "-"
-                << date->tm_min << "-"
-                << date->tm_sec
-                << ".properties";
+            stringstream fileName;
+            fileName << "dgmarkStatistics/dgmark_stat_"
+                    << (date->tm_year + 1900) << "-"
+                    << (date->tm_mon + 1) << "-"
+                    << date->tm_mday << "_"
+                    << date->tm_hour << "-"
+                    << date->tm_min << "-"
+                    << date->tm_sec
+                    << ".properties";
 
-        ofstream fileOut;
-        fileOut.open(fileName.str().c_str());
-        fileOut << statistics;
-        fileOut.close();
+            ofstream fileOut;
+            fileOut.open(fileName.str().c_str());
+            fileOut << statistics;
+            fileOut.close();
+        }
     }
 
 }

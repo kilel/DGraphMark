@@ -17,9 +17,8 @@
 #include <cstdlib>
 #include <time.h>
 #include "generators/SimpleGenerator.h"
-#include "tasks/tree-maker/BFSTask.h"
 #include "controllers/TreeMakerController.h"
-#include "tasks/tree-maker/BFSGraph500Optimized.h"
+#include "tasks/tree-maker/bfs/BFSGraph500Optimized.h"
 
 using namespace std;
 using namespace MPI;

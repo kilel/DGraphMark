@@ -17,8 +17,8 @@
 #ifndef GRAPHGENERATOR_H
 #define	GRAPHGENERATOR_H
 
-#include "Communicable.h"
-#include "Graph.h"
+#include "../base/Communicable.h"
+#include "../base/Graph.h"
 
 namespace dgmark {
 

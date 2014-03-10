@@ -9,7 +9,7 @@
 /*  Optimized and refactored by Kislitsyn Ilya                             */
 
 #include "BFSGraph500Optimized.h"
-#include "../../base/Utils.h"
+
 namespace dgmark {
 
     BFSGraph500Optimized::BFSGraph500Optimized(Intracomm *comm) : TreeMakerTask(comm) {
@@ -22,7 +22,7 @@ namespace dgmark {
     }
 
     ParentTree* BFSGraph500Optimized::run() {
-        log << "Running BFS (Graph500) from " << root << "\n";
+        log << "Running BFS (Graph500 optimized) from " << root << "\n";
         double startTime = Wtime();
         size_t parentBytesSize = (numLocalVertex + 1) * sizeof (int64_t);
         int64_t *parent = (int64_t*) Alloc_mem(parentBytesSize, INFO_NULL);

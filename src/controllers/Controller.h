@@ -18,8 +18,8 @@
 #define	CONTROLLER_H
 
 #include <string>
-#include "Communicable.h"
-#include "GraphGenerator.h"
+#include "../base/Communicable.h"
+#include "../generators/GraphGenerator.h"
 #include "../tasks/Task.h"
 
 namespace dgmark {

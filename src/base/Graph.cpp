@@ -85,8 +85,6 @@ namespace dgmark {
     }
 
     void Graph::initialize() {
-        //size = comm->Get_size();
-        //rank = comm->Get_rank();
         if (((size - 1) & size) != 0) {
             if (rank == 0) {
                 printf("Number of MPI nodes must be 2^n. %d is not.\n", size);

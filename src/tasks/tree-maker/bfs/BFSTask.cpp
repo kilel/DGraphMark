@@ -17,8 +17,7 @@
 #include <assert.h>
 
 #include "BFSTask.h"
-#include "../../base/RMAWindow.cpp" //to prevent link errors
-#include "../../base/Utils.h"
+#include "../../../base/RMAWindow.cpp" //to prevent link errors
 
 namespace dgmark {
 

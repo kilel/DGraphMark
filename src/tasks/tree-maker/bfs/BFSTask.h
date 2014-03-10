@@ -17,10 +17,11 @@
 #ifndef BFSTASK_H
 #define	BFSTASK_H
 
-#include "../../base/Graph.h"
-#include "../../base/RMAWindow.h"
-#include "ParentTree.h"
-#include "TreeMakerTask.h"
+#include "../../../base/Graph.h"
+#include "../../../base/RMAWindow.h"
+#include "../../../base/Utils.h"
+#include "../ParentTree.h"
+#include "../TreeMakerTask.h"
 
 namespace dgmark {
 
