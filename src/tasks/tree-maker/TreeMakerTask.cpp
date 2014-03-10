@@ -28,7 +28,7 @@ namespace dgmark {
     }
 
     TaskType TreeMakerTask::getTaskType() {
-        return TaskType::PARENT_TREE;
+        return PARENT_TREE;
     }
 
     void TreeMakerTask::open(Graph *newGraph) {

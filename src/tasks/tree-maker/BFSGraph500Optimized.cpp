@@ -93,13 +93,13 @@ namespace dgmark {
         }
 
         /* Coding of predecessor map:
-         * - White (not visited): INT64_MAX
+         * - White (not visited): nglobalverts
          * - Grey (in queue): 0 .. numGlobalVert-1
          * - Black (visited): -numGlobalVert .. -1 */
 
         /* Set initial predecessor values. */
         for (size_t i = 0; i < numLocalVert; ++i) {
-            parent[i] = INT64_MAX; //white
+            parent[i] = numGlobalVert; //white
         }
 
         /* Mark root as grey and add it to the queue. */
@@ -238,7 +238,7 @@ namespace dgmark {
         for (i = 0; i < numLocalVert; ++i) {
             if (returnParent[i] < 0) {
                 returnParent[i] += numGlobalVert;
-            } else if (returnParent[i] == INT64_MAX) {
+            } else if (returnParent[i] == numGlobalVert) {
                 returnParent[i] = numGlobalVert;
             }
         }

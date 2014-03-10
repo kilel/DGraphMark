@@ -114,7 +114,7 @@ namespace dgmark {
 
     private:
         int diffGrade;
-        size_t distributedEdges = 0;
+        size_t distributedEdges;
 
         void initialize();
 

@@ -193,7 +193,7 @@ namespace dgmark {
                 << ".properties";
 
         ofstream fileOut;
-        fileOut.open(fileName.str());
+        fileOut.open(fileName.str().c_str());
         fileOut << statistics;
         fileOut.close();
     }

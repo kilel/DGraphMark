@@ -33,7 +33,7 @@ namespace dgmark {
     }
 
     TaskType ParentTreeValidator::getTaskType() {
-        return TaskType::PARENT_TREE;
+        return PARENT_TREE;
     }
 
     double ParentTreeValidator::getValidationTime() {
@@ -132,13 +132,12 @@ namespace dgmark {
         bool isValid = true;
 
         Graph *graph = parentTree->getInitialGraph();
-        Vertex root = parentTree->getRoot();
-        Vertex *parent = parentTree->getParent();
         size_t parentSize = parentTree->getParentSize();
         Vertex *depths = dWin->getData();
+        size_t depthsMaxValue = graph->numGlobalVertex;
 
         for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
-            if (depths[localVertex] >= DEPTHS_MAX_VALUE) {
+            if (depths[localVertex] >= depthsMaxValue) {
                 printf("\nError: depths builded not for all verticies\n");
                 return false; // not all depths builded.
             }
@@ -152,12 +151,13 @@ namespace dgmark {
         Vertex root = parentTree->getRoot();
         Vertex *parent = parentTree->getParent();
         size_t parentSize = parentTree->getParentSize();
+        size_t depthsMaxValue = graph->numGlobalVertex;
 
         RMAWindow<Vertex> *dWin = new RMAWindow<Vertex>(comm, parentSize, VERTEX_TYPE);
         Vertex *depths = dWin->getData();
 
         for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
-            depths[localVertex] = DEPTHS_MAX_VALUE;
+            depths[localVertex] = depthsMaxValue;
         }
         if (graph->vertexRank(root) == rank) {
             depths[graph->vertexToLocal(root)] = 0;
@@ -182,10 +182,10 @@ namespace dgmark {
                             dWin->fenceOpen(MODE_NOPUT);
                             dWin->get(&parentDepth, 1, currParentRank, currParentLocal);
                             dWin->fenceClose(0);
-                            assert(0 <= parentDepth && parentDepth <= DEPTHS_MAX_VALUE);
+                            assert(0 <= parentDepth && parentDepth <= depthsMaxValue);
                         }
 
-                        if (depths[localVertex] == DEPTHS_MAX_VALUE && parentDepth != DEPTHS_MAX_VALUE) {
+                        if (depths[localVertex] == depthsMaxValue && parentDepth != depthsMaxValue) {
                             depths[localVertex] = parentDepth + 1;
                             isDepthsChanged = true;
                         }

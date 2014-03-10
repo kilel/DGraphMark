@@ -24,13 +24,13 @@ namespace dgmark {
         size_t dataSize = data->size();
 
         mean = 0;
-        for (auto it = data->begin(); it < data->end(); ++it) {
+        for (vector<double>::iterator it = data->begin(); it < data->end(); ++it) {
             mean += *it;
         }
         mean /= dataSize;
 
         stdDeviation = 0;
-        for (auto it = data->begin(); it < data->end(); ++it) {
+        for (vector<double>::iterator it = data->begin(); it < data->end(); ++it) {
             stdDeviation += pow(*it - mean, 2.);
         }
         stdDeviation = sqrt(stdDeviation / (dataSize - 1));

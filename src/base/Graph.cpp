@@ -21,9 +21,8 @@
 namespace dgmark {
 
     Graph::Graph(Intracomm *comm, int grade, int density) : Communicable(comm),
-    grade(grade), density(density) {
+    grade(grade), density(density), distributedEdges(0) {
         initialize();
-        distributedEdges = 0;
         edges = new vector<Edge*>();
     }
 
@@ -32,7 +31,9 @@ namespace dgmark {
     numLocalVertex(orig.numLocalVertex), numGlobalVertex(orig.numGlobalVertex) {
     }
 
-    Graph::Graph(const Graph *orig) : Graph(*orig) {
+    Graph::Graph(const Graph *orig) : Communicable(orig->comm), edges(orig->edges),
+    grade(orig->grade), diffGrade(orig->diffGrade), density(orig->density),
+    numLocalVertex(orig->numLocalVertex), numGlobalVertex(orig->numGlobalVertex) {
     }
 
     Graph::~Graph() {
@@ -84,8 +85,8 @@ namespace dgmark {
     }
 
     void Graph::initialize() {
-        size = comm->Get_size();
-        rank = comm->Get_rank();
+        //size = comm->Get_size();
+        //rank = comm->Get_rank();
         if (((size - 1) & size) != 0) {
             if (rank == 0) {
                 printf("Number of MPI nodes must be 2^n. %d is not.\n", size);

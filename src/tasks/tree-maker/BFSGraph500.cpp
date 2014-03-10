@@ -6,11 +6,11 @@
 /*                                                                         */
 /*  Authors: Jeremiah Willcock                                             */
 /*           Andrew Lumsdaine                                              */
-/*  Optimized and refactored by Kislitsyn Ilya                             */
 
 #include "BFSGraph500.h"
 #include "../../base/Utils.h"
 #include "BFSGraph500Optimized.h"
+
 namespace dgmark {
 
     BFSGraph500::BFSGraph500(Intracomm *comm) : TreeMakerTask(comm) {
@@ -90,7 +90,7 @@ namespace dgmark {
         /* Set initial predecessor map. */
         {
             size_t i;
-            for (i = 0; i < nlocalverts; ++i) pred[i] = INT64_MAX;
+            for (i = 0; i < nlocalverts; ++i) pred[i] = nglobalverts;
         }
 
         /* Mark root as grey and add it to the queue. */
@@ -221,7 +221,7 @@ namespace dgmark {
         for (i = 0; i < nlocalverts; ++i) {
             if (orig_pred[i] < 0) {
                 orig_pred[i] += nglobalverts;
-            } else if (orig_pred[i] == INT64_MAX) {
+            } else if (orig_pred[i] == nglobalverts) {
                 orig_pred[i] = nglobalverts;
             }
         }

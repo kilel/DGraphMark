@@ -36,7 +36,7 @@ namespace dgmark {
 
 
     private:
-        const int CONTROLLER_PRECISION = 5;
+        static const int CONTROLLER_PRECISION = 5;
 
         Log log;
         TreeMakerTask *task;

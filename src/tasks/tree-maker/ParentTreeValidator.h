@@ -35,8 +35,7 @@ namespace dgmark {
         virtual bool validate(Result *taskResult);
 
     private:
-        const Vertex DEPTHS_MAX_VALUE = UINT64_MAX;
-        const int VALIDATOR_SYNCH_TAG = 28952;
+        static const int VALIDATOR_SYNCH_TAG = 28952;
         
         Log log;
         double validationTime;
