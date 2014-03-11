@@ -15,7 +15,6 @@
  */
 
 #include "Graph.h"
-#include "Utils.h"
 #include "assert.h"
 
 namespace dgmark {

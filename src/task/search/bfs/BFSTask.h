@@ -17,10 +17,7 @@
 #ifndef BFSTASK_H
 #define	BFSTASK_H
 
-#include "../../../base/Graph.h"
-#include "../../../base/RMAWindow.h"
-#include "../../../base/Utils.h"
-#include "../ParentTree.h"
+#include "../../../mpi/RMAWindow.h"
 #include "../SearchTask.h"
 
 namespace dgmark {

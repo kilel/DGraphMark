@@ -21,10 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-
-#include "../../../base/Graph.h"
-#include "../../../base/Utils.h"
-#include "../ParentTree.h"
 #include "../SearchTask.h"
 
 namespace dgmark {

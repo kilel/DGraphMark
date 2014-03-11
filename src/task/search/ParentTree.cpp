@@ -14,8 +14,6 @@
  *   limitations under the License.
  */
 
-#include <vector>
-
 #include "ParentTree.h"
 
 namespace dgmark {

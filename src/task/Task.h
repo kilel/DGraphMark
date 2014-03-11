@@ -17,7 +17,7 @@
 #ifndef GRAPHTASK_H
 #define	GRAPHTASK_H
 
-#include "../base/Graph.h"
+#include "../graph/Graph.h"
 #include "Result.h"
 
 namespace dgmark {

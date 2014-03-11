@@ -17,8 +17,7 @@
 #ifndef PARENTTREEVALIDATOR_H
 #define	PARENTTREEVALIDATOR_H
 
-#include "../../base/Log.h"
-#include "../../base/RMAWindow.h"
+#include "../../util/Log.h"
 #include "../Validator.h"
 #include "ParentTree.h"
 
@@ -34,17 +33,17 @@ namespace dgmark {
         virtual double getValidationTime();
         virtual bool validate(Result *taskResult);
 
-    private:
+    protected:
         static const int VALIDATOR_SYNCH_TAG = 28952;
-        
+        virtual bool validateDepth(ParentTree *parentTree) = 0;
+
+    private:
         Log log;
         double validationTime;
 
         bool doValidate(ParentTree *parentTree);
         bool validateRanges(ParentTree *parentTree);
         bool validateParents(ParentTree *parentTree);
-        bool validateDepth(ParentTree *parentTree, RMAWindow<Vertex> *dWin);
-        RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
 
     };
 }

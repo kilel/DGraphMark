@@ -18,9 +18,7 @@
 #define	SIMPLEGENERATOR_H
 
 #include "GraphGenerator.h"
-#include "../base/Log.h"
-#include "../base/Utils.h"
-#include "../base/Random.h"
+#include "../util/Log.h"
 
 namespace dgmark {
 

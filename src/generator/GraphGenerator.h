@@ -17,9 +17,9 @@
 #ifndef GRAPHGENERATOR_H
 #define	GRAPHGENERATOR_H
 
-#include "../base/Communicable.h"
-#include "../base/Graph.h"
-#include "../base/Random.h"
+#include "../mpi/Communicable.h"
+#include "../graph/Graph.h"
+#include "../util/Random.h"
 
 namespace dgmark {
 

@@ -18,7 +18,7 @@
 #define	SEARCHCONTROLLER_H
 
 #include "Controller.h"
-#include "../base/Log.h"
+#include "../util/Log.h"
 #include "../task/search/ParentTreeValidator.h"
 #include "../task/search/SearchTask.h"
 

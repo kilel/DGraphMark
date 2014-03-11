@@ -14,9 +14,9 @@
  *   limitations under the License.
  */
 
+#include <algorithm>
 #include "SortedGraph.h"
-#include "Utils.h"
-#include "Log.h"
+#include "../util/Log.h"
 
 namespace dgmark {
 

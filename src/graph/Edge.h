@@ -18,7 +18,7 @@
 #define	EDGE_H
 
 #include <inttypes.h>
-#include "Communicable.h"
+#include "../mpi/Communicable.h"
 
 namespace dgmark {
 

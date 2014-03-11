@@ -17,17 +17,10 @@
 #ifndef PARENTTREE_H
 #define	PARENTTREE_H
 
-#include <vector>
-#include <mpi.h>
-
-#include "../../base/Graph.h"
+#include "../../graph/Graph.h"
 #include "../Result.h"
 
-
 namespace dgmark {
-
-    using namespace std;
-    using namespace MPI;
 
     class ParentTree : public Result {
     public:

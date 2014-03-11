@@ -20,8 +20,8 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
-#include "Communicable.h"
-#include "Edge.h"
+#include "../mpi/Communicable.h"
+#include "../graph/Edge.h"
 
 namespace dgmark {
     using namespace std;

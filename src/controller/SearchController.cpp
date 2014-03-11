@@ -15,19 +15,17 @@
  */
 
 #include <sstream>
-#include <cmath>
-#include <algorithm>
 #include <fstream>
-#include <ctime>
+#include <cstdlib>
 #include "SearchController.h"
-#include "../base/SortedGraph.h"
-#include "../base/Statistics.h"
+#include "../util/Statistics.h"
+#include "../task/search/validator/ParentTreeValidatorRMAFetch.h"
 
 namespace dgmark {
 
     SearchController::SearchController(Intracomm *comm, GraphGenerator *generator, SearchTask *task, int numStarts) :
     Controller(comm, generator), task(task), numStarts(numStarts), log(comm) {
-        validator = new ParentTreeValidator(comm);
+        validator = new ParentTreeValidatorRMAFetch(comm);
 
         taskRunningTimes = new vector<double>();
         traversedEdges = new vector<double>();
@@ -37,7 +35,7 @@ namespace dgmark {
 
     SearchController::SearchController(const SearchController& orig) :
     Controller(orig.comm, orig.generator), task(orig.task), numStarts(orig.numStarts), log(comm) {
-        validator = new ParentTreeValidator(comm);
+        validator = new ParentTreeValidatorRMAFetch(comm);
 
         taskRunningTimes = new vector<double>();
         traversedEdges = new vector<double>();

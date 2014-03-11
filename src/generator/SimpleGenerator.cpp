@@ -15,8 +15,6 @@
  */
 
 #include "SimpleGenerator.h"
-#include <cstdlib>
-#include <assert.h>
 
 namespace dgmark {
 

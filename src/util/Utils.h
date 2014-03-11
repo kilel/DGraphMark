@@ -17,9 +17,6 @@
 #ifndef UTILS_H
 #define	UTILS_H
 
-#include "Edge.h"
-#include <assert.h>
-
 namespace dgmark {
 
     class Utils : Communicable {

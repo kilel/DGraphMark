@@ -13,60 +13,83 @@
 #   limitations under the License.
 
 
-OPENMP = false	    # true of false to use or not of OpenMP in compilation
+# true of false to use or not of OpenMP in compilation
+OPENMP = true
 OPENMP_FLAG = -fopenmp
 MPICPP = mpic++
-CPPFLAGS =  -Ofast #-std=c++11
+CPPFLAGS = -Ofast #-std=c++11
 
-ifneq ($(OPENMP), true)
+ifeq ($(OPENMP), true)
 	CPPFLAGS += $(OPENMP_FLAG)
 endif
 
+#directories definition
 SRC_DIR = src/
 BIN_DIR = bin/
 OBJ_DIR = $(BIN_DIR)obj/
-BASE_DIR = base/
-TASKS_DIR = task/search/
-BFS_DIR = $(TASKS_DIR)bfs/
-GENERATOR_DIR = generator/
+BENCHMARK_DIR = benchmark/
 CONTROLLER_DIR = controller/
+GENERATOR_DIR = generator/
+GRAPH_DIR = graph/
+MPI_DIR = mpi/
+TASK_DIR = task/search/
+BFS_DIR = $(TASK_DIR)bfs/
+VALIDATOR_DIR = $(TASK_DIR)validator/
+UTIL_DIR = util/
 
-DIRECTORIES = $(OBJ_DIR)$(BASE_DIR) $(OBJ_DIR)$(TASKS_DIR) \
-	      $(OBJ_DIR)$(GENERATOR_DIR) $(OBJ_DIR)$(CONTROLLER_DIR) \
-	      $(OBJ_DIR)$(BFS_DIR)
+#definition of path to object directories
+OBJ_DIR_PATHS = $(addprefix $(OBJ_DIR), \
+		$(BENCHMARK_DIR) $(CONTROLLER_DIR) $(GENERATOR_DIR)  \
+		$(GRAPH_DIR) $(MPI_DIR) $(TASK_DIR) $(BFS_DIR) \
+		$(VALIDATOR_DIR) $(UTIL_DIR) )
 
-BASE = Graph SortedGraph RMAWindow Statistics Random
-GENERATORS = SimpleGenerator
-TASKS = ParentTree ParentTreeValidator SearchTask
+#Definitions of sources to compile
+BENCHMARK = 
+CONTROLLER = SearchController
+GENERATOR = SimpleGenerator
+GRAPH = Graph SortedGraph
+MPI = RMAWindow
+TASK = ParentTree ParentTreeValidator SearchTask
 BFS = BFSGraph500 BFSGraph500Optimized BFSTask
-CONTROLLERS = SearchController
-FILES_LIST = $(addprefix $(BASE_DIR), $(BASE)) \
-	    $(addprefix $(GENERATOR_DIR), $(GENERATORS)) \
-	    $(addprefix $(TASKS_DIR), $(TASKS)) \
-	    $(addprefix $(BFS_DIR), $(BFS)) \
-	    $(addprefix $(CONTROLLER_DIR), $(CONTROLLERS)) 
+VALIDATOR = ParentTreeValidatorRMAFetch
+UTIL = Statistics Random
 
+#separated, because if use all, it is too long, error occurred in build.
+FILES_LIST = $(addprefix $(BENCHMARK_DIR), $(BENCHMARK)) \
+	    $(addprefix $(CONTROLLER_DIR), $(CONTROLLER)) \
+	    $(addprefix $(GENERATOR_DIR), $(GENERATOR)) \
+	    $(addprefix $(GRAPH_DIR), $(GRAPH)) \
+	    $(addprefix $(MPI_DIR), $(MPI))
+FILES_LIST += $(addprefix $(TASK_DIR), $(TASK)) \
+	    $(addprefix $(BFS_DIR), $(BFS)) \
+	    $(addprefix $(VALIDATOR_DIR), $(VALIDATOR)) \
+	    $(addprefix $(UTIL_DIR), $(UTIL)) 
+#full sources and objects paths
 SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))
 OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
 
-BUILD = dgmark dgmark_graph500 dgmark_graph500_opt	    # list of builds
+#build targets
+BUILD = dgmark dgmark_graph500 dgmark_graph500_opt
 
+#build rules
 all: $(BUILD)
 
-$(DIRECTORIES):			    # prepairing directories.
+# prepairing directories.
+$(OBJ_DIR_PATHS):					    
 	mkdir -p $@
-	
-dgmark: $(DIRECTORIES) $(OBJECTS) $(OBJ_DIR)main_dgmark.o # basic build
+
+# basic build
+dgmark: $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark.o
 	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
-	
-dgmark_graph500: $(DIRECTORIES) $(OBJECTS) $(OBJ_DIR)main_dgmark_graph500.o # original graph500 build
+
+# extended builds
+dgmark_%: $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark_%.o
 	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
-	
-dgmark_graph500_opt: $(DIRECTORIES) $(OBJECTS) $(OBJ_DIR)main_dgmark_graph500_opt.o # optimized graph500 build
-	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
-	
-$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp	    # building of resource
+
+#building of sources
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
 	$(MPICPP) $(CPPFLAGS) -c $< -o $@
 
+#cleaning binaries
 clean:
 	rm -rf $(BIN_DIR)*

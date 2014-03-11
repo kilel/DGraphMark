@@ -14,7 +14,8 @@
  *   limitations under the License.
  */
 
-#include "../base/Task.h"
+#include "Task.h"
+#include "Validator.h"
 
 class StubResult : public Result {
 public:

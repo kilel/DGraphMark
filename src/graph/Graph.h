@@ -18,7 +18,6 @@
 #define	GRAPH_H
 
 #include <vector>
-#include <algorithm>
 #include "Edge.h"
 
 namespace dgmark {

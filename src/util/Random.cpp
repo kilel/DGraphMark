@@ -20,7 +20,6 @@
 #include <stdint.h>
 #include <cstdio>
 
-
 namespace dgmark {
 
     Random::Random() : typeBitSize(64) {

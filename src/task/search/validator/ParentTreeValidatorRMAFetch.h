@@ -14,36 +14,26 @@
  *   limitations under the License.
  */
 
-#ifndef CONTROLLER_H
-#define	CONTROLLER_H
+#ifndef PARENTTREEVALIDATORRMAFETCH_H
+#define	PARENTTREEVALIDATORRMAFETCH_H
 
-#include <string>
-#include "../mpi/Communicable.h"
-#include "../generator/GraphGenerator.h"
-#include "../task/Task.h"
+#include "../ParentTreeValidator.h"
+#include "../../../mpi/RMAWindow.h"
 
 namespace dgmark {
 
-    class Controller : public Communicable {
+    class ParentTreeValidatorRMAFetch : public ParentTreeValidator {
     public:
-
-        Controller(Intracomm *comm, GraphGenerator *generator) : Communicable(comm), generator(generator) {
-        }
-
-        Controller(const Controller& orig) : Communicable(orig.comm), generator(orig.generator) {
-        }
-
-        virtual ~Controller() {
-        }
-
-        virtual void runBenchmark() = 0;
-        virtual string getStatistics() = 0;
-        virtual void printStatistics() = 0;
+        ParentTreeValidatorRMAFetch(Intracomm *comm);
+        ParentTreeValidatorRMAFetch(const ParentTreeValidatorRMAFetch& orig);
+        virtual ~ParentTreeValidatorRMAFetch();
 
     protected:
-        GraphGenerator *generator;
+        virtual bool validateDepth(ParentTree *parentTree);
+
+    private:
+        RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
     };
 }
-
-#endif	/* CONTROLLER_H */
+#endif	/* PARENTTREEVALIDATORRMAFETCH_H */
 

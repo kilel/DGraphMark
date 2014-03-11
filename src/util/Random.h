@@ -16,6 +16,7 @@
 
 #ifndef RANDOM_H
 #define	RANDOM_H
+
 #include <inttypes.h>
 
 namespace dgmark {

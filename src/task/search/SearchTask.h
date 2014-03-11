@@ -17,11 +17,10 @@
 #ifndef SEARCHTASK_H
 #define	SEARCHTASK_H
 
-#include <mpi.h>
-#include "../Task.h"
-#include "../../base/SortedGraph.h"
-#include "../../base/Log.h"
 #include "ParentTree.h"
+#include "../Task.h"
+#include "../../graph/SortedGraph.h"
+#include "../../util/Log.h"
 
 namespace dgmark {
 

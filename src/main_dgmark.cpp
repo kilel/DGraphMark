@@ -19,6 +19,7 @@
 #include "generator/SimpleGenerator.h"
 #include "task/search/bfs/BFSTask.h"
 #include "controller/SearchController.h"
+#include "util/Utils.h"
 
 using namespace std;
 using namespace MPI;
@@ -44,7 +45,7 @@ int main(int argc, char** argv) {
     Utils::initialize(comm);
     Utils::parseArguments(&grade, &density, &startTimes, argc, argv);
 
-    SimpleGenerator *gen = new SimpleGenerator(comm, grade, density, random);
+    GraphGenerator *gen = new SimpleGenerator(comm, grade, density, random);
     SearchTask *task = new BFSTask(comm);
     Controller *controller = new SearchController(comm, gen, task, startTimes);
 

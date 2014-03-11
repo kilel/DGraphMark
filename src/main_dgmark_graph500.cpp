@@ -19,6 +19,7 @@
 #include "generator/SimpleGenerator.h"
 #include "controller/SearchController.h"
 #include "task/search/bfs/BFSGraph500.h"
+#include "util/Utils.h"
 
 using namespace std;
 using namespace MPI;
