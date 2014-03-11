@@ -58,9 +58,11 @@ namespace dgmark {
         log << "Generating roots... ";
         double startTime = Wtime();
         Vertex* startRoots = new Vertex[numStarts];
+        Random *random = generator->getRandom();
+
         if (rank == 0) {
             for (int i = 0; i < numStarts; ++i) {
-                startRoots[i] = rand() % maxStartRoot;
+                startRoots[i] = random->next(0, maxStartRoot);
             }
         }
 
@@ -170,6 +172,7 @@ namespace dgmark {
         out << statName << ".thirdQuertile = " << stat->getThirdQuartile() << "\n";
         out << statName << ".max = " << stat->getMaximum() << "\n";
 
+        delete stat;
         return out.str();
     }
 

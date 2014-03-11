@@ -20,8 +20,8 @@
 
 namespace dgmark {
 
-    SimpleGenerator::SimpleGenerator(Intracomm *comm, int grade, int density) :
-    GraphGenerator(comm), grade(grade), density(density), log(comm) {
+    SimpleGenerator::SimpleGenerator(Intracomm *comm, int grade, int density, Random *random) :
+    GraphGenerator(comm), grade(grade), density(density), log(comm), random(random) {
     }
 
     SimpleGenerator::~SimpleGenerator() {
@@ -46,8 +46,8 @@ namespace dgmark {
             int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
 
             for (int i = 0; i < numEdges; ++i) {
-                uint64_t rankTo = rand() % size;
-                uint64_t localVertexTo = rand() % numLocalVertex;
+                uint64_t rankTo = random->next(0, size);
+                uint64_t localVertexTo = random->next(0, numLocalVertex);
 
                 Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
                 if (globalVertexFrom != globalVertexTo) {
@@ -86,6 +86,10 @@ namespace dgmark {
 
     int SimpleGenerator::getDensity() {
         return density;
+    }
+
+    Random* SimpleGenerator::getRandom() {
+        return random;
     }
 
 }

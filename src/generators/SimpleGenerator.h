@@ -20,6 +20,7 @@
 #include "GraphGenerator.h"
 #include "../base/Log.h"
 #include "../base/Utils.h"
+#include "../base/Random.h"
 
 namespace dgmark {
 
@@ -33,7 +34,7 @@ namespace dgmark {
          * @param grade Grade of vertices. Total number is 2^grade
          * @param density Density of edges. Avg amount of edges per vertex.
          */
-        SimpleGenerator(Intracomm *comm, int grade, int density);
+        SimpleGenerator(Intracomm *comm, int grade, int density, Random *random);
         virtual ~SimpleGenerator();
 
         virtual Graph* generate();
@@ -42,6 +43,7 @@ namespace dgmark {
         
         virtual int getGrade();
         virtual int getDensity();
+        virtual Random* getRandom();
 
     private:
         int grade;
@@ -49,6 +51,8 @@ namespace dgmark {
         double generationTime;
         double distributionTime;
         Log log;
+        
+        Random *random;
     };
 }
 

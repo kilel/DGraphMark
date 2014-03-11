@@ -39,12 +39,15 @@ namespace dgmark {
 
         vector<double> *sortedData = new vector<double>();
         sortedData->insert(sortedData->begin(), data->begin(), data->end());
+
         sort(sortedData->begin(), sortedData->end());
 
+
+        size_t quartile = dataSize / 4 < 1 ? 1 : dataSize / 4;
         minimum = sortedData->front();
-        firstQuartile = sortedData->at(dataSize / 4);
+        firstQuartile = sortedData->at(quartile);
         median = sortedData->at(dataSize / 2);
-        thirdQuartile = sortedData->at(dataSize - dataSize / 4);
+        thirdQuartile = sortedData->at(dataSize - quartile);
         maximum = sortedData->back();
 
         delete sortedData;

@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     Init();
 
     Intracomm *comm = &COMM_WORLD;
-    srand(time(0) + comm->Get_rank()*3);
+    Random* random = new Random(comm->Get_rank());
 
     int grade;
     int density;
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     Utils::initialize(comm);
     Utils::parseArguments(&grade, &density, &startTimes, argc, argv);
 
-    SimpleGenerator *gen = new SimpleGenerator(comm, grade, density);
+    SimpleGenerator *gen = new SimpleGenerator(comm, grade, density, random);
     TreeMakerTask *task = new BFSGraph500(comm);
     Controller *controller = new TreeMakerController(comm, gen, task, startTimes);
 

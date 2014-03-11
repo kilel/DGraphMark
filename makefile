@@ -35,7 +35,7 @@ DIRECTORIES = $(OBJ_DIR)$(BASE_DIR) $(OBJ_DIR)$(TASKS_DIR) \
 	      $(OBJ_DIR)$(GENERATOR_DIR) $(OBJ_DIR)$(CONTROLLER_DIR) \
 	      $(OBJ_DIR)$(BFS_DIR)
 
-BASE = Graph SortedGraph RMAWindow Statistics
+BASE = Graph SortedGraph RMAWindow Statistics Random
 GENERATORS = SimpleGenerator
 TASKS = ParentTree ParentTreeValidator TreeMakerTask
 BFS = BFSGraph500 BFSGraph500Optimized BFSTask

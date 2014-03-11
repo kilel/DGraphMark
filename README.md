@@ -12,15 +12,15 @@ Main goal is to create benchmark, which:
 What is done now:
 
 1. creation and distribution of graph
-  1. generation of graph. Verticies of edges are generated with rand() function;
+  1. generation of graph. Verticies of edges are generated with 4.1 random function;
   2. distributing of graph with MPI point-to-point communication;
   3. creating Compressed Sparse Row Graph from initial list of edges;
 2. tree-making task (consists of creating a tree in graph, starting in root vertex)
-  1. creating root verticies with rand() function;
+  1. creating root verticies with 4.1 random function;
   2. BFS task:
      1. DGraphMark BFS. Implementation of BFS algorithm, used MPI one-sided communication;
      2. Graph500 BFS. Uses bfs_run function from mpi/bfs_onesided.c (v 2.1.4);
-     3. optimized Graph500 BFS. Same, as 2.1.2, bun refactored and optimized;
+     3. optimized Graph500 BFS. Same, as 2.2.2, bun refactored and optimized;
   3. BFS result is distributed array of global parents for each local vertex
   4. validation of built tree:
      1. ranges validation : make sure, that all vertices were traversed;
@@ -41,11 +41,13 @@ What is done now:
      6. median;
      7. trird quartile;
      8. maximum;
-  3. all statistics prints on screen and writes to file "./dgmarkStatistics/dgmark_stat_YYYY-MM-DDThh-mm-ss.properties" in machine-readable format.
-
+  3. all statistics prints on screen and writes to file "./dgmarkStatistics/dgmark_stat_YYYY-MM-DDThh-mm-ss.properties" in machine-readable format;
+4. random numbers generation
+  1. implemented simple method of generation. Results of rand() (from cstdib) are concatinated to provide 64 bit random value;
+  2. seed is generated separately for each node (based on it's rank);
+  3. this method is used, because it provides compability with compilers without c++11 functions. (<random>)
 
 What to be done:
 
-1. write random numbers generator to replace rand();
-2. write Kronecker graph generator and compare with simple one;
-3. test work on several machines with different architectures and realizations of MPI to find problems.
+1. write Kronecker graph generator and compare with simple one;
+2. test work on several machines with different architectures and realizations of MPI to find problems.

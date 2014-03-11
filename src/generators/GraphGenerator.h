@@ -19,6 +19,7 @@
 
 #include "../base/Communicable.h"
 #include "../base/Graph.h"
+#include "../base/Random.h"
 
 namespace dgmark {
 
@@ -45,6 +46,8 @@ namespace dgmark {
         
         virtual int getGrade() = 0;
         virtual int getDensity() = 0;
+        
+        virtual Random* getRandom() = 0;
     };
 
 }
