@@ -14,8 +14,8 @@
  *   limitations under the License.
  */
 
-#ifndef TREEMAKERTASK_H
-#define	TREEMAKERTASK_H
+#ifndef SEARCHTASK_H
+#define	SEARCHTASK_H
 
 #include <mpi.h>
 #include "../Task.h"
@@ -25,11 +25,11 @@
 
 namespace dgmark {
 
-    class TreeMakerTask : public Task {
+    class SearchTask : public Task {
     public:
-        TreeMakerTask(Intracomm *comm);
-        TreeMakerTask(const TreeMakerTask& orig);
-        virtual ~TreeMakerTask();
+        SearchTask(Intracomm *comm);
+        SearchTask(const SearchTask& orig);
+        virtual ~SearchTask();
 
         virtual TaskType getTaskType();
 
@@ -52,5 +52,5 @@ namespace dgmark {
 
 }
 
-#endif	/* TREEMAKERTASK_H */
+#endif	/* SEARCHTASK_H */
 

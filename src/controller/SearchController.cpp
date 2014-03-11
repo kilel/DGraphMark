@@ -19,13 +19,13 @@
 #include <algorithm>
 #include <fstream>
 #include <ctime>
-#include "TreeMakerController.h"
+#include "SearchController.h"
 #include "../base/SortedGraph.h"
 #include "../base/Statistics.h"
 
 namespace dgmark {
 
-    TreeMakerController::TreeMakerController(Intracomm *comm, GraphGenerator *generator, TreeMakerTask *task, int numStarts) :
+    SearchController::SearchController(Intracomm *comm, GraphGenerator *generator, SearchTask *task, int numStarts) :
     Controller(comm, generator), task(task), numStarts(numStarts), log(comm) {
         validator = new ParentTreeValidator(comm);
 
@@ -35,7 +35,7 @@ namespace dgmark {
         marks = new vector<double>();
     }
 
-    TreeMakerController::TreeMakerController(const TreeMakerController& orig) :
+    SearchController::SearchController(const SearchController& orig) :
     Controller(orig.comm, orig.generator), task(orig.task), numStarts(orig.numStarts), log(comm) {
         validator = new ParentTreeValidator(comm);
 
@@ -45,7 +45,7 @@ namespace dgmark {
         marks = new vector<double>();
     }
 
-    TreeMakerController::~TreeMakerController() {
+    SearchController::~SearchController() {
         delete validator;
 
         delete taskRunningTimes;
@@ -54,7 +54,7 @@ namespace dgmark {
         delete marks;
     }
 
-    Vertex* TreeMakerController::generateStartRoots(size_t maxStartRoot) {
+    Vertex* SearchController::generateStartRoots(size_t maxStartRoot) {
         log << "Generating roots... ";
         double startTime = Wtime();
         Vertex* startRoots = new Vertex[numStarts];
@@ -72,7 +72,7 @@ namespace dgmark {
         return startRoots;
     }
 
-    void TreeMakerController::runBenchmark() {
+    void SearchController::runBenchmark() {
         log << "Running benchmark\n";
         isLastRunValid = true;
 
@@ -119,7 +119,7 @@ namespace dgmark {
         comm->Barrier();
     }
 
-    string TreeMakerController::getStatistics() {
+    string SearchController::getStatistics() {
         stringstream out;
         out.precision(CONTROLLER_PRECISION);
         out.setf(ios::fixed, ios::floatfield);
@@ -155,7 +155,7 @@ namespace dgmark {
         return out.str();
     }
 
-    string TreeMakerController::getStatistics(vector<double> *data, string statName,
+    string SearchController::getStatistics(vector<double> *data, string statName,
             const ios::fmtflags floatfieldFlag) {
         Statistics* stat = new Statistics(data);
 
@@ -176,7 +176,7 @@ namespace dgmark {
         return out.str();
     }
 
-    void TreeMakerController::printStatistics() {
+    void SearchController::printStatistics() {
         string statistics = getStatistics();
         log << statistics;
 

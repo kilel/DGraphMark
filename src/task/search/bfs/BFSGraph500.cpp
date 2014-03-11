@@ -11,10 +11,10 @@
 
 namespace dgmark {
 
-    BFSGraph500::BFSGraph500(Intracomm *comm) : TreeMakerTask(comm) {
+    BFSGraph500::BFSGraph500(Intracomm *comm) : SearchTask(comm) {
     }
 
-    BFSGraph500::BFSGraph500(const BFSGraph500& orig) : TreeMakerTask(orig.comm) {
+    BFSGraph500::BFSGraph500(const BFSGraph500& orig) : SearchTask(orig.comm) {
     }
 
     BFSGraph500::~BFSGraph500() {

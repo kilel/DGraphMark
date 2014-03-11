@@ -24,11 +24,11 @@
 #include "../../../base/Graph.h"
 #include "../../../base/Utils.h"
 #include "../ParentTree.h"
-#include "../TreeMakerTask.h"
+#include "../SearchTask.h"
 
 namespace dgmark {
 
-    class BFSGraph500Optimized : public TreeMakerTask {
+    class BFSGraph500Optimized : public SearchTask {
     public:
         BFSGraph500Optimized(Intracomm *comm);
         BFSGraph500Optimized(const BFSGraph500Optimized& orig);

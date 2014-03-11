@@ -14,21 +14,21 @@
  *   limitations under the License.
  */
 
-#ifndef TREEMAKERCONTROLLER_H
-#define	TREEMAKERCONTROLLER_H
+#ifndef SEARCHCONTROLLER_H
+#define	SEARCHCONTROLLER_H
 
 #include "Controller.h"
 #include "../base/Log.h"
-#include "../tasks/tree-maker/ParentTreeValidator.h"
-#include "../tasks/tree-maker/TreeMakerTask.h"
+#include "../task/search/ParentTreeValidator.h"
+#include "../task/search/SearchTask.h"
 
 namespace dgmark {
 
-    class TreeMakerController : public Controller {
+    class SearchController : public Controller {
     public:
-        TreeMakerController(Intracomm *comm, GraphGenerator *generator, TreeMakerTask *task, int numStarts);
-        TreeMakerController(const TreeMakerController& orig);
-        virtual ~TreeMakerController();
+        SearchController(Intracomm *comm, GraphGenerator *generator, SearchTask *task, int numStarts);
+        SearchController(const SearchController& orig);
+        virtual ~SearchController();
 
         virtual void runBenchmark();
         virtual string getStatistics();
@@ -39,7 +39,7 @@ namespace dgmark {
         static const int CONTROLLER_PRECISION = 5;
 
         Log log;
-        TreeMakerTask *task;
+        SearchTask *task;
         Validator *validator;
         int numStarts;
 
@@ -63,5 +63,5 @@ namespace dgmark {
     };
 }
 
-#endif	/* TREEMAKERCONTROLLER_H */
+#endif	/* SEARCHCONTROLLER_H */
 

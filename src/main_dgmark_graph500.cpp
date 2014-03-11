@@ -16,9 +16,9 @@
 
 #include <cstdlib>
 #include <time.h>
-#include "generators/SimpleGenerator.h"
-#include "controllers/TreeMakerController.h"
-#include "tasks/tree-maker/bfs/BFSGraph500.h"
+#include "generator/SimpleGenerator.h"
+#include "controller/SearchController.h"
+#include "task/search/bfs/BFSGraph500.h"
 
 using namespace std;
 using namespace MPI;
@@ -45,8 +45,8 @@ int main(int argc, char** argv) {
     Utils::parseArguments(&grade, &density, &startTimes, argc, argv);
 
     SimpleGenerator *gen = new SimpleGenerator(comm, grade, density, random);
-    TreeMakerTask *task = new BFSGraph500(comm);
-    Controller *controller = new TreeMakerController(comm, gen, task, startTimes);
+    SearchTask *task = new BFSGraph500(comm);
+    Controller *controller = new SearchController(comm, gen, task, startTimes);
 
     controller->runBenchmark();
     controller->printStatistics();

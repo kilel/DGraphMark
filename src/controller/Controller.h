@@ -19,8 +19,8 @@
 
 #include <string>
 #include "../base/Communicable.h"
-#include "../generators/GraphGenerator.h"
-#include "../tasks/Task.h"
+#include "../generator/GraphGenerator.h"
+#include "../task/Task.h"
 
 namespace dgmark {
 

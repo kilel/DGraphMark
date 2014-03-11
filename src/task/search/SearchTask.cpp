@@ -14,24 +14,24 @@
  *   limitations under the License.
  */
 
-#include "TreeMakerTask.h"
+#include "SearchTask.h"
 
 namespace dgmark {
 
-    TreeMakerTask::TreeMakerTask(Intracomm *comm) : Task(comm), log(comm) {
+    SearchTask::SearchTask(Intracomm *comm) : Task(comm), log(comm) {
     }
 
-    TreeMakerTask::TreeMakerTask(const TreeMakerTask& orig) : Task(orig.comm), log(orig.comm) {
+    SearchTask::SearchTask(const SearchTask& orig) : Task(orig.comm), log(orig.comm) {
     }
 
-    TreeMakerTask::~TreeMakerTask() {
+    SearchTask::~SearchTask() {
     }
 
-    TaskType TreeMakerTask::getTaskType() {
+    TaskType SearchTask::getTaskType() {
         return PARENT_TREE;
     }
 
-    void TreeMakerTask::open(Graph *newGraph) {
+    void SearchTask::open(Graph *newGraph) {
         log << "Opening task... ";
         comm->Barrier();
         double startTime = Wtime();
@@ -43,18 +43,18 @@ namespace dgmark {
         numLocalVertex = graph->numLocalVertex;
     }
 
-    void TreeMakerTask::close() {
+    void SearchTask::close() {
         comm->Barrier();
         log << "Closing task... \n";
         delete graph;
         comm->Barrier();
     }
 
-    double TreeMakerTask::getTaskOpeningTime() {
+    double SearchTask::getTaskOpeningTime() {
         return taskOpeningTime;
     }
 
-    void TreeMakerTask::setRoot(Vertex newRoot) {
+    void SearchTask::setRoot(Vertex newRoot) {
         root = newRoot;
     }
 

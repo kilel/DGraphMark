@@ -21,11 +21,11 @@
 #include "../../../base/RMAWindow.h"
 #include "../../../base/Utils.h"
 #include "../ParentTree.h"
-#include "../TreeMakerTask.h"
+#include "../SearchTask.h"
 
 namespace dgmark {
 
-    class BFSTask : public TreeMakerTask {
+    class BFSTask : public SearchTask {
     public:
         BFSTask(Intracomm *comm);
         BFSTask(const BFSTask& orig);

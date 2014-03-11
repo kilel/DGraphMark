@@ -12,10 +12,10 @@
 
 namespace dgmark {
 
-    BFSGraph500Optimized::BFSGraph500Optimized(Intracomm *comm) : TreeMakerTask(comm) {
+    BFSGraph500Optimized::BFSGraph500Optimized(Intracomm *comm) : SearchTask(comm) {
     }
 
-    BFSGraph500Optimized::BFSGraph500Optimized(const BFSGraph500Optimized& orig) : TreeMakerTask(orig.comm) {
+    BFSGraph500Optimized::BFSGraph500Optimized(const BFSGraph500Optimized& orig) : SearchTask(orig.comm) {
     }
 
     BFSGraph500Optimized::~BFSGraph500Optimized() {

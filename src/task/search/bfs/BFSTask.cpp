@@ -21,10 +21,10 @@
 
 namespace dgmark {
 
-    BFSTask::BFSTask(Intracomm *comm) : TreeMakerTask(comm) {
+    BFSTask::BFSTask(Intracomm *comm) : SearchTask(comm) {
     }
 
-    BFSTask::BFSTask(const BFSTask& orig) : TreeMakerTask(orig.comm) {
+    BFSTask::BFSTask(const BFSTask& orig) : SearchTask(orig.comm) {
     }
 
     BFSTask::~BFSTask() {
