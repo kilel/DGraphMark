@@ -16,26 +16,26 @@
 
 #include <assert.h>
 
-#include "BFSTask.h"
+#include "BFSTaskRMAFetch.h"
 #include "../../../mpi/RMAWindow.cpp" //to prevent link errors
 
 namespace dgmark {
 
-    BFSTask::BFSTask(Intracomm *comm) : SearchTask(comm) {
+    BFSTaskRMAFetch::BFSTaskRMAFetch(Intracomm *comm) : SearchTask(comm) {
     }
 
-    BFSTask::BFSTask(const BFSTask& orig) : SearchTask(orig.comm) {
+    BFSTaskRMAFetch::BFSTaskRMAFetch(const BFSTaskRMAFetch& orig) : SearchTask(orig.comm) {
     }
 
-    BFSTask::~BFSTask() {
+    BFSTaskRMAFetch::~BFSTaskRMAFetch() {
     }
     
-    string BFSTask::getName() {
+    string BFSTaskRMAFetch::getName() {
         return "dgmark_BFS_RMA_Fetch";
     }
 
-    ParentTree* BFSTask::run() {
-        log << "Running BFS from " << root << "\n";
+    ParentTree* BFSTaskRMAFetch::run() {
+        log << "Running BFS (RMA Fetch) from " << root << "\n";
         double startTime = Wtime();
 
         Vertex queueSize = getQueueSize();
@@ -90,7 +90,7 @@ namespace dgmark {
         return parentTree;
     }
 
-    bool BFSTask::performBFS(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
+    bool BFSTaskRMAFetch::performBFS(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
         bool isQueueEnlarged = false;
 
         for (int node = 0; node < size; ++node) {
@@ -108,7 +108,7 @@ namespace dgmark {
         return isQueueEnlarged;
     }
 
-    bool BFSTask::performBFSActualStep(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
+    bool BFSTaskRMAFetch::performBFSActualStep(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
         bool isQueueEnlarged = false;
         vector<Edge*> *edges = graph->edges;
         Vertex *queue = qWin->getData();
@@ -139,7 +139,7 @@ namespace dgmark {
         return isQueueEnlarged;
     }
 
-    void BFSTask::performBFSSynchRMA(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
+    void BFSTaskRMAFetch::performBFSSynchRMA(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
         while (true) {
             if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
                 pWin->fenceOpen(MODE_NOPUT); //allow read parent
@@ -161,7 +161,7 @@ namespace dgmark {
         }
     }
 
-    bool BFSTask::processLocalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
+    bool BFSTaskRMAFetch::processLocalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
         Vertex childLocal = graph->vertexToLocal(child);
         Vertex *queue = qWin->getData();
         Vertex *parent = pWin->getData();
@@ -176,7 +176,7 @@ namespace dgmark {
         }
     }
 
-    bool BFSTask::processGlobalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
+    bool BFSTaskRMAFetch::processGlobalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
         Vertex childLocal = graph->vertexToLocal(child);
         int childRank = graph->vertexRank(child);
         Vertex parentOfChild;
@@ -227,7 +227,7 @@ namespace dgmark {
         }
     }
 
-    void BFSTask::alignQueue(Vertex *queue) {
+    void BFSTaskRMAFetch::alignQueue(Vertex *queue) {
         for (size_t qIndex = queue[0]; qIndex < queue[1]; ++qIndex) {
             queue[qIndex - queue[0] + 2] = queue[qIndex];
         }
@@ -235,7 +235,7 @@ namespace dgmark {
         queue[0] = 2;
     }
 
-    Vertex BFSTask::getQueueSize() {
+    Vertex BFSTaskRMAFetch::getQueueSize() {
         return numLocalVertex * 3 + 2;
     }
 }

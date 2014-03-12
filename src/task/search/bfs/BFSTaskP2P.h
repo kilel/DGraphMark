@@ -14,74 +14,74 @@
  *   limitations under the License.
  */
 
-#ifndef BFSTASK_H
-#define	BFSTASK_H
+#ifndef BFSTASKP2P_H
+#define	BFSTASKP2P_H
 
-#include "../../../mpi/RMAWindow.h"
 #include "../SearchTask.h"
 
 namespace dgmark {
 
-    class BFSTask : public SearchTask {
+    class BFSTaskP2P : public SearchTask {
     public:
-        BFSTask(Intracomm *comm);
-        BFSTask(const BFSTask& orig);
-        virtual ~BFSTask();
+        BFSTaskP2P(Intracomm *comm);
+        BFSTaskP2P(const BFSTaskP2P& orig);
+        virtual ~BFSTaskP2P();
 
         virtual ParentTree* run();
         virtual string getName();
     private:
-        static const int BFS_SYNCH_TAG = 45782;
+        static const int BFS_SYNCH_TAG = 541;
         /**
          * Performes one BSF step for all nodes.
          * 
-         * @param qWin queue RMA window
-         * @param pWin parent RMA window
+         * @param queue queue array
+         * @param parent parent array
          * @return true, if more steps are required.
          */
-        bool performBFS(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin);
+        bool performBFS(Vertex *queue, Vertex *parent);
 
         /**
          * Performs actual BFS step. 
          * Traverses endges from all queued vertices, and processes childs.
          * 
-         * @param qWin queue RMA window
-         * @param pWin parent RMA window
+         * @param queue queue array
+         * @param parent parent array
          * @return true, if local or global queue is enlarged.
          */
-        bool performBFSActualStep(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin);
+        bool performBFSActualStep(Vertex *queue, Vertex *parent);
 
         /**
          * Performs RMA synchronization.
          * Purpose is to allow main process in queue to perform actual BFS.
-         * @param qWin queue RMA window
-         * @param pWin parent RMA window
+         * 
+         * @param queue queue array
+         * @param parent parent array
          */
-        void performBFSSynchRMA(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin);
+        void performBFSSynchRMA(Vertex *queue, Vertex *parent);
 
         /**
          * Processes local child. 
          * Adds it to local queue and sets it's parent, if it was not set.
          * 
-         * @param qWin queue RMA window
-         * @param pWin parent RMA window
+         * @param queue queue array
+         * @param parent parent array
          * @param currVertex current vertex (parent of child) (global notation)
          * @param child Child of current vertex (global notation)
          * @return true, if local queue is enlarged.
          */
-        bool processLocalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child);
+        bool processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
 
         /**
          * Processes global child. 
          * Adds it to other nodes queue and sets it's parent, if it was not set.
          * 
-         * @param qWin queue RMA window
-         * @param pWin parent RMA window
+         * @param queue queue array
+         * @param parent parent array
          * @param currVertex current vertex (parent of child) (global notation)
          * @param child Child of current vertex (global notation)
          * @return true, if global queue is enlarged.
          */
-        bool processGlobalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child);
+        bool processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
 
         /**
          * Aligns queue.
@@ -97,8 +97,12 @@ namespace dgmark {
          * @return queue size.
          */
         Vertex getQueueSize();
+        
+        void sendSynch(bool value, int toRank);
+        void sendSynchEnd();
+        bool waitSynch();
     };
 }
 
-#endif	/* BFSTASK_H */
+#endif	/* BFSTASKP2P_H */
 

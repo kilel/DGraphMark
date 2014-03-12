@@ -51,7 +51,7 @@ GENERATOR = SimpleGenerator
 GRAPH = Graph CSRGraph
 MPI = RMAWindow
 TASK = ParentTree ParentTreeValidator SearchTask
-BFS = BFSGraph500 BFSGraph500Optimized BFSTask
+BFS = BFSGraph500 BFSGraph500Optimized BFSTaskRMAFetch BFSTaskP2P
 VALIDATOR = ParentTreeValidatorRMAFetch
 UTIL = Statistics Random
 
