@@ -32,6 +32,7 @@ namespace dgmark {
         virtual ~BFSGraph500();
 
         virtual ParentTree* run();
+        virtual string getName();
     private:
         void run_bfs(Vertex root, int64_t* parent);
 

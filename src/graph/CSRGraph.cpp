@@ -15,21 +15,21 @@
  */
 
 #include <algorithm>
-#include "SortedGraph.h"
+#include "CSRGraph.h"
 #include "../util/Log.h"
 
 namespace dgmark {
 
-    SortedGraph::SortedGraph(Graph *graph) : Graph(graph) {
+    CSRGraph::CSRGraph(Graph *graph) : Graph(graph) {
         startIndex = new Vertex[numLocalVertex + 1]; // the last one is numLocalVertex.
         sort();
     }
 
-    SortedGraph::SortedGraph(const SortedGraph& orig) :
+    CSRGraph::CSRGraph(const CSRGraph& orig) :
     Graph(orig), startIndex(orig.startIndex) {
     }
 
-    SortedGraph::~SortedGraph() {
+    CSRGraph::~CSRGraph() {
         delete startIndex;
     }
 
@@ -45,7 +45,7 @@ namespace dgmark {
         }
     }
 
-    void SortedGraph::sort() {
+    void CSRGraph::sort() {
         std::sort(edges->begin(), edges->end(), compareEdge);
 
         Vertex prev = 0;
@@ -65,11 +65,11 @@ namespace dgmark {
         startIndex[numLocalVertex] = edges->size();
     }
 
-    size_t SortedGraph::getStartIndex(Vertex localVertex) {
+    size_t CSRGraph::getStartIndex(Vertex localVertex) {
         return startIndex[localVertex];
     }
 
-    size_t SortedGraph::getEndIndex(Vertex localVertex) {
+    size_t CSRGraph::getEndIndex(Vertex localVertex) {
         return startIndex[localVertex + 1];
     }
 }

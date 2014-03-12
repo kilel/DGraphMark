@@ -18,24 +18,29 @@
 #define	RANDOM_H
 
 #include <inttypes.h>
+#include "../mpi/Communicable.h"
 
 namespace dgmark {
 
     class Random {
     public:
-        Random();
-        Random(uint64_t seed);
         Random(const Random& orig);
         virtual ~Random();
+        
+        static Random* getInstance(Intracomm *comm);
 
         uint64_t next();
         uint64_t next(uint64_t min, uint64_t max);
     private:
+        Random(uint64_t seed);
+        
         uint64_t seed;
 
         int typeBitSize;
         int randBitSize;
         void fillRandBitSize();
+        
+        static Random *instance;
     };
 }
 

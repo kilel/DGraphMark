@@ -21,18 +21,23 @@
 #include <cstdio>
 
 namespace dgmark {
-
-    Random::Random() : typeBitSize(64) {
-        seed = time(0);
-        srand(rand() + seed);
-        fillRandBitSize();
-    }
+    
+    Random* Random::instance;
 
     Random::Random(uint64_t newSeed) : typeBitSize(64) {
         seed = time(0) + newSeed;
         srand(time(0) + newSeed);
         srand(rand() + newSeed);
         fillRandBitSize();
+    }
+
+    Random* Random::getInstance(Intracomm *comm) {
+        if(instance) {
+            return instance;
+        } else {
+            instance = new Random(comm->Get_rank());
+            return instance;
+        }
     }
 
     Random::Random(const Random& orig) : seed(orig.seed), typeBitSize(orig.typeBitSize) {

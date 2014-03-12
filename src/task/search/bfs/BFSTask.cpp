@@ -29,6 +29,10 @@ namespace dgmark {
 
     BFSTask::~BFSTask() {
     }
+    
+    string BFSTask::getName() {
+        return "dgmark_BFS_RMA_Fetch";
+    }
 
     ParentTree* BFSTask::run() {
         log << "Running BFS from " << root << "\n";

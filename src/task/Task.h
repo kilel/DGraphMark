@@ -17,6 +17,7 @@
 #ifndef GRAPHTASK_H
 #define	GRAPHTASK_H
 
+#include <string>
 #include "../graph/Graph.h"
 #include "Result.h"
 
@@ -55,6 +56,12 @@ namespace dgmark {
          * Close task for graph.
          */
         virtual void close() = 0;
+        
+        /**
+         * Returns name of the task, used in benchmark. No spaces allowed!
+         * @return name of the task.
+         */
+        virtual string getName() = 0;
     };
 
 }

@@ -14,43 +14,21 @@
  *   limitations under the License.
  */
 
-#include <cstdlib>
-#include <time.h>
-#include "generator/SimpleGenerator.h"
 #include "task/search/bfs/BFSTask.h"
-#include "controller/SearchController.h"
-#include "util/Utils.h"
+#include "controller/search/SearchController.h"
 
-using namespace std;
-using namespace MPI;
 using namespace dgmark;
 
-Utils* Utils::instance;
-
-/**
- * @param argc
- * @param argv
- * @return sdf
- */
 int main(int argc, char** argv) {
     Init();
-
     Intracomm *comm = &COMM_WORLD;
-    Random* random = new Random(comm->Get_rank());
 
-    int grade;
-    int density;
-    int startTimes;
+    vector<Task*> *tasks = new vector<Task*>();
+    tasks->push_back(new BFSTask(comm));
 
-    Utils::initialize(comm);
-    Utils::parseArguments(&grade, &density, &startTimes, argc, argv);
-
-    GraphGenerator *gen = new SimpleGenerator(comm, grade, density, random);
-    SearchTask *task = new BFSTask(comm);
-    Controller *controller = new SearchController(comm, gen, task, startTimes);
-
-    controller->runBenchmark();
-    controller->printStatistics();
+    SearchController *controller = new SearchController(comm, argc, argv);
+    controller->run(tasks);
+    controller->clean(tasks);
 
     Finalize();
     return 0;

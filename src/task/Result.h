@@ -22,7 +22,7 @@
 namespace dgmark {
 
     enum TaskType {
-        STUB, PARENT_TREE
+        STUB, SEARCH
     };
 
     /**

@@ -29,6 +29,7 @@ namespace dgmark {
         virtual ~BFSTask();
 
         virtual ParentTree* run();
+        virtual string getName();
     private:
         static const int BFS_SYNCH_TAG = 45782;
         /**

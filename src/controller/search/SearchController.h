@@ -14,28 +14,32 @@
  *   limitations under the License.
  */
 
-#ifndef SORTEDGRAPH_H
-#define	SORTEDGRAPH_H
+#ifndef SEARCHCONTROLLER_H
+#define	SEARCHCONTROLLER_H
 
-#include "Graph.h"
+#include "../Controller.h"
+#include "../../task/search/SearchTask.h"
+#include "../../generator/GraphGenerator.h"
 
 namespace dgmark {
 
-    class SortedGraph : public Graph {
+    class SearchController : public Controller {
     public:
-        SortedGraph(Graph *graph);
-        SortedGraph(const SortedGraph& orig);
-        virtual ~SortedGraph();
+        SearchController(Intracomm *comm, int argc, char **argv);
+        SearchController(const SearchController& orig);
+        virtual ~SearchController();
 
-        size_t getStartIndex(Vertex v);
-        size_t getEndIndex(Vertex v);
+        virtual void run(vector<Task*> *tasks);
+        virtual void clean(vector<Task*> *tasks);
 
+    protected:
+        virtual string getAdditionalStatistics();
     private:
-        void sort();
-        Vertex *startIndex;
+        GraphGenerator *generator;
 
+        
     };
 }
 
-#endif	/* SORTEDGRAPH_H */
+#endif	/* SEARCHCONTROLLER_H */
 

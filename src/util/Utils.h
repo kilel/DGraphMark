@@ -19,55 +19,17 @@
 
 namespace dgmark {
 
-    class Utils : Communicable {
+    class Utils {
     public:
 
-        Utils(Intracomm *comm) : Communicable(comm) {
-        }
-
-        Utils(const Utils& orig) : Communicable(orig.comm) {
-        }
-
-        virtual ~Utils() {
-        }
-
-        static void initialize(Intracomm *comm) {
-            instance = new Utils(comm);
-        }
-
-        static void parseArguments(int *grade, int *density, int *numStarts, int argc, char** argv) {
-            if (instance->rank == 0) {
-                *grade = 8;
-                *density = 16;
-                *numStarts = 32;
-
-                if (argc >= 2) {
-                    *grade = atoi(argv[1]);
-                }
-                if (argc >= 3) {
-                    *density = atoi(argv[2]);
-                }
-                if (argc >= 4) {
-                    *numStarts = atoi(argv[3]);
-                }
-            }
-
-            instance->comm->Bcast(grade, 1, INT, 0);
-            instance->comm->Bcast(density, 1, INT, 0);
-            instance->comm->Bcast(numStarts, 1, INT, 0);
-        }
-
-        static void printGraph(Graph *graph) {
+        static void printGraph(Intracomm *comm, Graph *graph) {
             vector<Edge*> *edges = graph->edges;
 
             for (size_t i = 0; i < edges->size(); ++i) {
                 Edge *edge = edges->at(i);
-                printf("%d: %ld -> %ld\n", instance->rank, edge->from, edge->to);
+                printf("%d: %ld -> %ld\n", comm->Get_rank(), edge->from, edge->to);
             }
         }
-
-    private:
-        static Utils *instance;
     };
 
 }

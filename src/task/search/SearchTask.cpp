@@ -28,14 +28,14 @@ namespace dgmark {
     }
 
     TaskType SearchTask::getTaskType() {
-        return PARENT_TREE;
+        return SEARCH;
     }
 
     void SearchTask::open(Graph *newGraph) {
         log << "Opening task... ";
         comm->Barrier();
         double startTime = Wtime();
-        graph = new SortedGraph(newGraph);
+        graph = new CSRGraph(newGraph);
         comm->Barrier();
         taskOpeningTime = Wtime() - startTime;
         log << taskOpeningTime << " s\n";

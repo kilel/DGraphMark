@@ -14,23 +14,33 @@
  *   limitations under the License.
  */
 
+#ifndef CSRGRAPH_H
+#define	CSRGRAPH_H
 
-#include "task/search/bfs/BFSGraph500Optimized.h"
-#include "controller/search/SearchController.h"
+#include "Graph.h"
 
-using namespace dgmark;
+namespace dgmark {
 
-int main(int argc, char** argv) {
-    Init();
-    Intracomm *comm = &COMM_WORLD;
+    /*
+     * Compressed Sparse Row Graph.
+     * Contains vector of edges, sorted by v.form, and then by v.to.
+     * Provides start and end indices of an output edges interval for any local vertex.
+     */
+    class CSRGraph : public Graph {
+    public:
+        CSRGraph(Graph *graph);
+        CSRGraph(const CSRGraph& orig);
+        virtual ~CSRGraph();
 
-    vector<Task*> *tasks = new vector<Task*>();
-    tasks->push_back(new BFSGraph500Optimized(comm));
+        size_t getStartIndex(Vertex v);
+        size_t getEndIndex(Vertex v);
 
-    SearchController *controller = new SearchController(comm, argc, argv);
-    controller->run(tasks);
-    controller->clean(tasks);
+    private:
+        void sort();
+        Vertex *startIndex;
 
-    Finalize();
-    return 0;
+    };
 }
+
+#endif	/* CSRGRAPH_H */
+

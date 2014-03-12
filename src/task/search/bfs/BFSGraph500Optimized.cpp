@@ -20,6 +20,10 @@ namespace dgmark {
 
     BFSGraph500Optimized::~BFSGraph500Optimized() {
     }
+    
+    string BFSGraph500Optimized::getName() {
+        return "Graph500_BFS_RMA_Optimized";
+    }
 
     ParentTree* BFSGraph500Optimized::run() {
         log << "Running BFS (Graph500 optimized) from " << root << "\n";

@@ -39,15 +39,16 @@ UTIL_DIR = util/
 
 #definition of path to object directories
 OBJ_DIR_PATHS = $(addprefix $(OBJ_DIR), \
-		$(BENCHMARK_DIR) $(CONTROLLER_DIR) $(GENERATOR_DIR)  \
-		$(GRAPH_DIR) $(MPI_DIR) $(TASK_DIR) $(BFS_DIR) \
-		$(VALIDATOR_DIR) $(UTIL_DIR) )
+		$(BENCHMARK_DIR) $(BENCHMARK_DIR)search/ \
+		$(CONTROLLER_DIR) $(CONTROLLER_DIR)search/ \
+		$(GENERATOR_DIR) $(GRAPH_DIR) $(MPI_DIR) \
+		$(TASK_DIR) $(BFS_DIR) $(VALIDATOR_DIR) $(UTIL_DIR) )
 
 #Definitions of sources to compile
-BENCHMARK = 
-CONTROLLER = SearchController
+BENCHMARK = Benchmark search/SearchBenchmark
+CONTROLLER = Controller search/SearchController
 GENERATOR = SimpleGenerator
-GRAPH = Graph SortedGraph
+GRAPH = Graph CSRGraph
 MPI = RMAWindow
 TASK = ParentTree ParentTreeValidator SearchTask
 BFS = BFSGraph500 BFSGraph500Optimized BFSTask

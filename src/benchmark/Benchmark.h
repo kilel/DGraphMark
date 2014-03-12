@@ -14,54 +14,48 @@
  *   limitations under the License.
  */
 
-#ifndef SEARCHCONTROLLER_H
-#define	SEARCHCONTROLLER_H
+#ifndef BENCHMARK_H
+#define	BENCHMARK_H
 
-#include "Controller.h"
+#include <string>
+#include "../mpi/Communicable.h"
+#include "../task/Task.h"
+#include "../task/Validator.h"
 #include "../util/Log.h"
-#include "../task/search/ParentTreeValidator.h"
-#include "../task/search/SearchTask.h"
 
 namespace dgmark {
 
-    class SearchController : public Controller {
+    class Benchmark : public Communicable {
     public:
-        SearchController(Intracomm *comm, GraphGenerator *generator, SearchTask *task, int numStarts);
-        SearchController(const SearchController& orig);
-        virtual ~SearchController();
+        Benchmark(Intracomm *comm, Task *task, Validator *validator, Graph *graph, int numStarts);
+        Benchmark(const Benchmark& orig);
+        virtual ~Benchmark();
 
-        virtual void runBenchmark();
+        void run();
+        double getTaskOpeningTime();
         virtual string getStatistics();
-        virtual void printStatistics();
 
-
-    private:
-        static const int CONTROLLER_PRECISION = 5;
-
+    protected:
+        static const int statisticsPrecision = 5;
+        
         Log log;
-        SearchTask *task;
+        Task *task;
         Validator *validator;
+        Graph *graph;
+
         int numStarts;
-
-        Vertex* generateStartRoots(size_t maxStartRoot);
-
-        bool isLastRunValid;
-
-        //statistics data
-        double generationTime;
-        double distributionTime;
-        double taskOpeningTime;
-        double rootsGenerationTime;
+        bool isSuccessfullyFinished;
 
         vector<double> *taskRunningTimes;
-        vector<double> *traversedEdges;
         vector<double> *validationTimes;
         vector<double> *marks;
 
+        virtual bool runSingleTask(int startIndex) = 0;
         string getStatistics(vector<double> *data, string name, const ios::fmtflags floatfieldFlag = ios::scientific);
+    private:
 
     };
 }
 
-#endif	/* SEARCHCONTROLLER_H */
+#endif	/* BENCHMARK_H */
 

@@ -58,7 +58,7 @@ namespace dgmark {
     }
 
     TaskType ParentTree::getTaskType() {
-        return PARENT_TREE;
+        return SEARCH;
     }
 
     double ParentTree::getTraversedEdges() {

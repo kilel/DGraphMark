@@ -14,42 +14,29 @@
  *   limitations under the License.
  */
 
-#ifndef SEARCHTASK_H
-#define	SEARCHTASK_H
+#ifndef SEARCHBENCHMARK_H
+#define	SEARCHBENCHMARK_H
 
-#include "ParentTree.h"
-#include "../Task.h"
-#include "../../graph/CSRGraph.h"
+#include "../Benchmark.h"
 #include "../../util/Log.h"
+#include "../../task/search/ParentTreeValidator.h"
+#include "../../task/search/SearchTask.h"
 
 namespace dgmark {
 
-    class SearchTask : public Task {
+    class SearchBenchmark : public Benchmark {
     public:
-        SearchTask(Intracomm *comm);
-        SearchTask(const SearchTask& orig);
-        virtual ~SearchTask();
+        SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts);
+        SearchBenchmark(const SearchBenchmark& orig);
+        virtual ~SearchBenchmark();
 
-        virtual TaskType getTaskType();
+        virtual bool runSingleTask(int startIndex);
 
-        virtual void open(Graph *newGraph);
-        virtual double getTaskOpeningTime();
-        virtual ParentTree *run() = 0;
-        virtual void close();
-
-        void setRoot(Vertex newRoot);
-
-    protected:
-        CSRGraph *graph;
-        Vertex root;
-        Log log;
     private:
-        double taskOpeningTime;
-    protected:
-        Vertex numLocalVertex;
+        Vertex *startRoots;
+        Vertex* generateStartRoots(size_t maxStartRoot);
     };
-
 }
 
-#endif	/* SEARCHTASK_H */
+#endif	/* SEARCHBENCHMARK_H */
 

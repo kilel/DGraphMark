@@ -20,10 +20,14 @@ namespace dgmark {
     BFSGraph500::~BFSGraph500() {
     }
 
+    string BFSGraph500::getName() {
+        return "Graph500_BFS_RMA";
+    }
+
     ParentTree* BFSGraph500::run() {
         log << "Running BFS (Graph500) from " << root << "\n";
         double startTime = Wtime();
-        size_t parentBytesSize = (numLocalVertex + 1) * sizeof (Vertex);
+        size_t parentBytesSize = (numLocalVertex) * sizeof (int64_t);
         int64_t *parent = (int64_t*) Alloc_mem(parentBytesSize, INFO_NULL);
         run_bfs(root, parent);
 
@@ -93,9 +97,8 @@ namespace dgmark {
 
         /* Mark root as grey and add it to the queue. */
         if (graph->vertexRank(root) == rank) {
-            Vertex rootLocal = graph->vertexToLocal(root);
-            pred[rootLocal] = root;
-            queue_bitmap1[rootLocal / elts_per_queue_bit / ulong_bits] |= (1UL << ((rootLocal / elts_per_queue_bit) % ulong_bits));
+            pred[graph->vertexToLocal(root)] = root;
+            queue_bitmap1[graph->vertexToLocal(root) / elts_per_queue_bit / ulong_bits] |= (1UL << ((graph->vertexToLocal(root) / elts_per_queue_bit) % ulong_bits));
         }
 
         /* Create MPI windows on the two predecessor arrays and the two queues. */
@@ -141,7 +144,7 @@ namespace dgmark {
                         /* Since the queue is an overapproximation, check the predecessor map
                          * to be sure this vertex is grey. */
                         if (pred[v_local] >= 0 && pred[v_local] < nglobalverts) {
-                            size_t ei, ei_end = graph->getEndIndex(v_local + 1);
+                            size_t ei, ei_end = graph->getEndIndex(v_local);
                             /* Walk the incident edges. */
                             for (ei = graph->getStartIndex(v_local); ei < ei_end; ++ei) {
                                 int64_t w = graph->edges->at(ei)->to;

@@ -18,30 +18,36 @@
 #define	CONTROLLER_H
 
 #include <string>
-#include "../mpi/Communicable.h"
-#include "../generator/GraphGenerator.h"
-#include "../task/Task.h"
+#include <vector>
+#include "../benchmark/Benchmark.h"
 
 namespace dgmark {
 
     class Controller : public Communicable {
     public:
 
-        Controller(Intracomm *comm, GraphGenerator *generator) : Communicable(comm), generator(generator) {
-        }
+        Controller(Intracomm *comm, int argc, char **argv);
+        Controller(const Controller& orig);
+        virtual ~Controller();
 
-        Controller(const Controller& orig) : Communicable(orig.comm), generator(orig.generator) {
-        }
-
-        virtual ~Controller() {
-        }
-
-        virtual void runBenchmark() = 0;
-        virtual string getStatistics() = 0;
-        virtual void printStatistics() = 0;
+        virtual void run(vector<Task*> *tasks) = 0;
+        virtual void clean(vector<Task*> *tasks) = 0;
+        void run(vector<Benchmark*> *benchmarks);
+        void clean(vector<Benchmark*> *benchmarks);
 
     protected:
-        GraphGenerator *generator;
+        int grade;
+        int density;
+        int numStarts;
+
+        Log log;
+        static const int CONTROLLER_PRECISION = 5;
+
+        virtual string getAdditionalStatistics() = 0;
+    private:
+        string getInitialStatistics();
+        void parseArguments(int argc, char** argv);
+        void printResult(string stat);
     };
 }
 

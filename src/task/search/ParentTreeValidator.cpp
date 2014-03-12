@@ -29,7 +29,7 @@ namespace dgmark {
     }
 
     TaskType ParentTreeValidator::getTaskType() {
-        return PARENT_TREE;
+        return SEARCH;
     }
 
     double ParentTreeValidator::getValidationTime() {

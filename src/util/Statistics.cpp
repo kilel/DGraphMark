@@ -45,7 +45,7 @@ namespace dgmark {
 
         size_t quartile = dataSize / 4 < 1 ? 1 : dataSize / 4;
         minimum = sortedData->front();
-        firstQuartile = sortedData->at(quartile);
+        firstQuartile = sortedData->at(dataSize / 4);
         median = sortedData->at(dataSize / 2);
         thirdQuartile = sortedData->at(dataSize - quartile);
         maximum = sortedData->back();
