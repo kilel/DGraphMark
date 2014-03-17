@@ -35,6 +35,9 @@ namespace dgmark {
 
     protected:
         static const int VALIDATOR_SYNCH_TAG = 28952;
+        static const int VALIDATOR_SYNCH_END_TAG = 5794;
+        static const int VALIDATOR_LOCAL_SEND_TAG = 35738;
+        static const int VALIDATOR_DEPTH_SEND_TAG = 35832;
         virtual bool validateDepth(ParentTree *parentTree) = 0;
 
     private:

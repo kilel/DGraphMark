@@ -131,19 +131,19 @@ namespace dgmark {
             ++queue[0]; // shrinking queue.
         }
         alignQueue(queue);
-        sendSynchEnd(); //no fence is needed more.
+        endSynch(BFS_SYNCH_TAG); //no fence is needed more.
         return isQueueEnlarged;
     }
 
     void BFSTaskP2P::performBFSSynchRMA(Vertex *queue, Vertex *parent) {
         while (true) {
-            if (waitSynch()) {
+            if (waitSynch(BFS_SYNCH_TAG)) {
                 Vertex childLocal;
                 Status status;
                 comm->Recv(&childLocal, 1, VERTEX_TYPE, ANY_SOURCE, BFS_SYNCH_TAG, status);
                 comm->Send(&parent[childLocal], 1, VERTEX_TYPE, status.Get_source(), BFS_SYNCH_TAG);
 
-                if (waitSynch()) {
+                if (waitSynch(BFS_SYNCH_TAG)) {
                     comm->Recv(&parent[childLocal], 1, VERTEX_TYPE, ANY_SOURCE, BFS_SYNCH_TAG, status);
                     queue[queue[1]] = childLocal;
                     ++queue[1];
@@ -173,7 +173,7 @@ namespace dgmark {
 
         //printf("%d: Getting parent of child\n", rank);
 
-        sendSynch(true, childRank);
+        requestSynch(true, childRank, BFS_SYNCH_TAG);
         Vertex parentOfChild;
         comm->Send(&childLocal, 1, VERTEX_TYPE, childRank, BFS_SYNCH_TAG);
         comm->Recv(&parentOfChild, 1, VERTEX_TYPE, childRank, BFS_SYNCH_TAG);
@@ -182,7 +182,7 @@ namespace dgmark {
         assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
 
         bool isInnerSynchNeeded = (parentOfChild == graph->numGlobalVertex);
-        sendSynch(isInnerSynchNeeded, childRank);
+        requestSynch(isInnerSynchNeeded, childRank, BFS_SYNCH_TAG);
 
         if (isInnerSynchNeeded) {
             //printf("%d: Putting child to the parent\n", rank);
@@ -205,22 +205,4 @@ namespace dgmark {
         return numLocalVertex * 3 + 2;
     }
 
-    void BFSTaskP2P::sendSynch(bool value, int toRank) {
-        comm->Send(&value, 1, BOOL, toRank, BFS_SYNCH_TAG);
-    }
-
-    void BFSTaskP2P::sendSynchEnd() {
-        bool value = false;
-        for (int node = 0; node < size; ++node) {
-            if (node != rank) {
-                comm->Send(&value, 1, BOOL, node, BFS_SYNCH_TAG);
-            }
-        }
-    }
-
-    bool BFSTaskP2P::waitSynch() {
-        bool value;
-        comm->Recv(&value, 1, BOOL, ANY_SOURCE, BFS_SYNCH_TAG);
-        return value;
-    }
 }

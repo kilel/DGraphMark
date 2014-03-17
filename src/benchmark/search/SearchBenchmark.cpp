@@ -19,11 +19,15 @@
 #include "SearchBenchmark.h"
 
 #include "../../task/search/validator/ParentTreeValidatorRMAFetch.h"
+#include "../../task/search/validator/ParentTreeValidatorP2P.h"
+#include "../../task/search/validator/ParentTreeValidatorP2PNoBlock.h"
 
 namespace dgmark {
 
     SearchBenchmark::SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts) :
-    Benchmark(comm, task, new ParentTreeValidatorRMAFetch(comm), graph, numStarts),
+    //Benchmark(comm, task, new ParentTreeValidatorRMAFetch(comm), graph, numStarts),
+    //Benchmark(comm, task, new ParentTreeValidatorP2P(comm), graph, numStarts),
+    Benchmark(comm, task, new ParentTreeValidatorP2PNoBlock(comm), graph, numStarts),
     startRoots(generateStartRoots(graph->numGlobalVertex)) {
     }
 

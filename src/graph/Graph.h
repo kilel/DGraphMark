@@ -103,7 +103,7 @@ namespace dgmark {
          * @return global vertex.
          */
         Vertex vertexToGlobal(int rank, Vertex localVertex);
-        
+
         /**
          * Returns rank of the global vertex.
          * @param globalVertex global vertex.

@@ -97,10 +97,6 @@ namespace dgmark {
          * @return queue size.
          */
         Vertex getQueueSize();
-        
-        void sendSynch(bool value, int toRank);
-        void sendSynchEnd();
-        bool waitSynch();
     };
 }
 

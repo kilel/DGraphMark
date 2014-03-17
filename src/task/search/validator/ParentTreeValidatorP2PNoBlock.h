@@ -14,34 +14,27 @@
  *   limitations under the License.
  */
 
-#ifndef COMMUNICABLE_H
-#define	COMMUNICABLE_H
+#ifndef PARENTTREEVALIDATORP2PNOBLOCK_H
+#define	PARENTTREEVALIDATORP2PNOBLOCK_H
 
-#include <mpi.h>
+#include "../ParentTreeValidator.h"
 
 namespace dgmark {
 
-    using namespace MPI;
-
-    class Communicable {
+    class ParentTreeValidatorP2PNoBlock : public ParentTreeValidator {
     public:
-
-        Communicable(Intracomm *comm);
-        Communicable(const Communicable& orig);
-        virtual ~Communicable();
-        
-        void requestSynch(bool isSynchNeeded, int synchTag);
-        void requestSynch(bool isSynchNeeded, int toRank, int synchTag);
-        void endSynch(int synchTag);
-        bool waitSynch(int synchTag);
-        bool probeSynch(int synchTag);
+        ParentTreeValidatorP2PNoBlock(Intracomm *comm);
+        ParentTreeValidatorP2PNoBlock(const ParentTreeValidatorP2PNoBlock& orig);
+        virtual ~ParentTreeValidatorP2PNoBlock();
 
     protected:
-        Intracomm *comm;
-        int rank;
-        int size;
+        virtual bool validateDepth(ParentTree *parentTree);
+
+    private:
+        Vertex* buildDepth(ParentTree *parentTree);
+        Vertex getDepth(Graph *graph, Vertex* depths, Vertex currVertex);
+        void synchAction(Vertex* depths);
     };
 }
-
-#endif	/* COMMUNICABLE_H */
+#endif	/* PARENTTREEVALIDATORP2PNOBLOCK_H */
 

@@ -66,20 +66,20 @@ namespace dgmark {
         return (distributedEdges == edges->size());
     }
 
-    Vertex Graph::vertexToLocal(Vertex globalVertex) {
+    Vertex Graph::vertexToLocal(const Vertex globalVertex) {
         int rank = vertexRank(globalVertex);
         return (rank << diffGrade) ^ globalVertex;
     }
 
-    Vertex Graph::vertexToGlobal(Vertex localVertex) {
+    Vertex Graph::vertexToGlobal(const Vertex localVertex) {
         return vertexToGlobal(rank, localVertex);
     }
 
-    Vertex Graph::vertexToGlobal(int rank, Vertex localVertex) {
+    Vertex Graph::vertexToGlobal(const int rank, const Vertex localVertex) {
         return (rank << diffGrade) | localVertex;
     }
 
-    Vertex Graph::vertexRank(Vertex globalVertex) {
+    Vertex Graph::vertexRank(const Vertex globalVertex) {
         return globalVertex >> diffGrade;
     }
 

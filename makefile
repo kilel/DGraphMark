@@ -49,10 +49,10 @@ BENCHMARK = Benchmark search/SearchBenchmark
 CONTROLLER = Controller search/SearchController
 GENERATOR = SimpleGenerator
 GRAPH = Graph CSRGraph
-MPI = RMAWindow
+MPI = Communicable RMAWindow
 TASK = ParentTree ParentTreeValidator SearchTask
 BFS = BFSGraph500 BFSGraph500Optimized BFSTaskRMAFetch BFSTaskP2P
-VALIDATOR = ParentTreeValidatorRMAFetch
+VALIDATOR = ParentTreeValidatorRMAFetch ParentTreeValidatorP2P ParentTreeValidatorP2PNoBlock
 UTIL = Statistics Random
 
 #separated, because if use all, it is too long, error occurred in build.
