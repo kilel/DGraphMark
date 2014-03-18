@@ -112,39 +112,38 @@ namespace dgmark {
         while (queue[0] < queueEnd) { //is it better?
             Vertex currVertex = queue[queue[0]];
 
-            for (size_t childIndex = graph->getStartIndex(currVertex);
-                    childIndex < graph->getEndIndex(currVertex); ++childIndex) {
-                //iterate through all childs of queued vertex
+            const size_t childStartindex = graph->getStartIndex(currVertex);
+            const size_t childEndIndex = graph->getEndIndex(currVertex);
+            for (size_t childIndex = childStartindex; childIndex < childEndIndex; ++childIndex) {
                 Vertex child = edges->at(childIndex)->to;
                 int childRank = graph->vertexRank(child);
-                //printf("%d: currVert = %ld, child = %ld (in %d), qLen = %ld\n", rank, currVertex, graph->vertexToLocal(child), childRank, queue[1]);
                 if (childRank == rank) {
-                    //vertex is mine
                     isQueueEnlarged |= processLocalChild(queue, parent, graph->vertexToGlobal(currVertex), child);
                 } else {
-                    //vertex is in the other process
                     isQueueEnlarged |= processGlobalChild(queue, parent, graph->vertexToGlobal(currVertex), child);
                 }
             }
             ++queue[0]; // shrinking queue.
         }
         alignQueue(queue);
-        endSynch(BFS_SYNCH_TAG); //no fence is needed more.
+        endSynch(BFS_SYNCH_TAG);
         return isQueueEnlarged;
     }
 
     void BFSTaskP2P::performBFSSynch(Vertex *queue, Vertex *parent) {
-        while (true) {
-            if (waitSynch(BFS_SYNCH_TAG)) {
-                Vertex childLocal;
-                Status status;
-                comm->Recv(&childLocal, 1, VERTEX_TYPE, ANY_SOURCE, BFS_SYNCH_TAG, status);
-                comm->Send(&parent[childLocal], 1, VERTEX_TYPE, status.Get_source(), BFS_SYNCH_TAG);
+        Status status;
+        Vertex memory[2] = {0};
 
-                if (waitSynch(BFS_SYNCH_TAG)) {
-                    comm->Recv(&parent[childLocal], 1, VERTEX_TYPE, status.Get_source(), BFS_SYNCH_TAG, status);
-                    queue[queue[1]] = childLocal;
+        while (true) {
+            if (waitSynch(BFS_SYNCH_TAG, status)) {
+                comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
+                if (parent[memory[0]] == graph->numGlobalVertex) {
+                    parent[memory[0]] = memory[1];
+                    queue[queue[1]] = memory[0];
                     ++queue[1];
+                    requestSynch(true, status.Get_source(), BFS_SYNCH_2_TAG);
+                } else {
+                    requestSynch(false, status.Get_source(), BFS_SYNCH_2_TAG);
                 }
             } else { //if fence is not neaded mode
                 break;
@@ -155,27 +154,12 @@ namespace dgmark {
     bool BFSTaskP2P::processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child) {
         Vertex childLocal = graph->vertexToLocal(child);
         int childRank = graph->vertexRank(child);
-
-        //printf("%d: Getting parent of child\n", rank);
+        Vertex memory[2] = {childLocal, currVertex};
 
         requestSynch(true, childRank, BFS_SYNCH_TAG);
-        Vertex parentOfChild;
-        comm->Send(&childLocal, 1, VERTEX_TYPE, childRank, BFS_SYNCH_TAG);
-        comm->Recv(&parentOfChild, 1, VERTEX_TYPE, childRank, BFS_SYNCH_TAG);
-
-        //printf("%d: Parent of child is %ld\n", rank, parentOfChild, numLocalVertex);
-        assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
-
-        bool isInnerSynchNeeded = (parentOfChild == graph->numGlobalVertex);
-        requestSynch(isInnerSynchNeeded, childRank, BFS_SYNCH_TAG);
-
-        if (isInnerSynchNeeded) {
-            //printf("%d: Putting child to the parent\n", rank);
-            comm->Send(&currVertex, 1, VERTEX_TYPE, childRank, BFS_SYNCH_TAG);
-            return true; // queue is enlarged
-        } else {
-            return false; //queue was not enlarged
-        }
+        comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
+        bool isQueueEnlarged = waitSynch(BFS_SYNCH_2_TAG, childRank);
+        return isQueueEnlarged;
     }
 
 }

@@ -90,25 +90,28 @@ namespace dgmark {
 
         requestSynch(true, childRank, BFS_SYNCH_TAG);
         comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
-        probeBFSSynch(queue, parent);
+
+        while (!comm->Iprobe(childRank, BFS_SYNCH_2_TAG)) {
+            probeBFSSynch(queue, parent);
+        }
         bool isQueueEnlarged = waitSynch(BFS_SYNCH_2_TAG, childRank);
         return isQueueEnlarged;
     }
 
-    void BFSTaskP2PNoBlock::probeBFSSynch(Vertex *queue, Vertex *parent) {
+    void BFSTaskP2PNoBlock::probeBFSSynch(Vertex *queue, Vertex * parent) {
         Status status;
         Vertex memory[2] = {0};
 
         while (probeSynch(BFS_SYNCH_TAG, status)) {
             comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
+            bool isQueueChanged = false;
             if (parent[memory[0]] == graph->numGlobalVertex) {
                 parent[memory[0]] = memory[1];
                 queue[queue[1]] = memory[0];
                 ++queue[1];
-                requestSynch(true, status.Get_source(), BFS_SYNCH_2_TAG);
-            } else {
-                requestSynch(false, status.Get_source(), BFS_SYNCH_2_TAG);
+                isQueueChanged = true;
             }
+            requestSynch(isQueueChanged, status.Get_source(), BFS_SYNCH_2_TAG);
         }
     }
 

@@ -25,8 +25,8 @@
 namespace dgmark {
 
     SearchBenchmark::SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts) :
-    Benchmark(comm, task, new ParentTreeValidatorP2P(comm), graph, numStarts),
-    //    Benchmark(comm, task, new ParentTreeValidatorP2PNoBlock(comm), graph, numStarts),
+    //    Benchmark(comm, task, new ParentTreeValidatorP2P(comm), graph, numStarts),
+    Benchmark(comm, task, new ParentTreeValidatorP2PNoBlock(comm), graph, numStarts),
     startRoots(generateStartRoots(graph->numGlobalVertex)) {
     }
 

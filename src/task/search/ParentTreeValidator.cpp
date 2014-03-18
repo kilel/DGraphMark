@@ -126,6 +126,7 @@ namespace dgmark {
         bool isValid = true;
 
         Graph *graph = parentTree->getInitialGraph();
+        Vertex *parent = parentTree->getParent();
         size_t parentSize = parentTree->getParentSize();
         size_t depthsMaxValue = graph->numGlobalVertex;
 

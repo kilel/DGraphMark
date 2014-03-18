@@ -31,7 +31,7 @@ namespace dgmark {
 
     bool ParentTreeValidatorP2PNoBlock::validateDepth(ParentTree *parentTree) {
         Vertex *depths = buildDepth(parentTree);
-        bool isValid = doValidateDepth(parentTree, depths);
+        const bool isValid = doValidateDepth(parentTree, depths);
         delete[] depths;
         return isValid;
     }
@@ -56,8 +56,8 @@ namespace dgmark {
             bool isDepthsChanged = false;
 
             for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
-                Vertex currParent = parent[localVertex];
-                Vertex parentDepth = getDepth(graph, depths, currParent);
+                const Vertex currParent = parent[localVertex];
+                const Vertex parentDepth = getDepth(graph, depths, currParent);
 
                 if (depths[localVertex] == depthsMaxValue && parentDepth != depthsMaxValue) {
                     depths[localVertex] = parentDepth + 1;
@@ -75,6 +75,7 @@ namespace dgmark {
                 }
             }
 
+            comm->Barrier();
             comm->Allreduce(IN_PLACE, &isDepthsChanged, 1, BOOL, LOR);
 
             if (!isDepthsChanged) {
@@ -86,28 +87,30 @@ namespace dgmark {
 
     Vertex ParentTreeValidatorP2PNoBlock::getDepth(Graph *graph, Vertex* depths, Vertex currVertex) {
         const size_t depthsMaxValue = graph->numGlobalVertex;
-        Vertex currRank = graph->vertexRank(currVertex);
-        Vertex currLocal = graph->vertexToLocal(currVertex);
+        const int currRank = graph->vertexRank(currVertex);
+        const Vertex currLocal = graph->vertexToLocal(currVertex);
         Vertex currDepth;
 
         if (currRank == rank) {
             currDepth = depths[currLocal];
         } else {
             requestSynch(true, currRank, VALIDATOR_SYNCH_TAG);
-            comm->Send(&currLocal, 1, VERTEX_TYPE, currRank, VALIDATOR_LOCAL_SEND_TAG);
-            synchAction(depths);
-            comm->Recv(&currDepth, 1, VERTEX_TYPE, currRank, VALIDATOR_DEPTH_SEND_TAG);
+            sendVertex(currLocal, currRank, VALIDATOR_LOCAL_SEND_TAG);
+            while (!comm->Iprobe(currRank, VALIDATOR_DEPTH_SEND_TAG)) {
+                synchAction(depths);
+            }
+            currDepth = waitVertex(currRank, VALIDATOR_DEPTH_SEND_TAG);
             assert(0 <= currDepth && currDepth <= depthsMaxValue);
         }
         return currDepth;
     }
 
     void ParentTreeValidatorP2PNoBlock::synchAction(Vertex* depths) {
-        while (probeSynch(VALIDATOR_SYNCH_TAG)) {
-            Vertex currParentLocal;
-            Status status;
-            comm->Recv(&currParentLocal, 1, VERTEX_TYPE, ANY_SOURCE, VALIDATOR_LOCAL_SEND_TAG, status);
-            comm->Send(&depths[currParentLocal], 1, VERTEX_TYPE, status.Get_source(), VALIDATOR_DEPTH_SEND_TAG);
+        Status status;
+        while (probeSynch(VALIDATOR_SYNCH_TAG, status)) {
+            Vertex currParentLocal = waitVertex(status.Get_source(), VALIDATOR_LOCAL_SEND_TAG);
+            //printf("%d: write depth (%d)\n", rank, status.Get_source());
+            sendVertex(depths[currParentLocal], status.Get_source(), VALIDATOR_DEPTH_SEND_TAG);
         }
     }
 }
