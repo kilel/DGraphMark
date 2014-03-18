@@ -54,7 +54,7 @@ GENERATOR = SimpleGenerator
 GRAPH = Graph CSRGraph
 MPI = Communicable RMAWindow
 TASK = ParentTree ParentTreeValidator SearchTask
-BFS = BFSdgmark BFSGraph500 BFSGraph500Optimized BFSTaskRMAFetch BFSTaskP2P
+BFS = BFSdgmark BFSGraph500 BFSGraph500Optimized BFSTaskRMAFetch BFSTaskP2P BFSTaskP2PNoBlock
 VALIDATOR = ParentTreeValidatorRMAFetch ParentTreeValidatorP2P ParentTreeValidatorP2PNoBlock
 UTIL = Statistics Random
 
@@ -73,7 +73,7 @@ SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))
 OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
 
 #build targets
-BUILD = dgmark dgmark_rma_fetch
+BUILD = dgmark dgmark_p2p dgmark_p2p_noblock dgmark_rma_fetch
 
 ifeq ($(BUILD_GRAPH500_BFS), true)
 	BUILD += dgmark_graph500 dgmark_graph500_opt

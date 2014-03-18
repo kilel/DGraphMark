@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-#include "task/search/bfs/BFSTaskP2PNoBlock.h"
+#include "task/search/bfs/BFSTaskP2P.h"
 #include "controller/search/SearchController.h"
 
 using namespace dgmark;
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     Intracomm *comm = &COMM_WORLD;
 
     vector<Task*> *tasks = new vector<Task*>();
-    tasks->push_back(new BFSTaskP2PNoBlock(comm));
+    tasks->push_back(new BFSTaskP2P(comm));
 
     SearchController *controller = new SearchController(comm, argc, argv);
     controller->run(tasks);

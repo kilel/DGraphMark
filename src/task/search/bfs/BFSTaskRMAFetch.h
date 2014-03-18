@@ -31,7 +31,6 @@ namespace dgmark {
         virtual ParentTree* run();
         virtual string getName();
     private:
-        static const int BFS_SYNCH_TAG = 45782;
         /**
          * Performes one BSF step for all nodes.
          * 

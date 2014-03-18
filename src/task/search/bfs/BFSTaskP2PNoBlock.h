@@ -14,20 +14,19 @@
  *   limitations under the License.
  */
 
-#ifndef BFSTASKP2P_H
-#define	BFSTASKP2P_H
+#ifndef BFSTASKP2PNOBLOCK_H
+#define	BFSTASKP2PNOBLOCK_H
 
-#include "BFSdgmark.h"
+#include "BFSTaskP2P.h"
 
 namespace dgmark {
 
-    class BFSTaskP2P : public BFSdgmark {
+    class BFSTaskP2PNoBlock : public BFSTaskP2P {
     public:
-        BFSTaskP2P(Intracomm *comm);
-        BFSTaskP2P(const BFSTaskP2P& orig);
-        virtual ~BFSTaskP2P();
+        BFSTaskP2PNoBlock(Intracomm *comm);
+        BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig);
+        virtual ~BFSTaskP2PNoBlock();
 
-        virtual ParentTree* run();
         virtual string getName();
 
     protected:
@@ -35,10 +34,10 @@ namespace dgmark {
 
     private:
         bool performBFSActualStep(Vertex *queue, Vertex *parent);
-        void performBFSSynch(Vertex *queue, Vertex *parent);
+        void probeBFSSynch(Vertex *queue, Vertex *parent);
         bool processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
     };
 }
 
-#endif	/* BFSTASKP2P_H */
+#endif	/* BFSTASKP2PNOBLOCK_H */
 

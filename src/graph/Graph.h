@@ -19,6 +19,7 @@
 
 #include <vector>
 #include "Edge.h"
+#include "../mpi/Communicable.h"
 
 namespace dgmark {
     using namespace std;

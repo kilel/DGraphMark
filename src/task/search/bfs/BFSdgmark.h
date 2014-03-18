@@ -29,6 +29,12 @@ namespace dgmark {
 
     protected:
         static const int BFS_SYNCH_TAG = 541;
+        static const int BFS_SYNCH_2_TAG = 13646;
+        static const int BFS_END_SYNCH_TAG = 24657;
+        static const int BFS_DATA_TAG = 7353;
+        static const int BFS_DATA_2_TAG = 924;
+        static const int BFS_DATA_3_TAG = 23664;
+        static const int BFS_DATA_4_TAG = 7421;
 
         /**
          * Processes local child. 

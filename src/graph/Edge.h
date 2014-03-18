@@ -18,9 +18,10 @@
 #define	EDGE_H
 
 #include <inttypes.h>
-#include "../mpi/Communicable.h"
+#include <mpi.h>
 
 namespace dgmark {
+    using namespace MPI;
 
     /**
      * Represents index of vertex of the graph.

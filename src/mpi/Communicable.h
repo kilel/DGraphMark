@@ -18,6 +18,7 @@
 #define	COMMUNICABLE_H
 
 #include <mpi.h>
+#include "../graph/Edge.h"
 
 namespace dgmark {
 
@@ -29,12 +30,24 @@ namespace dgmark {
         Communicable(Intracomm *comm);
         Communicable(const Communicable& orig);
         virtual ~Communicable();
-        
+
         void requestSynch(bool isSynchNeeded, int synchTag);
         void requestSynch(bool isSynchNeeded, int toRank, int synchTag);
         void endSynch(int synchTag);
+
+        bool waitSynch(int synchTag, int fromRank, Status &status);
+        bool waitSynch(int synchTag, int fromRank);
+        bool waitSynch(int synchTag, Status &status);
         bool waitSynch(int synchTag);
+        
+        bool probeSynch(int synchTag, Status &status);
         bool probeSynch(int synchTag);
+
+        void sendVertex(Vertex vertex, int toRank, int tag);
+        Vertex waitVertex(int fromRank, int tag, Status &status);
+        Vertex waitVertex(int fromRank, int tag);
+        Vertex waitVertex(int tag, Status &status);
+        Vertex waitVertex(int tag);
 
     protected:
         Intracomm *comm;

@@ -35,7 +35,7 @@ namespace dgmark {
     }
 
     ParentTree* BFSTaskP2P::run() {
-        log << "Running BFS (P2P) from " << root << "\n";
+        log << "Running BFS (" << getName() << ") from " << root << "\n";
         double startTime = Wtime();
 
         Vertex queueSize = getQueueSize();
@@ -92,10 +92,8 @@ namespace dgmark {
 
         for (int node = 0; node < size; ++node) {
             if (rank == node) {
-                //BFS from current node
                 isQueueEnlarged = performBFSActualStep(queue, parent);
             } else {
-                //RMA synchronization for all other nodes
                 performBFSSynch(queue, parent);
             }
             comm->Barrier();
@@ -144,7 +142,7 @@ namespace dgmark {
                 comm->Send(&parent[childLocal], 1, VERTEX_TYPE, status.Get_source(), BFS_SYNCH_TAG);
 
                 if (waitSynch(BFS_SYNCH_TAG)) {
-                    comm->Recv(&parent[childLocal], 1, VERTEX_TYPE, ANY_SOURCE, BFS_SYNCH_TAG, status);
+                    comm->Recv(&parent[childLocal], 1, VERTEX_TYPE, status.Get_source(), BFS_SYNCH_TAG, status);
                     queue[queue[1]] = childLocal;
                     ++queue[1];
                 }

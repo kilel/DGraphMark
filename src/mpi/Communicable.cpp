@@ -55,24 +55,61 @@ namespace dgmark {
         requestSynch(false, synchTag);
     }
 
-    bool Communicable::waitSynch(int synchTag) {
+    bool Communicable::waitSynch(int synchTag, int fromRank, Status &status) {
         bool value;
-        comm->Recv(&value, 1, BOOL, ANY_SOURCE, synchTag);
+        comm->Recv(&value, 1, BOOL, ANY_SOURCE, synchTag, status);
         return value;
+    }
+
+    bool Communicable::waitSynch(int synchTag, int fromRank) {
+        Status status;
+        return waitSynch(synchTag, fromRank, status);
+    }
+
+    bool Communicable::waitSynch(int synchTag, Status &status) {
+        return waitSynch(synchTag, ANY_SOURCE, status);
+    }
+
+    bool Communicable::waitSynch(int synchTag) {
+        Status status;
+        return waitSynch(synchTag, ANY_SOURCE, status);
+    }
+
+    bool Communicable::probeSynch(int synchTag, Status &status) {
+        if (comm->Iprobe(ANY_SOURCE, synchTag, status)) {
+            if (status.Get_count(BOOL) > 0) {
+                return waitSynch(synchTag, status.Get_source(), status);
+            }
+        }
+        return false;
     }
 
     bool Communicable::probeSynch(int synchTag) {
         Status status;
-        //printf("%d: probe synch\n", rank);
-        if (comm->Iprobe(ANY_SOURCE, synchTag, status)) {
-            //if (status.Get_count(BOOL) > 0) {
-                //printf("%d: waiting synch (%d)\n", rank, status.Get_count(BOOL));
-                return waitSynch(synchTag);
-            //}
-        }
-        //printf("%d: no synch required\n", rank);
-        return false;
+        return probeSynch(synchTag, status);
+    }
 
+    void Communicable::sendVertex(Vertex vertex, int toRank, int tag) {
+        comm->Send(&vertex, 1, VERTEX_TYPE, toRank, tag);
+    }
+
+    Vertex Communicable::waitVertex(int fromRank, int tag, Status &status) {
+        Vertex vertex;
+        comm->Recv(&vertex, 1, VERTEX_TYPE, fromRank, tag, status);
+        return vertex;
+    }
+
+    Vertex Communicable::waitVertex(int fromRank, int tag) {
+        Status status;
+        return waitVertex(fromRank, tag, status);
+    }
+
+    Vertex Communicable::waitVertex(int tag, Status &status) {
+        return waitVertex(ANY_SOURCE, tag, status);
+    }
+
+    Vertex Communicable::waitVertex(int tag) {
+        return waitVertex(ANY_SOURCE, tag);
     }
 
 }
