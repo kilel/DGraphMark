@@ -39,6 +39,7 @@ namespace dgmark {
         static const int VALIDATOR_LOCAL_SEND_TAG = 35738;
         static const int VALIDATOR_DEPTH_SEND_TAG = 35832;
         virtual bool validateDepth(ParentTree *parentTree) = 0;
+        bool doValidateDepth(ParentTree *parentTree, Vertex *depths);
 
     private:
         Log log;
@@ -47,7 +48,6 @@ namespace dgmark {
         bool doValidate(ParentTree *parentTree);
         bool validateRanges(ParentTree *parentTree);
         bool validateParents(ParentTree *parentTree);
-
     };
 }
 #endif	/* PARENTTREEVALIDATOR_H */

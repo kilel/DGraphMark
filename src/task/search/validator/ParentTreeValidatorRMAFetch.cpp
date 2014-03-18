@@ -32,23 +32,10 @@ namespace dgmark {
 
     bool ParentTreeValidatorRMAFetch::validateDepth(ParentTree *parentTree) {
         RMAWindow<Vertex> *dWin = buildDepth(parentTree);
-        bool isValid = true;
-
-        Graph *graph = parentTree->getInitialGraph();
-        size_t parentSize = parentTree->getParentSize();
         Vertex *depths = dWin->getData();
-        size_t depthsMaxValue = graph->numGlobalVertex;
-
-        for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
-            if (depths[localVertex] >= depthsMaxValue) {
-                printf("\nError: depths builded not for all verticies\n");
-                return false; // not all depths builded.
-            }
-        }
-
+        bool isValid = doValidateDepth(parentTree, depths);
         dWin->clean();
         delete dWin;
-
         return isValid;
     }
 

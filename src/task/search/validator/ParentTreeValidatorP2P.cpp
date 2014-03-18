@@ -31,19 +31,7 @@ namespace dgmark {
 
     bool ParentTreeValidatorP2P::validateDepth(ParentTree *parentTree) {
         Vertex *depths = buildDepth(parentTree);
-        bool isValid = true;
-
-        Graph *graph = parentTree->getInitialGraph();
-        size_t parentSize = parentTree->getParentSize();
-        size_t depthsMaxValue = graph->numGlobalVertex;
-
-        for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
-            if (depths[localVertex] >= depthsMaxValue) {
-                printf("\nError: depths builded not for all verticies\n");
-                return false; // not all depths builded.
-            }
-        }
-
+        bool isValid = doValidateDepth(parentTree, depths);
         delete[] depths;
         return isValid;
     }
@@ -67,23 +55,11 @@ namespace dgmark {
         while (true) {
             bool isDepthsChanged = false;
 
-            //synchroPhase
             for (int node = 0; node < size; ++node) {
                 if (node == rank) {
                     for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
                         Vertex currParent = parent[localVertex];
-                        Vertex currParentRank = graph->vertexRank(currParent);
-                        Vertex currParentLocal = graph->vertexToLocal(currParent);
-                        Vertex parentDepth;
-
-                        if (currParentRank == rank) {
-                            parentDepth = depths[currParentLocal];
-                        } else {
-                            requestSynch(true, VALIDATOR_SYNCH_TAG);
-                            comm->Send(&currParentLocal, 1, VERTEX_TYPE, currParentRank, VALIDATOR_SYNCH_TAG);
-                            comm->Recv(&parentDepth, 1, VERTEX_TYPE, currParentRank, VALIDATOR_SYNCH_TAG);
-                            assert(0 <= parentDepth && parentDepth <= depthsMaxValue);
-                        }
+                        Vertex parentDepth = getDepth(graph, depths, currParent);
 
                         if (depths[localVertex] == depthsMaxValue && parentDepth != depthsMaxValue) {
                             depths[localVertex] = parentDepth + 1;
@@ -92,16 +68,7 @@ namespace dgmark {
                     }
                     endSynch(VALIDATOR_SYNCH_TAG);
                 } else {
-                    while (true) {
-                        if (waitSynch(VALIDATOR_SYNCH_TAG)) {
-                            Vertex currParentLocal;
-                            Status status;
-                            comm->Recv(&currParentLocal, 1, VERTEX_TYPE, ANY_SOURCE, VALIDATOR_SYNCH_TAG, status);
-                            comm->Send(&depths[currParentLocal], 1, VERTEX_TYPE, status.Get_source(), VALIDATOR_SYNCH_TAG);
-                        } else {
-                            break;
-                        }
-                    }
+                    synchAction(depths);
                 }
                 comm->Barrier();
             }
@@ -113,5 +80,34 @@ namespace dgmark {
             }
         }
         return depths;
+    }
+
+    Vertex ParentTreeValidatorP2P::getDepth(Graph *graph, Vertex* depths, Vertex currVertex) {
+        const size_t depthsMaxValue = graph->numGlobalVertex;
+        Vertex currRank = graph->vertexRank(currVertex);
+        Vertex currLocal = graph->vertexToLocal(currVertex);
+        Vertex currDepth;
+
+        if (currRank == rank) {
+            currDepth = depths[currLocal];
+        } else {
+            requestSynch(true, currRank, VALIDATOR_SYNCH_TAG);
+            comm->Send(&currLocal, 1, VERTEX_TYPE, currRank, VALIDATOR_LOCAL_SEND_TAG);
+            comm->Recv(&currDepth, 1, VERTEX_TYPE, currRank, VALIDATOR_DEPTH_SEND_TAG);
+            assert(0 <= currDepth && currDepth <= depthsMaxValue);
+        }
+    }
+
+    void ParentTreeValidatorP2P::synchAction(Vertex* depths) {
+        while (true) {
+            if (waitSynch(VALIDATOR_SYNCH_TAG)) {
+                Vertex currParentLocal;
+                Status status;
+                comm->Recv(&currParentLocal, 1, VERTEX_TYPE, ANY_SOURCE, VALIDATOR_LOCAL_SEND_TAG, status);
+                comm->Send(&depths[currParentLocal], 1, VERTEX_TYPE, status.Get_source(), VALIDATOR_DEPTH_SEND_TAG);
+            } else {
+                break;
+            }
+        }
     }
 }

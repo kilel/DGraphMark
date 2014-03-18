@@ -18,11 +18,11 @@
 #define	BFSTASKRMAFETCH_H
 
 #include "../../../mpi/RMAWindow.h"
-#include "../SearchTask.h"
+#include "BFSdgmark.h"
 
 namespace dgmark {
 
-    class BFSTaskRMAFetch : public SearchTask {
+    class BFSTaskRMAFetch : public BFSdgmark {
     public:
         BFSTaskRMAFetch(Intracomm *comm);
         BFSTaskRMAFetch(const BFSTaskRMAFetch& orig);
@@ -60,18 +60,6 @@ namespace dgmark {
         void performBFSSynchRMA(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin);
 
         /**
-         * Processes local child. 
-         * Adds it to local queue and sets it's parent, if it was not set.
-         * 
-         * @param qWin queue RMA window
-         * @param pWin parent RMA window
-         * @param currVertex current vertex (parent of child) (global notation)
-         * @param child Child of current vertex (global notation)
-         * @return true, if local queue is enlarged.
-         */
-        bool processLocalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child);
-
-        /**
          * Processes global child. 
          * Adds it to other nodes queue and sets it's parent, if it was not set.
          * 
@@ -82,21 +70,6 @@ namespace dgmark {
          * @return true, if global queue is enlarged.
          */
         bool processGlobalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child);
-
-        /**
-         * Aligns queue.
-         * Just moves elements to the start of array.
-         * 
-         * @param queue queue of local vertices.
-         */
-        void alignQueue(Vertex *queue);
-
-        /**
-         * Function to calculate queue size.
-         * 
-         * @return queue size.
-         */
-        Vertex getQueueSize();
     };
 }
 

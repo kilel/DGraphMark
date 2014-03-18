@@ -21,10 +21,10 @@
 
 namespace dgmark {
 
-    BFSTaskRMAFetch::BFSTaskRMAFetch(Intracomm *comm) : SearchTask(comm) {
+    BFSTaskRMAFetch::BFSTaskRMAFetch(Intracomm *comm) : BFSdgmark(comm) {
     }
 
-    BFSTaskRMAFetch::BFSTaskRMAFetch(const BFSTaskRMAFetch& orig) : SearchTask(orig.comm) {
+    BFSTaskRMAFetch::BFSTaskRMAFetch(const BFSTaskRMAFetch& orig) : BFSdgmark(orig.comm) {
     }
 
     BFSTaskRMAFetch::~BFSTaskRMAFetch() {
@@ -126,7 +126,7 @@ namespace dgmark {
                 //printf("%d: currVert = %ld, child = %ld (in %d), qLen = %ld\n", rank, currVertex, graph->vertexToLocal(child), childRank, queue[1]);
                 if (childRank == rank) {
                     //vertex is mine
-                    isQueueEnlarged |= processLocalChild(qWin, pWin, graph->vertexToGlobal(currVertex), child);
+                    isQueueEnlarged |= processLocalChild(queue, pWin->getData(), graph->vertexToGlobal(currVertex), child);
                 } else {
                     //vertex is in the other process
                     isQueueEnlarged |= processGlobalChild(qWin, pWin, graph->vertexToGlobal(currVertex), child);
@@ -158,21 +158,6 @@ namespace dgmark {
             } else { //if fence is not neaded mode
                 break;
             }
-        }
-    }
-
-    bool BFSTaskRMAFetch::processLocalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
-        Vertex childLocal = graph->vertexToLocal(child);
-        Vertex *queue = qWin->getData();
-        Vertex *parent = pWin->getData();
-
-        if (parent[childLocal] == graph->numGlobalVertex) {
-            parent[childLocal] = currVertex;
-            queue[queue[1]] = childLocal;
-            ++queue[1];
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -225,17 +210,5 @@ namespace dgmark {
         } else {
             return false; //queue was not enlarged
         }
-    }
-
-    void BFSTaskRMAFetch::alignQueue(Vertex *queue) {
-        for (size_t qIndex = queue[0]; qIndex < queue[1]; ++qIndex) {
-            queue[qIndex - queue[0] + 2] = queue[qIndex];
-        }
-        queue[1] = queue[1] - queue[0] + 2;
-        queue[0] = 2;
-    }
-
-    Vertex BFSTaskRMAFetch::getQueueSize() {
-        return numLocalVertex * 3 + 2;
     }
 }

@@ -121,4 +121,21 @@ namespace dgmark {
 
         return isValid;
     }
+
+    bool ParentTreeValidator::doValidateDepth(ParentTree *parentTree, Vertex *depths) {
+        bool isValid = true;
+
+        Graph *graph = parentTree->getInitialGraph();
+        size_t parentSize = parentTree->getParentSize();
+        size_t depthsMaxValue = graph->numGlobalVertex;
+
+        for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
+            if (depths[localVertex] >= depthsMaxValue) {
+                printf("\nError: depths builded not for all verticies\n");
+                return false; // not all depths builded.
+            }
+        }
+
+        return isValid;
+    }
 }

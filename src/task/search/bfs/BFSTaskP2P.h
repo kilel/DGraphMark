@@ -17,11 +17,11 @@
 #ifndef BFSTASKP2P_H
 #define	BFSTASKP2P_H
 
-#include "../SearchTask.h"
+#include "BFSdgmark.h"
 
 namespace dgmark {
 
-    class BFSTaskP2P : public SearchTask {
+    class BFSTaskP2P : public BFSdgmark {
     public:
         BFSTaskP2P(Intracomm *comm);
         BFSTaskP2P(const BFSTaskP2P& orig);
@@ -57,19 +57,7 @@ namespace dgmark {
          * @param queue queue array
          * @param parent parent array
          */
-        void performBFSSynchRMA(Vertex *queue, Vertex *parent);
-
-        /**
-         * Processes local child. 
-         * Adds it to local queue and sets it's parent, if it was not set.
-         * 
-         * @param queue queue array
-         * @param parent parent array
-         * @param currVertex current vertex (parent of child) (global notation)
-         * @param child Child of current vertex (global notation)
-         * @return true, if local queue is enlarged.
-         */
-        bool processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
+        void performBFSSynch(Vertex *queue, Vertex *parent);
 
         /**
          * Processes global child. 
@@ -82,21 +70,6 @@ namespace dgmark {
          * @return true, if global queue is enlarged.
          */
         bool processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
-
-        /**
-         * Aligns queue.
-         * Just moves elements to the start of array.
-         * 
-         * @param queue queue of local vertices.
-         */
-        void alignQueue(Vertex *queue);
-
-        /**
-         * Function to calculate queue size.
-         * 
-         * @return queue size.
-         */
-        Vertex getQueueSize();
     };
 }
 

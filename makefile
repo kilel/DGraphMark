@@ -15,6 +15,9 @@
 
 # true of false to use or not of OpenMP in compilation
 OPENMP = true
+BUILD_GRAPH500_BFS = false
+
+#compile flags
 OPENMP_FLAG = -fopenmp
 MPICPP = mpic++
 CPPFLAGS = -Ofast #-std=c++11
@@ -51,7 +54,7 @@ GENERATOR = SimpleGenerator
 GRAPH = Graph CSRGraph
 MPI = Communicable RMAWindow
 TASK = ParentTree ParentTreeValidator SearchTask
-BFS = BFSGraph500 BFSGraph500Optimized BFSTaskRMAFetch BFSTaskP2P
+BFS = BFSdgmark BFSGraph500 BFSGraph500Optimized BFSTaskRMAFetch BFSTaskP2P
 VALIDATOR = ParentTreeValidatorRMAFetch ParentTreeValidatorP2P ParentTreeValidatorP2PNoBlock
 UTIL = Statistics Random
 
@@ -70,7 +73,12 @@ SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))
 OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
 
 #build targets
-BUILD = dgmark dgmark_graph500 dgmark_graph500_opt
+BUILD = dgmark dgmark_rma_fetch
+
+ifeq ($(BUILD_GRAPH500_BFS), true)
+	BUILD += dgmark_graph500 dgmark_graph500_opt
+endif
+
 
 #build rules
 all: $(BUILD)
@@ -80,11 +88,11 @@ $(OBJ_DIR_PATHS):
 	mkdir -p $@
 
 # basic build
-dgmark: $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark.o
+dgmark : $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark.o
 	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
 
 # extended builds
-dgmark_%: $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark_%.o
+dgmark_% : $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark_%.o
 	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
 
 #building of sources

@@ -21,17 +21,17 @@
 
 namespace dgmark {
 
-    BFSTaskP2P::BFSTaskP2P(Intracomm *comm) : SearchTask(comm) {
+    BFSTaskP2P::BFSTaskP2P(Intracomm *comm) : BFSdgmark(comm) {
     }
 
-    BFSTaskP2P::BFSTaskP2P(const BFSTaskP2P& orig) : SearchTask(orig.comm) {
+    BFSTaskP2P::BFSTaskP2P(const BFSTaskP2P& orig) : BFSdgmark(orig.comm) {
     }
 
     BFSTaskP2P::~BFSTaskP2P() {
     }
 
     string BFSTaskP2P::getName() {
-        return "dgmark_BFS_RMA_P2P";
+        return "dgmark_BFS_P2P";
     }
 
     ParentTree* BFSTaskP2P::run() {
@@ -96,7 +96,7 @@ namespace dgmark {
                 isQueueEnlarged = performBFSActualStep(queue, parent);
             } else {
                 //RMA synchronization for all other nodes
-                performBFSSynchRMA(queue, parent);
+                performBFSSynch(queue, parent);
             }
             comm->Barrier();
         }
@@ -135,7 +135,7 @@ namespace dgmark {
         return isQueueEnlarged;
     }
 
-    void BFSTaskP2P::performBFSSynchRMA(Vertex *queue, Vertex *parent) {
+    void BFSTaskP2P::performBFSSynch(Vertex *queue, Vertex *parent) {
         while (true) {
             if (waitSynch(BFS_SYNCH_TAG)) {
                 Vertex childLocal;
@@ -151,19 +151,6 @@ namespace dgmark {
             } else { //if fence is not neaded mode
                 break;
             }
-        }
-    }
-
-    bool BFSTaskP2P::processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child) {
-        Vertex childLocal = graph->vertexToLocal(child);
-
-        if (parent[childLocal] == graph->numGlobalVertex) {
-            parent[childLocal] = currVertex;
-            queue[queue[1]] = childLocal;
-            ++queue[1];
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -191,18 +178,6 @@ namespace dgmark {
         } else {
             return false; //queue was not enlarged
         }
-    }
-
-    void BFSTaskP2P::alignQueue(Vertex *queue) {
-        for (size_t qIndex = queue[0]; qIndex < queue[1]; ++qIndex) {
-            queue[qIndex - queue[0] + 2] = queue[qIndex];
-        }
-        queue[1] = queue[1] - queue[0] + 2;
-        queue[0] = 2;
-    }
-
-    Vertex BFSTaskP2P::getQueueSize() {
-        return numLocalVertex * 3 + 2;
     }
 
 }
