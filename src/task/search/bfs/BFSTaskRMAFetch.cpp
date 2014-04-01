@@ -29,77 +29,36 @@ namespace dgmark {
 
     BFSTaskRMAFetch::~BFSTaskRMAFetch() {
     }
-    
+
+    void BFSTaskRMAFetch::open(Graph *newGraph) {
+        SearchTask::open(newGraph);
+
+        qWin = new RMAWindow<Vertex>(comm, getQueueSize(), VERTEX_TYPE);
+        pWin = new RMAWindow<Vertex>(comm, numLocalVertex, VERTEX_TYPE);
+        queue = qWin->getData();
+        parent = pWin->getData();
+    }
+
+    void BFSTaskRMAFetch::close() {
+        qWin->clean();
+        pWin->clean();
+        delete qWin;
+        delete pWin;
+        SearchTask::close();
+    }
+
     string BFSTaskRMAFetch::getName() {
         return "dgmark_BFS_RMA_Fetch";
     }
 
-    ParentTree* BFSTaskRMAFetch::run() {
-        log << "Running BFS (RMA Fetch) from " << root << "\n";
-        double startTime = Wtime();
-
-        Vertex queueSize = getQueueSize();
-        size_t vertexBytesSize = sizeof (Vertex);
-        size_t parentBytesSize = (numLocalVertex + 1) * vertexBytesSize;
-
-        /**
-         * queue is a queue of vertex (local).
-         * Traversed vertex adds to the end of the queue.
-         * When BFS performs, it looks on the first vertex (at queue[0] index)
-         * queue[0] is a start index.
-         * queue[1] is an index after the end.
-         */
-
-        RMAWindow<Vertex> *qWin = new RMAWindow<Vertex>(comm, queueSize, VERTEX_TYPE);
-        Vertex *queue = qWin->getData();
-        queue[0] = 2;
-        queue[1] = 2;
-
-        /**
-         * parent is an array, which associates vertex with it parent (global) in tree.
-         * parent[root] is always must be root.
-         * parent[visited] >= 0 and \<= numGlobalVertex
-         * parent[initially] == numGlobalVertex
-         * Note: contains local vertex only.
-         */
-
-        RMAWindow<Vertex> *pWin = new RMAWindow<Vertex>(comm, numLocalVertex, VERTEX_TYPE);
-        Vertex *parent = pWin->getData();
-        for (size_t i = 0; i < numLocalVertex; ++i) {
-            parent[i] = graph->numGlobalVertex;
-        }
-
-        if (graph->vertexRank(root) == rank) {
-            //root is my vertex, put it into queue.
-            Vertex rootLocal = graph->vertexToLocal(root); 
-            queue[queue[1]] = rootLocal;
-            parent[rootLocal] = root;
-            ++queue[1];
-        }
-
-        //main loop
-        while (performBFS(qWin, pWin));
-
-        qWin->clean();
-        delete qWin;
-        delete pWin;
-
-        double taskRunTime = Wtime() - startTime;
-        ParentTree *parentTree = new ParentTree(comm, root, parent, graph, taskRunTime);
-        log << "BFS time: " << taskRunTime << " s\n";
-        return parentTree;
-    }
-
-    bool BFSTaskRMAFetch::performBFS(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
+    bool BFSTaskRMAFetch::performBFS() {
         bool isQueueEnlarged = false;
 
         for (int node = 0; node < size; ++node) {
             if (rank == node) {
-                //BFS from current node
-                isQueueEnlarged = performBFSActualStep(qWin, pWin);
+                isQueueEnlarged = performBFSActualStep();
             } else {
-                //RMA synchronization for all other nodes
-                performBFSSynchRMA(qWin, pWin);
+                performBFSSynchRMA();
             }
             comm->Barrier();
         }
@@ -108,38 +67,7 @@ namespace dgmark {
         return isQueueEnlarged;
     }
 
-    bool BFSTaskRMAFetch::performBFSActualStep(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
-        bool isQueueEnlarged = false;
-        vector<Edge*> *edges = graph->edges;
-        Vertex *queue = qWin->getData();
-
-        size_t queueEnd = queue[1];
-        //while (queue[0] < queue[1]) {
-        while (queue[0] < queueEnd) { //is it better?
-            Vertex currVertex = queue[queue[0]];
-
-            for (size_t childIndex = graph->getStartIndex(currVertex);
-                    childIndex < graph->getEndIndex(currVertex); ++childIndex) {
-                //iterate through all childs of queued vertex
-                Vertex child = edges->at(childIndex)->to;
-                int childRank = graph->vertexRank(child);
-                //printf("%d: currVert = %ld, child = %ld (in %d), qLen = %ld\n", rank, currVertex, graph->vertexToLocal(child), childRank, queue[1]);
-                if (childRank == rank) {
-                    //vertex is mine
-                    isQueueEnlarged |= processLocalChild(queue, pWin->getData(), graph->vertexToGlobal(currVertex), child);
-                } else {
-                    //vertex is in the other process
-                    isQueueEnlarged |= processGlobalChild(qWin, pWin, graph->vertexToGlobal(currVertex), child);
-                }
-            }
-            ++queue[0]; // shrinking queue.
-        }
-        alignQueue(queue);
-        pWin->sendIsFenceNeeded(false, BFS_SYNCH_TAG); //no fence is needed more.
-        return isQueueEnlarged;
-    }
-
-    void BFSTaskRMAFetch::performBFSSynchRMA(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin) {
+    void BFSTaskRMAFetch::performBFSSynchRMA() {
         while (true) {
             if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
                 pWin->fenceOpen(MODE_NOPUT); //allow read parent
@@ -161,7 +89,7 @@ namespace dgmark {
         }
     }
 
-    bool BFSTaskRMAFetch::processGlobalChild(RMAWindow<Vertex> *qWin, RMAWindow<Vertex> *pWin, Vertex currVertex, Vertex child) {
+    bool BFSTaskRMAFetch::processGlobalChild(Vertex currVertex, Vertex child) {
         Vertex childLocal = graph->vertexToLocal(child);
         int childRank = graph->vertexRank(child);
         Vertex parentOfChild;
@@ -210,5 +138,13 @@ namespace dgmark {
         } else {
             return false; //queue was not enlarged
         }
+    }
+
+    bool BFSTaskRMAFetch::probeBFSSynch() {
+        return false;
+    }
+
+    void BFSTaskRMAFetch::endActualStepAction() {
+        endSynch(BFS_SYNCH_TAG);
     }
 }

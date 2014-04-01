@@ -30,12 +30,10 @@ namespace dgmark {
         virtual string getName();
 
     protected:
-        virtual bool performBFS(Vertex *queue, Vertex *parent);
-
-    private:
-        bool performBFSActualStep(Vertex *queue, Vertex *parent);
-        void probeBFSSynch(Vertex *queue, Vertex *parent);
-        bool processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
+        virtual bool performBFS();
+        virtual bool processGlobalChild(Vertex currVertex, Vertex child);
+        virtual bool probeBFSSynch();
+        virtual void endActualStepAction();
     };
 }
 

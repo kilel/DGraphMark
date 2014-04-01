@@ -34,85 +34,52 @@ namespace dgmark {
         return "dgmark_BFS_P2P_no_block";
     }
 
-    bool BFSTaskP2PNoBlock::performBFS(Vertex *queue, Vertex *parent) {
-        bool isQueueEnlarged = false;
-
-        isQueueEnlarged = performBFSActualStep(queue, parent);
-
+    bool BFSTaskP2PNoBlock::performBFS() {
+        bool isQueueEnlarged = performBFSActualStep();
         requestSynch(true, BFS_END_SYNCH_TAG); // tell all processes, that you had been stopped;
 
         int endedProcesses = 1;
         while (endedProcesses < size) {
-            probeBFSSynch(queue, parent);
+            isQueueEnlarged |= probeBFSSynch();
             while (probeSynch(BFS_END_SYNCH_TAG)) {
                 ++endedProcesses;
             }
         }
         comm->Barrier();
-
         comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
         return isQueueEnlarged;
     }
 
-    bool BFSTaskP2PNoBlock::performBFSActualStep(Vertex *queue, Vertex *parent) {
-        bool isQueueEnlarged = false;
-        vector<Edge*> *edges = graph->edges;
-
-        const size_t queueEnd = queue[1];
-        while (queue[0] < queueEnd) {
-            Vertex currVertex = queue[queue[0]];
-
-            const size_t childStartindex = graph->getStartIndex(currVertex);
-            const size_t childEndIndex = graph->getEndIndex(currVertex);
-            for (size_t childIndex = childStartindex; childIndex < childEndIndex; ++childIndex) {
-                const Vertex child = edges->at(childIndex)->to;
-                const int childRank = graph->vertexRank(child);
-
-                if (childRank == rank) {
-                    isQueueEnlarged |= processLocalChild(queue, parent, graph->vertexToGlobal(currVertex), child);
-                } else {
-                    isQueueEnlarged |= processGlobalChild(queue, parent, graph->vertexToGlobal(currVertex), child);
-                }
-
-                probeBFSSynch(queue, parent);
-            }
-            probeBFSSynch(queue, parent);
-            ++queue[0];
-        }
-        alignQueue(queue);
-        return isQueueEnlarged;
-    }
-
-    bool BFSTaskP2PNoBlock::processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child) {
+    bool BFSTaskP2PNoBlock::processGlobalChild(Vertex currVertex, Vertex child) {
         const Vertex childLocal = graph->vertexToLocal(child);
         const int childRank = graph->vertexRank(child);
         Vertex memory[2] = {childLocal, currVertex};
-
-        requestSynch(true, childRank, BFS_SYNCH_TAG);
         comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
-
-        while (!comm->Iprobe(childRank, BFS_SYNCH_2_TAG)) {
-            probeBFSSynch(queue, parent);
-        }
-        bool isQueueEnlarged = waitSynch(BFS_SYNCH_2_TAG, childRank);
-        return isQueueEnlarged;
+        return false;
     }
 
-    void BFSTaskP2PNoBlock::probeBFSSynch(Vertex *queue, Vertex * parent) {
+    bool BFSTaskP2PNoBlock::probeBFSSynch() {
         Status status;
+        bool isQueueChanged = false;
         Vertex memory[2] = {0};
 
-        while (probeSynch(BFS_SYNCH_TAG, status)) {
-            comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
-            bool isQueueChanged = false;
-            if (parent[memory[0]] == graph->numGlobalVertex) {
-                parent[memory[0]] = memory[1];
-                queue[queue[1]] = memory[0];
-                ++queue[1];
-                isQueueChanged = true;
+        while (comm->Iprobe(ANY_SOURCE, BFS_DATA_TAG, status)) {
+            if (status.Get_count(VERTEX_TYPE) >= 2) {
+                comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
+
+                if (parent[memory[0]] == graph->numGlobalVertex) {
+                    parent[memory[0]] = memory[1];
+                    queue[queue[1]] = memory[0];
+                    ++queue[1];
+                    isQueueChanged = true;
+                }
             }
-            requestSynch(isQueueChanged, status.Get_source(), BFS_SYNCH_2_TAG);
         }
+        return isQueueChanged;
+    }
+
+    void BFSTaskP2PNoBlock::endActualStepAction() {
+        return;
     }
 
 }

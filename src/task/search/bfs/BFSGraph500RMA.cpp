@@ -8,7 +8,7 @@
 /*           Andrew Lumsdaine                                              */
 /*  Optimized and refactored by Kislitsyn Ilya                             */
 
-#include "BFSGraph500Optimized.h"
+#include "BFSGraph500RMA.h"
 
 namespace dgmark {
 
@@ -22,7 +22,7 @@ namespace dgmark {
     }
     
     string BFSGraph500Optimized::getName() {
-        return "Graph500_BFS_RMA_Optimized";
+        return "Graph500_BFS_RMA";
     }
 
     ParentTree* BFSGraph500Optimized::run() {

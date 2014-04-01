@@ -30,71 +30,31 @@ namespace dgmark {
     BFSTaskP2P::~BFSTaskP2P() {
     }
 
+    void BFSTaskP2P::open(Graph *newGraph) {
+        SearchTask::open(newGraph);
+
+        queue = new Vertex[getQueueSize()];
+        parent = new Vertex[numLocalVertex];
+    }
+
+    void BFSTaskP2P::close() {
+        delete queue;
+        delete parent;
+        SearchTask::close();
+    }
+
     string BFSTaskP2P::getName() {
         return "dgmark_BFS_P2P";
     }
 
-    ParentTree* BFSTaskP2P::run() {
-        log << "Running BFS (" << getName() << ") from " << root << "\n";
-        double startTime = Wtime();
-
-        Vertex queueSize = getQueueSize();
-        size_t vertexBytesSize = sizeof (Vertex);
-        size_t parentBytesSize = (numLocalVertex + 1) * vertexBytesSize;
-
-        /**
-         * queue is a queue of vertex (local).
-         * Traversed vertex adds to the end of the queue.
-         * When BFS performs, it looks on the first vertex (at queue[0] index)
-         * queue[0] is a start index.
-         * queue[1] is an index after the end.
-         */
-
-        Vertex *queue = new Vertex[queueSize];
-        memset(queue, 0, queueSize * vertexBytesSize);
-        queue[0] = 2;
-        queue[1] = 2;
-
-        /**
-         * parent is an array, which associates vertex with it parent (global) in tree.
-         * parent[root] is always must be root.
-         * parent[visited] >= 0 and \<= numGlobalVertex
-         * parent[initially] == numGlobalVertex
-         * Note: contains local vertex only.
-         */
-
-        Vertex *parent = new Vertex[numLocalVertex];
-        for (size_t i = 0; i < numLocalVertex; ++i) {
-            parent[i] = graph->numGlobalVertex;
-        }
-
-        if (graph->vertexRank(root) == rank) {
-            //root is my vertex, put it into queue.
-            Vertex rootLocal = graph->vertexToLocal(root);
-            queue[queue[1]] = rootLocal;
-            parent[rootLocal] = root;
-            ++queue[1];
-        }
-
-        //main loop
-        while (performBFS(queue, parent));
-
-        delete queue;
-
-        double taskRunTime = Wtime() - startTime;
-        ParentTree *parentTree = new ParentTree(comm, root, parent, graph, taskRunTime);
-        log << "BFS time: " << taskRunTime << " s\n";
-        return parentTree;
-    }
-
-    bool BFSTaskP2P::performBFS(Vertex *queue, Vertex *parent) {
+    bool BFSTaskP2P::performBFS() {
         bool isQueueEnlarged = false;
 
         for (int node = 0; node < size; ++node) {
             if (rank == node) {
-                isQueueEnlarged = performBFSActualStep(queue, parent);
+                isQueueEnlarged = performBFSActualStep();
             } else {
-                performBFSSynch(queue, parent);
+                performBFSSynch();
             }
             comm->Barrier();
         }
@@ -103,34 +63,7 @@ namespace dgmark {
         return isQueueEnlarged;
     }
 
-    bool BFSTaskP2P::performBFSActualStep(Vertex *queue, Vertex *parent) {
-        bool isQueueEnlarged = false;
-        vector<Edge*> *edges = graph->edges;
-
-        size_t queueEnd = queue[1];
-        //while (queue[0] < queue[1]) {
-        while (queue[0] < queueEnd) { //is it better?
-            Vertex currVertex = queue[queue[0]];
-
-            const size_t childStartindex = graph->getStartIndex(currVertex);
-            const size_t childEndIndex = graph->getEndIndex(currVertex);
-            for (size_t childIndex = childStartindex; childIndex < childEndIndex; ++childIndex) {
-                Vertex child = edges->at(childIndex)->to;
-                int childRank = graph->vertexRank(child);
-                if (childRank == rank) {
-                    isQueueEnlarged |= processLocalChild(queue, parent, graph->vertexToGlobal(currVertex), child);
-                } else {
-                    isQueueEnlarged |= processGlobalChild(queue, parent, graph->vertexToGlobal(currVertex), child);
-                }
-            }
-            ++queue[0]; // shrinking queue.
-        }
-        alignQueue(queue);
-        endSynch(BFS_SYNCH_TAG);
-        return isQueueEnlarged;
-    }
-
-    void BFSTaskP2P::performBFSSynch(Vertex *queue, Vertex *parent) {
+    void BFSTaskP2P::performBFSSynch() {
         Status status;
         Vertex memory[2] = {0};
 
@@ -151,7 +84,7 @@ namespace dgmark {
         }
     }
 
-    bool BFSTaskP2P::processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child) {
+    bool BFSTaskP2P::processGlobalChild(Vertex currVertex, Vertex child) {
         Vertex childLocal = graph->vertexToLocal(child);
         int childRank = graph->vertexRank(child);
         Vertex memory[2] = {childLocal, currVertex};
@@ -160,6 +93,14 @@ namespace dgmark {
         comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
         bool isQueueEnlarged = waitSynch(BFS_SYNCH_2_TAG, childRank);
         return isQueueEnlarged;
+    }
+
+    bool BFSTaskP2P::probeBFSSynch() {
+        return false;
+    }
+
+    void BFSTaskP2P::endActualStepAction() {
+        endSynch(BFS_SYNCH_TAG);
     }
 
 }

@@ -14,7 +14,8 @@
  *   limitations under the License.
  */
 
-#include "task/search/bfs/BFSGraph500.h"
+
+#include "task/search/bfs/BFSGraph500RMA.h"
 #include "controller/search/SearchController.h"
 
 using namespace dgmark;
@@ -24,7 +25,7 @@ int main(int argc, char** argv) {
     Intracomm *comm = &COMM_WORLD;
 
     vector<Task*> *tasks = new vector<Task*>();
-    tasks->push_back(new BFSGraph500(comm));
+    tasks->push_back(new BFSGraph500Optimized(comm));
 
     SearchController *controller = new SearchController(comm, argc, argv);
     controller->run(tasks);

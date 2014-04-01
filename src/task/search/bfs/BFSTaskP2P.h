@@ -27,16 +27,19 @@ namespace dgmark {
         BFSTaskP2P(const BFSTaskP2P& orig);
         virtual ~BFSTaskP2P();
 
-        virtual ParentTree* run();
         virtual string getName();
+        
+        virtual void open(Graph *newGraph);
+        virtual void close();
 
     protected:
-        virtual bool performBFS(Vertex *queue, Vertex *parent);
-
+        virtual bool performBFS();
+        virtual bool processGlobalChild(Vertex currVertex, Vertex child);
+        virtual bool probeBFSSynch();
+        virtual void endActualStepAction();
+        
     private:
-        bool performBFSActualStep(Vertex *queue, Vertex *parent);
-        void performBFSSynch(Vertex *queue, Vertex *parent);
-        bool processGlobalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
+        void performBFSSynch();
     };
 }
 

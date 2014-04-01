@@ -15,7 +15,7 @@
 
 # true of false to use or not of OpenMP in compilation
 OPENMP = true
-BUILD_GRAPH500_BFS = false
+BUILD_GRAPH500_BFS = true
 
 #compile flags
 OPENMP_FLAG = -fopenmp
@@ -54,7 +54,7 @@ GENERATOR = SimpleGenerator
 GRAPH = Graph CSRGraph
 MPI = Communicable RMAWindow
 TASK = ParentTree ParentTreeValidator SearchTask
-BFS = BFSdgmark BFSGraph500 BFSGraph500Optimized BFSTaskRMAFetch BFSTaskP2P BFSTaskP2PNoBlock
+BFS = BFSdgmark BFSGraph500P2P BFSGraph500RMA BFSTaskRMAFetch BFSTaskP2P BFSTaskP2PNoBlock
 VALIDATOR = ParentTreeValidatorRMAFetch ParentTreeValidatorP2P ParentTreeValidatorP2PNoBlock
 UTIL = Statistics Random
 
@@ -76,7 +76,7 @@ OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
 BUILD = dgmark dgmark_p2p dgmark_p2p_noblock dgmark_rma_fetch
 
 ifeq ($(BUILD_GRAPH500_BFS), true)
-	BUILD += dgmark_graph500 dgmark_graph500_opt
+	BUILD += dgmark_graph500_p2p dgmark_graph500_rma
 endif
 
 

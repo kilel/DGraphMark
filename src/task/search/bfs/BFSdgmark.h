@@ -26,6 +26,8 @@ namespace dgmark {
         BFSdgmark(Intracomm *comm);
         BFSdgmark(const BFSdgmark& orig);
         virtual ~BFSdgmark();
+        
+        virtual ParentTree* run();
 
     protected:
         static const int BFS_SYNCH_TAG = 541;
@@ -37,16 +39,65 @@ namespace dgmark {
         static const int BFS_DATA_4_TAG = 7421;
 
         /**
+         * queue is a queue of vertex (local).
+         * Traversed vertex adds to the end of the queue.
+         * When BFS performs, it looks on the first vertex (at queue[0] index)
+         * queue[0] is a start index.
+         * queue[1] is an index after the end.
+         */
+        Vertex *queue;
+
+        /**
+         * parent is an array, which associates vertex with it parent (global) in tree.
+         * parent[root] is always must be root.
+         * parent[visited] >= 0 and \<= numGlobalVertex
+         * parent[initially] == numGlobalVertex
+         * Note: contains local vertex only.
+         */
+        Vertex *parent;
+
+        /**
+         * Performs BFS step.
+         * @return true, if more steps are needed.
+         */
+        virtual bool performBFS() = 0;
+        
+        /**
+         * Performs actual BFS step. Probes synchronization by calling probeBFSSynch.
+         * @return true, if some queuewas enlarged.
+         */
+        virtual bool performBFSActualStep();
+        
+        /**
+         * Action, called in end of actual step. Used mostly to end synchronization.
+         */
+        virtual void endActualStepAction() = 0;
+        
+        /**
+         * Probes BFS synchronization.
+         * @return true, if some queuewas enlarged.
+         */
+        virtual bool probeBFSSynch() = 0;
+
+        /**
          * Processes local child. 
          * Adds it to local queue and sets it's parent, if it was not set.
          * 
-         * @param queue queue array
-         * @param parent parent array
          * @param currVertex current vertex (parent of child) (global notation)
          * @param child Child of current vertex (global notation)
-         * @return true, if local queue is enlarged.
+         * @return true, if some queue is enlarged.
          */
-        bool processLocalChild(Vertex *queue, Vertex *parent, Vertex currVertex, Vertex child);
+        bool processLocalChild(Vertex currVertex, Vertex child);
+
+        /**
+         * Processes global child. 
+         * Adds it to local queue and sets it's parent, if it was not set.
+         * 
+         * @param currVertex current vertex (parent of child) (global notation)
+         * @param child Child of current vertex (global notation)
+         * @return true, if some queue is enlarged.
+         */
+        virtual bool processGlobalChild(Vertex currVertex, Vertex child) = 0;
 
         /**
          * Aligns queue.
@@ -54,14 +105,16 @@ namespace dgmark {
          * 
          * @param queue queue of local vertices.
          */
-        void alignQueue(Vertex *queue);
+        void alignQueue();
+        
+        void resetQueueParent();
 
         /**
          * Function to calculate queue size.
          * 
          * @return queue size.
          */
-        Vertex getQueueSize();
+        virtual Vertex getQueueSize();
     };
 }
 

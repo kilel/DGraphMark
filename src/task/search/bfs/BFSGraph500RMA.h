@@ -14,23 +14,30 @@
  *   limitations under the License.
  */
 
+#ifndef BFSGRAPH500_RMA_H
+#define	BFSGRAPH500_RMA_H
 
-#include "task/search/bfs/BFSGraph500Optimized.h"
-#include "controller/search/SearchController.h"
+#include <inttypes.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include "../SearchTask.h"
 
-using namespace dgmark;
+namespace dgmark {
 
-int main(int argc, char** argv) {
-    Init();
-    Intracomm *comm = &COMM_WORLD;
+    class BFSGraph500Optimized : public SearchTask {
+    public:
+        BFSGraph500Optimized(Intracomm *comm);
+        BFSGraph500Optimized(const BFSGraph500Optimized& orig);
+        virtual ~BFSGraph500Optimized();
 
-    vector<Task*> *tasks = new vector<Task*>();
-    tasks->push_back(new BFSGraph500Optimized(comm));
+        virtual ParentTree* run();
+        virtual string getName();
+    private:
+        void run_bfs(Vertex root, int64_t* parent);
 
-    SearchController *controller = new SearchController(comm, argc, argv);
-    controller->run(tasks);
-    controller->clean(tasks);
-
-    Finalize();
-    return 0;
+    };
 }
+
+#endif	/* BFSGRAPH500_RMA_H */
+
