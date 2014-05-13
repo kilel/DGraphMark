@@ -26,7 +26,7 @@ namespace dgmark {
         BFSdgmark(Intracomm *comm);
         BFSdgmark(const BFSdgmark& orig);
         virtual ~BFSdgmark();
-        
+
         virtual ParentTree* run();
 
     protected:
@@ -38,6 +38,7 @@ namespace dgmark {
         static const int BFS_DATA_3_TAG = 23664;
         static const int BFS_DATA_4_TAG = 7421;
 
+        int stepCount;
         /**
          * queue is a queue of vertex (local).
          * Traversed vertex adds to the end of the queue.
@@ -46,6 +47,11 @@ namespace dgmark {
          * queue[1] is an index after the end.
          */
         Vertex *queue;
+
+        /**
+         * Queue, prepared for next step.
+         */
+        Vertex *nextQueue;
 
         /**
          * parent is an array, which associates vertex with it parent (global) in tree.
@@ -61,23 +67,12 @@ namespace dgmark {
          * @return true, if more steps are needed.
          */
         virtual bool performBFS() = 0;
-        
+
         /**
          * Performs actual BFS step. Probes synchronization by calling probeBFSSynch.
          * @return true, if some queuewas enlarged.
          */
         virtual bool performBFSActualStep();
-        
-        /**
-         * Action, called in end of actual step. Used mostly to end synchronization.
-         */
-        virtual void endActualStepAction() = 0;
-        
-        /**
-         * Probes BFS synchronization.
-         * @return true, if some queuewas enlarged.
-         */
-        virtual bool probeBFSSynch() = 0;
 
         /**
          * Processes local child. 
@@ -87,7 +82,7 @@ namespace dgmark {
          * @param child Child of current vertex (global notation)
          * @return true, if some queue is enlarged.
          */
-        bool processLocalChild(Vertex currVertex, Vertex child);
+        virtual bool processLocalChild(Vertex currVertex, Vertex child);
 
         /**
          * Processes global child. 
@@ -100,13 +95,13 @@ namespace dgmark {
         virtual bool processGlobalChild(Vertex currVertex, Vertex child) = 0;
 
         /**
-         * Aligns queue.
-         * Just moves elements to the start of array.
+         * Swaps queues.
+         * Swaps next and current queues.
          * 
          * @param queue queue of local vertices.
          */
-        void alignQueue();
-        
+        virtual void swapQueues();
+
         void resetQueueParent();
 
         /**

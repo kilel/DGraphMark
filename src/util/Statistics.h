@@ -18,6 +18,7 @@
 #define	STATISTICS_H
 
 #include <vector>
+#include <string>
 
 namespace dgmark {
     using namespace std;

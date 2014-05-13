@@ -18,49 +18,36 @@
 
 namespace dgmark {
 
-    SimpleGenerator::SimpleGenerator(Intracomm *comm, int grade, int density, Random *random) :
-    GraphGenerator(comm), grade(grade), density(density), log(comm), random(random) {
+    SimpleGenerator::SimpleGenerator(Intracomm *comm) :
+    GraphGenerator(comm), log(comm), random(Random::getInstance(comm)) {
     }
 
     SimpleGenerator::~SimpleGenerator() {
     }
 
-    Graph* SimpleGenerator::generate() {
-        log << "Generating graph... ";
-        comm->Barrier();
-        double startTime = Wtime();
-
-
+    Graph* SimpleGenerator::generate(int grade, int density) {
         Graph* graph = new Graph(comm, grade, density);
-        vector<Edge*> *edges = graph->edges;
         Vertex numLocalVertex = graph->numLocalVertex;
 
         int numEdgesPerVertex = density / 2;
         int additionalEdgeFlag = density % 2;
 
+        log << "Generating graph... ";
+        comm->Barrier();
+        double startTime = Wtime();
+
         //Here we create density/2 oriented edges from each of local
         for (Vertex vertex = 0; vertex < numLocalVertex; ++vertex) {
-            Vertex globalVertexFrom = graph->vertexToGlobal(vertex);
             int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
-
-            for (int i = 0; i < numEdges; ++i) {
-                uint64_t rankTo = random->next(0, size);
-                uint64_t localVertexTo = random->next(0, numLocalVertex);
-
-                Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
-                if (globalVertexFrom != globalVertexTo) {
-                    edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
-                } else {
-                    --i;
-                    continue;
-                }
-            }
+            addEdgeFromVertex(graph, vertex, numEdges);
         }
+
         comm->Barrier();
         generationTime = Wtime();
         log << generationTime - startTime << " s\n";
 
         log << "Distributing graph... ";
+
         //Here we make graph unoriended, by transfering edges between nodes.
         graph->distribute();
 
@@ -70,6 +57,23 @@ namespace dgmark {
         return graph;
     }
 
+    void SimpleGenerator::addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges) {
+        vector<Edge*> *edges = graph->edges;
+        Vertex globalVertexFrom = graph->vertexToGlobal(localVertex);
+        for (int i = 0; i < numEdges; ++i) {
+            uint64_t rankTo = random->next(0, size);
+            uint64_t localVertexTo = random->next(0, graph->numGlobalVertex);
+
+            Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
+            if (globalVertexFrom != globalVertexTo) {
+                edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
+            } else {
+                --i;
+                continue;
+            }
+        }
+    }
+
     double SimpleGenerator::getGenerationTime() {
         return generationTime;
     }
@@ -77,17 +81,4 @@ namespace dgmark {
     double SimpleGenerator::getDistributionTime() {
         return distributionTime;
     }
-
-    int SimpleGenerator::getGrade() {
-        return grade;
-    }
-
-    int SimpleGenerator::getDensity() {
-        return density;
-    }
-
-    Random* SimpleGenerator::getRandom() {
-        return random;
-    }
-
 }

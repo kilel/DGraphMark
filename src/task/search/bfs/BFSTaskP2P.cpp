@@ -21,86 +21,88 @@
 
 namespace dgmark {
 
-    BFSTaskP2P::BFSTaskP2P(Intracomm *comm) : BFSdgmark(comm) {
+    BFSTaskP2P::BFSTaskP2P(Intracomm *comm) : BFSdgmark(comm)
+    {
     }
 
-    BFSTaskP2P::BFSTaskP2P(const BFSTaskP2P& orig) : BFSdgmark(orig.comm) {
+    BFSTaskP2P::BFSTaskP2P(const BFSTaskP2P& orig) : BFSdgmark(orig.comm)
+    {
     }
 
-    BFSTaskP2P::~BFSTaskP2P() {
+    BFSTaskP2P::~BFSTaskP2P()
+    {
     }
 
-    void BFSTaskP2P::open(Graph *newGraph) {
-        SearchTask::open(newGraph);
+    void BFSTaskP2P::open(Graph *newGraph)
+    {
+	SearchTask::open(newGraph);
 
-        queue = new Vertex[getQueueSize()];
-        parent = new Vertex[numLocalVertex];
+	queue = new Vertex[getQueueSize()];
+	nextQueue = new Vertex[getQueueSize()];
+	parent = new Vertex[numLocalVertex];
     }
 
-    void BFSTaskP2P::close() {
-        delete queue;
-        delete parent;
-        SearchTask::close();
+    void BFSTaskP2P::close()
+    {
+	delete queue;
+	delete parent;
+	SearchTask::close();
     }
 
-    string BFSTaskP2P::getName() {
-        return "dgmark_BFS_P2P";
+    string BFSTaskP2P::getName()
+    {
+	return "dgmark_BFS_P2P";
     }
 
-    bool BFSTaskP2P::performBFS() {
-        bool isQueueEnlarged = false;
+    bool BFSTaskP2P::performBFS()
+    {
+	bool isQueueEnlarged = false;
 
-        for (int node = 0; node < size; ++node) {
-            if (rank == node) {
-                isQueueEnlarged = performBFSActualStep();
-            } else {
-                performBFSSynch();
-            }
-            comm->Barrier();
-        }
+	for (int node = 0; node < size; ++node) {
+	    if (rank == node) {
+		isQueueEnlarged |= performBFSActualStep();
+		endSynch(BFS_SYNCH_TAG);
+	    } else {
+		isQueueEnlarged |= performBFSSynch();
+	    }
+	    comm->Barrier();
+	}
 
-        comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
-        return isQueueEnlarged;
+	comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
+	swapQueues();
+	return isQueueEnlarged;
     }
 
-    void BFSTaskP2P::performBFSSynch() {
-        Status status;
-        Vertex memory[2] = {0};
+    inline bool BFSTaskP2P::processGlobalChild(Vertex currVertex, Vertex child)
+    {
+	Vertex childLocal = graph->vertexToLocal(child);
+	int childRank = graph->vertexRank(child);
+	Vertex memory[2] = {childLocal, currVertex};
 
-        while (true) {
-            if (waitSynch(BFS_SYNCH_TAG, status)) {
-                comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
-                if (parent[memory[0]] == graph->numGlobalVertex) {
-                    parent[memory[0]] = memory[1];
-                    queue[queue[1]] = memory[0];
-                    ++queue[1];
-                    requestSynch(true, status.Get_source(), BFS_SYNCH_2_TAG);
-                } else {
-                    requestSynch(false, status.Get_source(), BFS_SYNCH_2_TAG);
-                }
-            } else { //if fence is not neaded mode
-                break;
-            }
-        }
+	requestSynch(true, childRank, BFS_SYNCH_TAG);
+	comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
+	return false;
     }
 
-    bool BFSTaskP2P::processGlobalChild(Vertex currVertex, Vertex child) {
-        Vertex childLocal = graph->vertexToLocal(child);
-        int childRank = graph->vertexRank(child);
-        Vertex memory[2] = {childLocal, currVertex};
+    bool BFSTaskP2P::performBFSSynch()
+    {
+	Status status;
+	Vertex memory[2] = {0};
+	bool isQueueChanged = false;
 
-        requestSynch(true, childRank, BFS_SYNCH_TAG);
-        comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
-        bool isQueueEnlarged = waitSynch(BFS_SYNCH_2_TAG, childRank);
-        return isQueueEnlarged;
+	while (true) {
+	    if (waitSynch(BFS_SYNCH_TAG, status)) {
+		comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
+		if (parent[memory[0]] == graph->numGlobalVertex) {
+		    parent[memory[0]] = memory[1];
+		    nextQueue[nextQueue[1]] = memory[0];
+		    ++nextQueue[1];
+		    isQueueChanged = true;
+		}
+	    } else { //if fence is not neaded mode
+		break;
+	    }
+	}
+	return isQueueChanged;
     }
-
-    bool BFSTaskP2P::probeBFSSynch() {
-        return false;
-    }
-
-    void BFSTaskP2P::endActualStepAction() {
-        endSynch(BFS_SYNCH_TAG);
-    }
-
 }

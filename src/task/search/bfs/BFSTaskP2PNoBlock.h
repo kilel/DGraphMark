@@ -31,9 +31,50 @@ namespace dgmark {
 
     protected:
         virtual bool performBFS();
+        virtual bool processLocalChild(Vertex currVertex, Vertex child);
         virtual bool processGlobalChild(Vertex currVertex, Vertex child);
         virtual bool probeBFSSynch();
-        virtual void endActualStepAction();
+    private:
+        /**
+         * Quantity of elements to send with single package.
+         */
+        static const size_t itemsToSendCount = 512;
+        
+        /**
+         * Cached requests for all nodes.
+         */
+        Request* requests;
+        
+        Request recvReq;
+        bool isRecvActive;
+        
+        /**
+         * Cached request activity states for nodes. 
+         * True, if request to node is still running.
+         */
+        bool* isRequestActive;
+        
+        /**
+         * Buffers of data for all nodes. 
+         * Each node buffer contains itemsToSendCount elements.
+         */
+        Vertex** sendDataBuffer;
+        
+        /**
+         * Count of elements, which are ready to be sent.
+         */
+        size_t* sendDataCount;
+        
+        /**
+         * Recieve buffer.
+         */
+        Vertex* recvBuffer;
+        
+        /**
+         * Sends request to specified rank.
+         * @param toRank Reciever node rank.
+         */
+        void sendData(int toRank);
     };
 }
 

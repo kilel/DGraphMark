@@ -14,30 +14,29 @@
  *   limitations under the License.
  */
 
-#ifndef BFSTASKP2P_H
-#define	BFSTASKP2P_H
+#ifndef KRONECKERGENERATOR_H
+#define	KRONECKERGENERATOR_H
 
-#include "BFSdgmark.h"
+#include "GraphGenerator.h"
+#include "SimpleGenerator.h"
+
 
 namespace dgmark {
-
-    class BFSTaskP2P : public BFSdgmark {
+    class KroneckerGenerator : SimpleGenerator{
     public:
-        BFSTaskP2P(Intracomm *comm);
-        BFSTaskP2P(const BFSTaskP2P& orig);
-        virtual ~BFSTaskP2P();
-
-        virtual string getName();
-        
-        virtual void open(Graph *newGraph);
-        virtual void close();
-
+        KroneckerGenerator(Intracomm *comm);
+        virtual ~KroneckerGenerator();
     protected:
-        virtual bool performBFS();
-        virtual bool processGlobalChild(Vertex currVertex, Vertex child);
-        virtual bool performBFSSynch();
+        
+        /**
+         * Adds edges with kronecker algorithm 2x2. Equals to R-MAT.
+         * @param graph Graph to add in.
+         * @param localVertex local vertex to start from.
+         * @param numEdges num edges to add from vertex.
+         */
+        virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
     };
 }
 
-#endif	/* BFSTASKP2P_H */
+#endif	/* KRONECKERGENERATOR_H */
 

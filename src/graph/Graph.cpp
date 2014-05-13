@@ -45,21 +45,26 @@ namespace dgmark {
 
     void Graph::distribute() {
         size_t initialEdgesCount = edges->size();
-        Vertex *edgeMemory = new Vertex[2];
+        Vertex *sendBuffer = (Vertex*) Alloc_mem(2 * sizeof(Vertex), INFO_NULL);
+	Vertex *recvBuffer = (Vertex*) Alloc_mem(2 * sizeof(Vertex), INFO_NULL);
+	Vertex *edgeMemory = new Vertex[2];
 
         for (size_t i = distributedEdges; i < initialEdgesCount; ++i) {
             //send edge
-            sendEdge(edges->at(i), edgeMemory);
+            sendEdge(edges->at(i), sendBuffer);
             //try to recieve edge (by probe)
-            while (probeReadEdge(edgeMemory));
+            while (probeReadEdge(recvBuffer));
         }
         comm->Barrier(); //important. Wait, till all sends are done.
         //recieve all other edges.
-        while (probeReadEdge(edgeMemory));
+        while (probeReadEdge(recvBuffer));
 
         delete edgeMemory;
+	Free_mem(sendBuffer);
+	Free_mem(recvBuffer);
         distributedEdges = edges->size();
         comm->Barrier(); //important. Waits to complete distribution.
+	//printf("\n%d: %ld edges\n", rank, edges->size());
     }
 
     bool Graph::isDistributed() {

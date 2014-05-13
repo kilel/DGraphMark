@@ -32,25 +32,27 @@ namespace dgmark {
          * @param grade Grade of vertices. Total number is 2^grade
          * @param density Density of edges. Avg amount of edges per vertex.
          */
-        SimpleGenerator(Intracomm *comm, int grade, int density, Random *random);
+        SimpleGenerator(Intracomm *comm);
         virtual ~SimpleGenerator();
 
-        virtual Graph* generate();
+        virtual Graph* generate(int grade, int density);
         virtual double getGenerationTime();
         virtual double getDistributionTime();
-        
-        virtual int getGrade();
-        virtual int getDensity();
-        virtual Random* getRandom();
+
+    protected:
+        /**
+         * Adds edges evenly with equal probabilities.
+         * @param graph Graph to add in.
+         * @param localVertex local vertex to start from.
+         * @param numEdges num edges to add from vertex.
+         */
+        virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
+        Random *random;
+        Log log;
 
     private:
-        int grade;
-        int density;
         double generationTime;
         double distributionTime;
-        Log log;
-        
-        Random *random;
     };
 }
 

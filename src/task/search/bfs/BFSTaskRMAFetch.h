@@ -35,12 +35,12 @@ namespace dgmark {
 
     protected:
         RMAWindow<Vertex> *qWin;
+        RMAWindow<Vertex> *nextQWin;
         RMAWindow<Vertex> *pWin;
 
+        virtual void swapQueues();
         virtual bool performBFS();
         virtual bool processGlobalChild(Vertex currVertex, Vertex child);
-        virtual bool probeBFSSynch();
-        virtual void endActualStepAction();
 
     private:
         /**

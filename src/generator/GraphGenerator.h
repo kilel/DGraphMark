@@ -40,14 +40,9 @@ namespace dgmark {
          * Generates graph with specified parameters.
          * @return Graph.
          */
-        virtual Graph* generate() = 0;
+        virtual Graph* generate(int grade, int density) = 0;
         virtual double getGenerationTime() = 0;
         virtual double getDistributionTime() = 0;
-        
-        virtual int getGrade() = 0;
-        virtual int getDensity() = 0;
-        
-        virtual Random* getRandom() = 0;
     };
 
 }

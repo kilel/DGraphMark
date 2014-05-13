@@ -50,12 +50,12 @@ OBJ_DIR_PATHS = $(addprefix $(OBJ_DIR), \
 #Definitions of sources to compile
 BENCHMARK = Benchmark search/SearchBenchmark
 CONTROLLER = Controller search/SearchController
-GENERATOR = SimpleGenerator
+GENERATOR = SimpleGenerator KroneckerGenerator
 GRAPH = Graph CSRGraph
 MPI = Communicable RMAWindow
 TASK = ParentTree ParentTreeValidator SearchTask
 BFS = BFSdgmark BFSGraph500P2P BFSGraph500RMA BFSTaskRMAFetch BFSTaskP2P BFSTaskP2PNoBlock
-VALIDATOR = ParentTreeValidatorRMAFetch ParentTreeValidatorP2P ParentTreeValidatorP2PNoBlock
+VALIDATOR = ParentTreeValidatorRMAFetch ParentTreeValidatorP2PNoBlock #ParentTreeValidatorP2P
 UTIL = Statistics Random
 
 #separated, because if use all, it is too long, error occurred in build.

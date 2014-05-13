@@ -25,7 +25,7 @@ namespace dgmark {
 
     SearchController::SearchController(Intracomm *comm, int argc, char **argv) :
     Controller(comm, argc, argv) {
-        generator = new SimpleGenerator(comm, grade, density, Random::getInstance(comm));
+        generator = new SimpleGenerator(comm);
     }
 
     SearchController::SearchController(const SearchController& orig) :
@@ -37,7 +37,7 @@ namespace dgmark {
     }
 
     void SearchController::run(vector<Task*> *tasks) {
-        Graph *graph = generator->generate();
+        Graph *graph = generator->generate(grade, density);
 
         vector<Benchmark*> *benchmarks = new vector<Benchmark*>(0);
 
