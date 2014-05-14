@@ -39,6 +39,7 @@ namespace dgmark {
         static const int BFS_DATA_4_TAG = 7421;
 
         int stepCount;
+        
         /**
          * queue is a queue of vertex (local).
          * Traversed vertex adds to the end of the queue.
@@ -102,6 +103,9 @@ namespace dgmark {
          */
         virtual void swapQueues();
 
+        /**
+         * Resets queues and parent to defult values.
+         */
         void resetQueueParent();
 
         /**

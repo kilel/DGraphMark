@@ -21,125 +21,124 @@
 
 namespace dgmark {
 
-    BFSdgmark::BFSdgmark(Intracomm *comm) : SearchTask(comm)
-    {
-    }
-
-    BFSdgmark::BFSdgmark(const BFSdgmark& orig) : SearchTask(orig.comm)
-    {
-    }
-
-    BFSdgmark::~BFSdgmark()
-    {
-    }
-
-    ParentTree* BFSdgmark::run()
-    {
-	log << "Running BFS (" << getName() << ") from " << root << "\n";
-	comm->Barrier();
-	double startTime = Wtime();
-
-	resetQueueParent();
-
-	if (graph->vertexRank(root) == rank) {
-	    //root is my vertex, put it into queue.
-	    Vertex rootLocal = graph->vertexToLocal(root);
-	    queue[queue[1]] = rootLocal;
-	    parent[rootLocal] = root;
-	    ++queue[1];
+	BFSdgmark::BFSdgmark(Intracomm *comm) : SearchTask(comm)
+	{
 	}
 
-	//main loop
-	stepCount = 0;
-	while (performBFS())
-	    stepCount++;
-
-	log << "Finished in " << stepCount << " steps\n";
-
-	comm->Barrier();
-	double taskRunTime = Wtime() - startTime;
-
-	Vertex *resultParent = new Vertex[numLocalVertex];
-	for (int i = 0; i < numLocalVertex; ++i) {
-	    resultParent[i] = parent[i];
+	BFSdgmark::BFSdgmark(const BFSdgmark& orig) : SearchTask(orig.comm)
+	{
 	}
 
-	ParentTree *parentTree = new ParentTree(comm, root, resultParent, graph, taskRunTime);
-	log << "BFS time: " << taskRunTime << " s\n";
-	return parentTree;
-    }
+	BFSdgmark::~BFSdgmark()
+	{
+	}
 
-    inline bool BFSdgmark::performBFSActualStep()
-    {
-	bool isQueueEnlarged = false;
-	vector<Edge*> *edges = graph->edges;
+	ParentTree* BFSdgmark::run()
+	{
+		log << "Running BFS (" << getName() << ") from " << root << "\n";
+		comm->Barrier();
+		double startTime = Wtime();
 
-	const size_t queueEnd = queue[1];
-	while (queue[0] < queueEnd) {
-	    Vertex currVertex = queue[queue[0]];
+		resetQueueParent();
 
-	    const size_t childStartIndex = graph->getStartIndex(currVertex);
-	    const size_t childEndIndex = graph->getEndIndex(currVertex);
-	    for (size_t childIndex = childStartIndex; childIndex < childEndIndex; ++childIndex) {
-		const Vertex child = edges->at(childIndex)->to;
-		const int childRank = graph->vertexRank(child);
-		//if(stepCount == 0)
-		//printf("%d: %ld -> %ld\n", rank, currVertex, child);
-		if (childRank == rank) {
-		    isQueueEnlarged |= processLocalChild(graph->vertexToGlobal(currVertex), child);
-		} else {
-		    isQueueEnlarged |= processGlobalChild(graph->vertexToGlobal(currVertex), child);
+		if (graph->vertexRank(root) == rank) {
+			//root is my vertex, put it into queue.
+			Vertex rootLocal = graph->vertexToLocal(root);
+			parent[rootLocal] = root;
+			queue[queue[1]++] = rootLocal;
 		}
 
-	    }
-	    ++queue[0];
+		//main loop
+		stepCount = 0;
+		while (performBFS())
+			stepCount++;
+
+		log << "Finished in " << stepCount << " steps\n";
+
+		comm->Barrier();
+		double taskRunTime = Wtime() - startTime;
+
+		Vertex *resultParent = new Vertex[numLocalVertex];
+		for (int i = 0; i < numLocalVertex; ++i) {
+			resultParent[i] = parent[i];
+		}
+
+		ParentTree *parentTree = new ParentTree(comm, root, resultParent, graph, taskRunTime);
+		log << "BFS time: " << taskRunTime << " s\n";
+		return parentTree;
 	}
-	return isQueueEnlarged;
-    }
 
-    inline bool BFSdgmark::processLocalChild(Vertex currVertex, Vertex child)
-    {
-	Vertex childLocal = graph->vertexToLocal(child);
+	inline bool BFSdgmark::performBFSActualStep()
+	{
+		bool isQueueEnlarged = false;
+		vector<Edge*> *edges = graph->edges;
 
-	if (parent[childLocal] == graph->numGlobalVertex) {
-	    parent[childLocal] = currVertex;
-	    nextQueue[nextQueue[1]++] = childLocal;
-	    //assert(nextQueue[1] < getQueueSize());
-	    return true;
-	} else {
-	    return false;
+		const size_t queueEnd = queue[1];
+		while (queue[0] < queueEnd) {
+			Vertex currVertex = queue[queue[0]];
+
+			const size_t childStartIndex = graph->getStartIndex(currVertex);
+			const size_t childEndIndex = graph->getEndIndex(currVertex);
+			for (size_t childIndex = childStartIndex; childIndex < childEndIndex; ++childIndex) {
+				const Vertex child = edges->at(childIndex)->to;
+				const int childRank = graph->vertexRank(child);
+				//if(stepCount == 0)
+				//printf("%d: %ld -> %ld\n", rank, currVertex, child);
+				if (childRank == rank) {
+					isQueueEnlarged |= processLocalChild(graph->vertexToGlobal(currVertex), child);
+				} else {
+					isQueueEnlarged |= processGlobalChild(graph->vertexToGlobal(currVertex), child);
+				}
+
+			}
+			++queue[0];
+		}
+		return isQueueEnlarged;
 	}
-    }
 
-    inline void BFSdgmark::swapQueues()
-    {
-	//clean current queue
-	queue[0] = 2;
-	queue[1] = 2;
+	inline bool BFSdgmark::processLocalChild(Vertex currVertex, Vertex child)
+	{
+		Vertex childLocal = graph->vertexToLocal(child);
 
-	//swap queues
-	Vertex *temp = queue;
-	queue = nextQueue;
-	nextQueue = temp;
-    }
-
-    inline void BFSdgmark::resetQueueParent()
-    {
-	memset(queue, 0, getQueueSize() * sizeof(Vertex));
-	queue[0] = 2;
-	queue[1] = 2;
-
-	nextQueue[0] = 2;
-	nextQueue[1] = 2;
-
-	for (size_t i = 0; i < numLocalVertex; ++i) {
-	    parent[i] = graph->numGlobalVertex;
+		if (parent[childLocal] == graph->numGlobalVertex) {
+			parent[childLocal] = currVertex;
+			nextQueue[nextQueue[1]++] = childLocal;
+			//assert(nextQueue[1] < getQueueSize());
+			return true;
+		} else {
+			return false;
+		}
 	}
-    }
 
-    inline Vertex BFSdgmark::getQueueSize()
-    {
-	return numLocalVertex + 2;
-    }
+	inline void BFSdgmark::swapQueues()
+	{
+		//clean current queue
+		queue[0] = 2;
+		queue[1] = 2;
+
+		//swap queues
+		Vertex *temp = queue;
+		queue = nextQueue;
+		nextQueue = temp;
+	}
+
+	inline void BFSdgmark::resetQueueParent()
+	{
+		memset(queue, 0, getQueueSize() * sizeof(Vertex));
+		queue[0] = 2;
+		queue[1] = 2;
+
+		nextQueue[0] = 2;
+		nextQueue[1] = 2;
+
+		for (size_t i = 0; i < numLocalVertex; ++i) {
+			parent[i] = graph->numGlobalVertex;
+		}
+	}
+
+	inline Vertex BFSdgmark::getQueueSize()
+	{
+		return numLocalVertex + 2;
+	}
 
 }

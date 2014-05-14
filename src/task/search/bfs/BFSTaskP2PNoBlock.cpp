@@ -22,153 +22,180 @@
 
 namespace dgmark {
 
-    BFSTaskP2PNoBlock::BFSTaskP2PNoBlock(Intracomm *comm) : BFSTaskP2P(comm)
-    {
-	requests = new Request[size];
-	isRequestActive = new bool[size];
-	sendDataBuffer = new Vertex*[size];
-	sendDataCount = new size_t[size];
-	recvBuffer = (Vertex*) Alloc_mem(itemsToSendCount * sizeof(Vertex), INFO_NULL);
-	for (int i = 0; i < size; ++i) {
-	    sendDataBuffer[i] = (Vertex*) Alloc_mem(itemsToSendCount * sizeof(Vertex), INFO_NULL);
-	}
-    }
-
-    BFSTaskP2PNoBlock::BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig) : BFSTaskP2P(orig.comm)
-    {
-    }
-
-    BFSTaskP2PNoBlock::~BFSTaskP2PNoBlock()
-    {
-	delete[] requests;
-	delete[] isRequestActive;
-	delete sendDataCount;
-	Free_mem(recvBuffer);
-	for (int i = 0; i < size; ++i) {
-	    Free_mem(sendDataBuffer[i]);
-	}
-	delete[] sendDataBuffer;
-    }
-
-    string BFSTaskP2PNoBlock::getName()
-    {
-	return "dgmark_BFS_P2P_no_block";
-    }
-
-    bool BFSTaskP2PNoBlock::performBFS()
-    {
-	for (int i = 0; i < size; ++i) {
-	    isRequestActive[i] = false;
-	    sendDataCount[i] = 0;
-	}
-	isRecvActive = false;
-
-	bool isQueueEnlarged = performBFSActualStep();
-
-	//send remaining data buffers
-	for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
-	    if (!isRequestActive[reqIndex] && sendDataCount[reqIndex] > 0) {
-		sendData(reqIndex);
-	    }
-	    while (isRequestActive[reqIndex]) {
-		isQueueEnlarged |= probeBFSSynch();
-	    }
+	BFSTaskP2PNoBlock::BFSTaskP2PNoBlock(Intracomm *comm) : BFSTaskP2P(comm)
+	{
 	}
 
-	requestSynch(true, BFS_END_SYNCH_TAG); // tell all processes, that you had been stopped;
-
-	int endedProcesses = 1;
-	while (endedProcesses < size) {
-	    isQueueEnlarged |= probeBFSSynch();
-	    while (probeSynch(BFS_END_SYNCH_TAG)) {
-		++endedProcesses;
-	    }
+	BFSTaskP2PNoBlock::BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig) : BFSTaskP2P(orig.comm)
+	{
 	}
 
-	isQueueEnlarged |= probeBFSSynch();
-	
-	if(isRecvActive) {
-	    recvReq.Cancel();
+	BFSTaskP2PNoBlock::~BFSTaskP2PNoBlock()
+	{
 	}
 
-	comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
-	swapQueues();
-	return isQueueEnlarged;
-    }
-
-    inline bool BFSTaskP2PNoBlock::processLocalChild(Vertex currVertex, Vertex child)
-    {
-	bool isQueueChanged = probeBFSSynch();
-	return BFSdgmark::processLocalChild(currVertex, child) || isQueueChanged;
-    }
-
-    inline bool BFSTaskP2PNoBlock::processGlobalChild(Vertex currVertex, Vertex child)
-    {
-	const Vertex childLocal = graph->vertexToLocal(child);
-	const int childRank = graph->vertexRank(child);
-
-	while (isRequestActive[childRank]) {
-	    probeBFSSynch();
+	string BFSTaskP2PNoBlock::getName()
+	{
+		return "dgmark_BFS_P2P_no_block";
 	}
 
-	sendDataBuffer[childRank][sendDataCount[childRank]] = childLocal;
-	sendDataBuffer[childRank][sendDataCount[childRank] + 1] = currVertex;
-	sendDataCount[childRank] += 2;
+	bool BFSTaskP2PNoBlock::performBFS()
+	{
+		prepareBufers();
+		bool isQueueEnlarged = performBFSActualStep();
+		isQueueEnlarged |= flushBuffers();
+		isQueueEnlarged |= waitForOthersToEnd();
+		swapQueues();
 
-	if (sendDataCount[childRank] == itemsToSendCount) {
-	    sendData(childRank);
-	}
-
-	return probeBFSSynch();
-    }
-
-    inline void BFSTaskP2PNoBlock::sendData(int toRank)
-    {
-	requests[toRank] = comm->Isend(&sendDataBuffer[toRank][0], sendDataCount[toRank], VERTEX_TYPE, toRank, BFS_DATA_TAG);
-	sendDataCount[toRank] = 0;
-	isRequestActive[toRank] = true;
-    }
-
-    inline bool BFSTaskP2PNoBlock::probeBFSSynch()
-    {
-	Status status;
-	bool isQueueChanged = false;
-
-	if (isRecvActive && recvReq.Test(status)) {
-	    isRecvActive = false;
-	    int elementsCount = status.Get_count(VERTEX_TYPE);
-	    if (elementsCount >= 2) {
-		//Vertex parentRank = status.Get_source();
-		//comm->Recv(&recvBuffer[0], elementsCount, VERTEX_TYPE, parentRank, BFS_DATA_TAG);
-
-		for (size_t dataIndex = 0; dataIndex < elementsCount; dataIndex += 2) {
-		    Vertex currLocal = recvBuffer[dataIndex];
-		    Vertex parentGlobal = recvBuffer[dataIndex + 1];
-
-		    if (parent[currLocal] == graph->numGlobalVertex) {
-			parent[currLocal] = parentGlobal;
-			nextQueue[nextQueue[1]++] = currLocal;
-			//assert(nextQueue[1] < getQueueSize());
-			isQueueChanged = true;
-		    }
+		if (isRecvActive) {
+			recvReq.Cancel();
 		}
-	    }
-	}
-	
-	if(!isRecvActive) {
-	    recvReq = comm->Irecv(&recvBuffer[0], itemsToSendCount, VERTEX_TYPE, ANY_SOURCE, BFS_DATA_TAG);
-	    isRecvActive = true;
+
+		//finds OR for "isQueueEnlarged" in all processes.
+		comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR);
+		return isQueueEnlarged;
 	}
 
-	//test all active request
-	for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
-	    if (isRequestActive[reqIndex]) {
-		//if request completed, active state must be "false"
-		isRequestActive[reqIndex] &= !requests[reqIndex].Test();
-	    }
+	inline bool BFSTaskP2PNoBlock::processLocalChild(Vertex currVertex, Vertex child)
+	{
+		bool isQueueChanged = probeBFSSynch();
+		return BFSdgmark::processLocalChild(currVertex, child) || isQueueChanged;
 	}
 
-	return isQueueChanged;
-    }
+	inline bool BFSTaskP2PNoBlock::processGlobalChild(Vertex currVertex, Vertex child)
+	{
+		const Vertex childLocal = graph->vertexToLocal(child);
+		const int childRank = graph->vertexRank(child);
+
+		while (isRequestActive[childRank]) {
+			probeBFSSynch();
+		}
+
+		sendDataBuffer[childRank][sendDataCount[childRank]] = childLocal;
+		sendDataBuffer[childRank][sendDataCount[childRank] + 1] = currVertex;
+		sendDataCount[childRank] += 2;
+
+		if (sendDataCount[childRank] == itemsToSendCount) {
+			sendData(childRank);
+		}
+
+		return probeBFSSynch();
+	}
+
+	inline bool BFSTaskP2PNoBlock::probeBFSSynch()
+	{
+		Status status;
+		bool isQueueChanged = false;
+
+		if (isRecvActive && recvReq.Test(status)) {
+			isRecvActive = false;
+			int elementsCount = status.Get_count(VERTEX_TYPE);
+
+			for (size_t dataIndex = 0; dataIndex < elementsCount; dataIndex += 2) {
+				Vertex currLocal = recvBuffer[dataIndex];
+				Vertex parentGlobal = recvBuffer[dataIndex + 1];
+
+				if (parent[currLocal] == graph->numGlobalVertex) {
+					parent[currLocal] = parentGlobal;
+					nextQueue[nextQueue[1]++] = currLocal;
+					//assert(nextQueue[1] < getQueueSize());
+					isQueueChanged = true;
+				}
+			}
+		}
+
+		if (!isRecvActive) {
+			recvReq = comm->Irecv(&recvBuffer[0], itemsToSendCount, VERTEX_TYPE, ANY_SOURCE, BFS_DATA_TAG);
+			isRecvActive = true;
+		}
+
+		refreshActivityState();
+		return isQueueChanged;
+	}
+
+	inline void BFSTaskP2PNoBlock::sendData(int toRank)
+	{
+		requests[toRank] = comm->Isend(&sendDataBuffer[toRank][0], sendDataCount[toRank], VERTEX_TYPE, toRank, BFS_DATA_TAG);
+		sendDataCount[toRank] = 0;
+		isRequestActive[toRank] = true;
+	}
+
+	inline void BFSTaskP2PNoBlock::prepareBufers()
+	{
+		for (int i = 0; i < size; ++i) {
+			isRequestActive[i] = false;
+			sendDataCount[i] = 0;
+		}
+		isRecvActive = false;
+	}
+
+	inline bool BFSTaskP2PNoBlock::flushBuffers()
+	{
+		bool isQueueEnlarged = false;
+		//send remaining data buffers
+		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
+			if (!isRequestActive[reqIndex] && sendDataCount[reqIndex] > 0) {
+				sendData(reqIndex);
+			}
+			while (isRequestActive[reqIndex]) {
+				isQueueEnlarged |= probeBFSSynch();
+			}
+		}
+		return isQueueEnlarged;
+	}
+
+	inline bool BFSTaskP2PNoBlock::waitForOthersToEnd()
+	{
+		bool isQueueEnlarged = false;
+		// tell all processes, that you had been stopped;
+		requestSynch(true, BFS_END_SYNCH_TAG);
+		int endedProcesses = 1;
+		while (endedProcesses < size) {
+			isQueueEnlarged |= probeBFSSynch();
+			while (probeSynch(BFS_END_SYNCH_TAG)) {
+				++endedProcesses;
+			}
+		}
+
+		isQueueEnlarged |= probeBFSSynch();
+		return isQueueEnlarged;
+	}
+
+	inline void BFSTaskP2PNoBlock::refreshActivityState()
+	{
+		//test all active request
+		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
+			if (isRequestActive[reqIndex]) {
+				//if request completed, active state must be "false"
+				isRequestActive[reqIndex] &= !requests[reqIndex].Test();
+			}
+		}
+	}
+
+	void BFSTaskP2PNoBlock::open(Graph* newGraph)
+	{
+		BFSTaskP2P::open(newGraph);
+		requests = new Request[size];
+		isRequestActive = new bool[size];
+		sendDataBuffer = new Vertex*[size];
+		sendDataCount = new size_t[size];
+		recvBuffer = (Vertex*) Alloc_mem(itemsToSendCount * sizeof(Vertex), INFO_NULL);
+		for (int i = 0; i < size; ++i) {
+			sendDataBuffer[i] = (Vertex*) Alloc_mem(itemsToSendCount * sizeof(Vertex), INFO_NULL);
+		}
+	}
+
+	void BFSTaskP2PNoBlock::close()
+	{
+		delete[] requests;
+		delete[] isRequestActive;
+		delete sendDataCount;
+		Free_mem(recvBuffer);
+		for (int i = 0; i < size; ++i) {
+			Free_mem(sendDataBuffer[i]);
+		}
+		delete[] sendDataBuffer;
+		BFSTaskP2P::close();
+	}
 
 }

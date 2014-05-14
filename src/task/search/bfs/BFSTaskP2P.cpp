@@ -21,88 +21,91 @@
 
 namespace dgmark {
 
-    BFSTaskP2P::BFSTaskP2P(Intracomm *comm) : BFSdgmark(comm)
-    {
-    }
-
-    BFSTaskP2P::BFSTaskP2P(const BFSTaskP2P& orig) : BFSdgmark(orig.comm)
-    {
-    }
-
-    BFSTaskP2P::~BFSTaskP2P()
-    {
-    }
-
-    void BFSTaskP2P::open(Graph *newGraph)
-    {
-	SearchTask::open(newGraph);
-
-	queue = new Vertex[getQueueSize()];
-	nextQueue = new Vertex[getQueueSize()];
-	parent = new Vertex[numLocalVertex];
-    }
-
-    void BFSTaskP2P::close()
-    {
-	delete queue;
-	delete parent;
-	SearchTask::close();
-    }
-
-    string BFSTaskP2P::getName()
-    {
-	return "dgmark_BFS_P2P";
-    }
-
-    bool BFSTaskP2P::performBFS()
-    {
-	bool isQueueEnlarged = false;
-
-	for (int node = 0; node < size; ++node) {
-	    if (rank == node) {
-		isQueueEnlarged |= performBFSActualStep();
-		endSynch(BFS_SYNCH_TAG);
-	    } else {
-		isQueueEnlarged |= performBFSSynch();
-	    }
-	    comm->Barrier();
+	BFSTaskP2P::BFSTaskP2P(Intracomm *comm) : BFSdgmark(comm)
+	{
 	}
 
-	comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
-	swapQueues();
-	return isQueueEnlarged;
-    }
+	BFSTaskP2P::BFSTaskP2P(const BFSTaskP2P& orig) : BFSdgmark(orig.comm)
+	{
+	}
 
-    inline bool BFSTaskP2P::processGlobalChild(Vertex currVertex, Vertex child)
-    {
-	Vertex childLocal = graph->vertexToLocal(child);
-	int childRank = graph->vertexRank(child);
-	Vertex memory[2] = {childLocal, currVertex};
+	BFSTaskP2P::~BFSTaskP2P()
+	{
+	}
 
-	requestSynch(true, childRank, BFS_SYNCH_TAG);
-	comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
-	return false;
-    }
+	string BFSTaskP2P::getName()
+	{
+		return "dgmark_BFS_P2P";
+	}
 
-    bool BFSTaskP2P::performBFSSynch()
-    {
-	Status status;
-	Vertex memory[2] = {0};
-	bool isQueueChanged = false;
+	bool BFSTaskP2P::performBFS()
+	{
+		bool isQueueEnlarged = false;
 
-	while (true) {
-	    if (waitSynch(BFS_SYNCH_TAG, status)) {
-		comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
-		if (parent[memory[0]] == graph->numGlobalVertex) {
-		    parent[memory[0]] = memory[1];
-		    nextQueue[nextQueue[1]] = memory[0];
-		    ++nextQueue[1];
-		    isQueueChanged = true;
+		for (int node = 0; node < size; ++node) {
+			if (rank == node) {
+				isQueueEnlarged |= performBFSActualStep();
+				endSynch(BFS_SYNCH_TAG);
+			} else {
+				isQueueEnlarged |= performBFSSynch();
+			}
+			comm->Barrier();
 		}
-	    } else { //if fence is not neaded mode
-		break;
-	    }
+
+		comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
+		swapQueues();
+		return isQueueEnlarged;
 	}
-	return isQueueChanged;
-    }
+
+	inline bool BFSTaskP2P::processGlobalChild(Vertex currVertex, Vertex child)
+	{
+		Vertex childLocal = graph->vertexToLocal(child);
+		int childRank = graph->vertexRank(child);
+		Vertex memory[2] = {childLocal, currVertex};
+
+		requestSynch(true, childRank, BFS_SYNCH_TAG);
+		comm->Send(&memory[0], 2, VERTEX_TYPE, childRank, BFS_DATA_TAG);
+		return false;
+	}
+
+	bool BFSTaskP2P::performBFSSynch()
+	{
+		Status status;
+		Vertex memory[2] = {0};
+		bool isQueueChanged = false;
+
+		while (true) {
+			if (waitSynch(BFS_SYNCH_TAG, status)) {
+				comm->Recv(&memory[0], 2, VERTEX_TYPE, status.Get_source(), BFS_DATA_TAG);
+				const Vertex currLocal = memory[0];
+				const Vertex parentGlobal = memory[1];
+				if (parent[currLocal] == graph->numGlobalVertex) {
+					parent[currLocal] = parentGlobal;
+					nextQueue[nextQueue[1]++] = currLocal;
+					isQueueChanged = true;
+				}
+			} else {
+				//synchronization is not neaded mode
+				break;
+			}
+		}
+		return isQueueChanged;
+	}
+
+	void BFSTaskP2P::open(Graph *newGraph)
+	{
+		SearchTask::open(newGraph);
+
+		queue = new Vertex[getQueueSize()];
+		nextQueue = new Vertex[getQueueSize()];
+		parent = new Vertex[numLocalVertex];
+	}
+
+	void BFSTaskP2P::close()
+	{
+		delete queue;
+		delete parent;
+		SearchTask::close();
+	}
+
 }

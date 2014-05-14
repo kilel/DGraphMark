@@ -34,6 +34,8 @@ namespace dgmark {
         Vertex* buildDepth(ParentTree *parentTree);
         Vertex getDepth(Graph *graph, Vertex* depths, Vertex currVertex);
         void synchAction(Vertex* depths);
+        
+        void waitForOthersToEnd(Vertex *depths);
     };
 }
 #endif	/* PARENTTREEVALIDATORP2PNOBLOCK_H */
