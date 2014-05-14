@@ -15,70 +15,78 @@
  */
 
 #include "SimpleGenerator.h"
+#include "../util/Utils.h"
 
 namespace dgmark {
 
-    SimpleGenerator::SimpleGenerator(Intracomm *comm) :
-    GraphGenerator(comm), log(comm), random(Random::getInstance(comm)) {
-    }
+	SimpleGenerator::SimpleGenerator(Intracomm *comm) :
+	GraphGenerator(comm), log(comm), random(Random::getInstance(comm))
+	{
+	}
 
-    SimpleGenerator::~SimpleGenerator() {
-    }
+	SimpleGenerator::~SimpleGenerator()
+	{
+	}
 
-    Graph* SimpleGenerator::generate(int grade, int density) {
-        Graph* graph = new Graph(comm, grade, density);
-        Vertex numLocalVertex = graph->numLocalVertex;
+	Graph* SimpleGenerator::generate(int grade, int density)
+	{
+		Graph* graph = new Graph(comm, grade, density);
+		Vertex numLocalVertex = graph->numLocalVertex;
 
-        int numEdgesPerVertex = density / 2;
-        int additionalEdgeFlag = density % 2;
+		int numEdgesPerVertex = density / 2;
+		int additionalEdgeFlag = density % 2;
 
-        log << "Generating graph... ";
-        comm->Barrier();
-        double startTime = Wtime();
+		log << "Generating graph... ";
+		comm->Barrier();
+		double startTime = Wtime();
 
-        //Here we create density/2 oriented edges from each of local
-        for (Vertex vertex = 0; vertex < numLocalVertex; ++vertex) {
-            int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
-            addEdgeFromVertex(graph, vertex, numEdges);
-        }
+		//Here we create density/2 oriented edges from each of local
+		for (Vertex vertex = 0; vertex < numLocalVertex; ++vertex) {
+			int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
+			addEdgeFromVertex(graph, vertex, numEdges);
+		}
 
-        comm->Barrier();
-        generationTime = Wtime();
-        log << generationTime - startTime << " s\n";
+		comm->Barrier();
+		generationTime = Wtime();
+		log << generationTime - startTime << " s\n";
+		log << "Distributing graph... ";
 
-        log << "Distributing graph... ";
+		//Here we make graph unoriended, by transfering edges between nodes.
+		GraphDistributor *distributor = new GraphDistributor(comm);
+		distributor->distribute(graph);
+		delete distributor;
 
-        //Here we make graph unoriended, by transfering edges between nodes.
-        graph->distribute();
+		distributionTime = Wtime() - generationTime;
+		generationTime = generationTime - startTime;
+		log << distributionTime << " s\n";
+		return graph;
+	}
 
-        distributionTime = Wtime() - generationTime;
-        generationTime = generationTime - startTime;
-        log << distributionTime << " s\n";
-        return graph;
-    }
+	void SimpleGenerator::addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges)
+	{
+		vector<Edge*> *edges = graph->edges;
+		Vertex globalVertexFrom = graph->vertexToGlobal(localVertex);
+		for (int i = 0; i < numEdges; ++i) {
+			uint64_t rankTo = random->next(0, size);
+			uint64_t localVertexTo = random->next(0, graph->numGlobalVertex);
 
-    void SimpleGenerator::addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges) {
-        vector<Edge*> *edges = graph->edges;
-        Vertex globalVertexFrom = graph->vertexToGlobal(localVertex);
-        for (int i = 0; i < numEdges; ++i) {
-            uint64_t rankTo = random->next(0, size);
-            uint64_t localVertexTo = random->next(0, graph->numGlobalVertex);
+			Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
+			if (globalVertexFrom != globalVertexTo) {
+				edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
+			} else {
+				--i;
+				continue;
+			}
+		}
+	}
 
-            Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
-            if (globalVertexFrom != globalVertexTo) {
-                edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
-            } else {
-                --i;
-                continue;
-            }
-        }
-    }
+	double SimpleGenerator::getGenerationTime()
+	{
+		return generationTime;
+	}
 
-    double SimpleGenerator::getGenerationTime() {
-        return generationTime;
-    }
-
-    double SimpleGenerator::getDistributionTime() {
-        return distributionTime;
-    }
+	double SimpleGenerator::getDistributionTime()
+	{
+		return distributionTime;
+	}
 }

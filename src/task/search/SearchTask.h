@@ -24,30 +24,30 @@
 
 namespace dgmark {
 
-    class SearchTask : public Task {
-    public:
-        SearchTask(Intracomm *comm);
-        SearchTask(const SearchTask& orig);
-        virtual ~SearchTask();
+	class SearchTask : public Task {
+	public:
+		SearchTask(Intracomm *comm);
+		SearchTask(const SearchTask& orig);
+		virtual ~SearchTask();
 
-        virtual TaskType getTaskType();
+		virtual TaskType getTaskType();
 
-        virtual void open(Graph *newGraph);
-        virtual double getTaskOpeningTime();
-        virtual ParentTree *run() = 0;
-        virtual void close();
+		virtual void open(Graph *newGraph);
+		virtual double getTaskOpeningTime();
+		virtual ParentTree *run() = 0;
+		virtual void close();
 
-        void setRoot(Vertex newRoot);
+		void setRoot(Vertex newRoot);
 
-    protected:
-        CSRGraph *graph;
-        Vertex root;
-        Log log;
-    private:
-        double taskOpeningTime;
-    protected:
-        Vertex numLocalVertex;
-    };
+	protected:
+		CSRGraph *graph;
+		Vertex root;
+		Log log;
+	private:
+		double taskOpeningTime;
+	protected:
+		Vertex numLocalVertex;
+	};
 
 }
 

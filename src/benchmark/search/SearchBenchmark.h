@@ -24,18 +24,18 @@
 
 namespace dgmark {
 
-    class SearchBenchmark : public Benchmark {
-    public:
-        SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts);
-        SearchBenchmark(const SearchBenchmark& orig);
-        virtual ~SearchBenchmark();
+	class SearchBenchmark : public Benchmark {
+	public:
+		SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts);
+		SearchBenchmark(const SearchBenchmark& orig);
+		virtual ~SearchBenchmark();
 
-        virtual bool runSingleTask(int startIndex);
+		virtual bool runSingleTask(int startIndex);
 
-    private:
-        Vertex *startRoots;
-        Vertex* generateStartRoots(size_t maxStartRoot);
-    };
+	private:
+		Vertex *startRoots;
+		Vertex* generateStartRoots(size_t maxStartRoot);
+	};
 }
 
 #endif	/* SEARCHBENCHMARK_H */

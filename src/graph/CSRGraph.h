@@ -21,25 +21,25 @@
 
 namespace dgmark {
 
-    /*
-     * Compressed Sparse Row Graph.
-     * Contains vector of edges, sorted by v.form, and then by v.to.
-     * Provides start and end indices of an output edges interval for any local vertex.
-     */
-    class CSRGraph : public Graph {
-    public:
-        CSRGraph(Graph *graph);
-        CSRGraph(const CSRGraph& orig);
-        virtual ~CSRGraph();
+	/*
+	 * Compressed Sparse Row Graph.
+	 * Contains vector of edges, sorted by v.form, and then by v.to.
+	 * Provides start and end indices of an output edges interval for any local vertex.
+	 */
+	class CSRGraph : public Graph {
+	public:
+		CSRGraph(Graph *graph);
+		CSRGraph(const CSRGraph& orig);
+		virtual ~CSRGraph();
 
-        size_t getStartIndex(Vertex v);
-        size_t getEndIndex(Vertex v);
+		size_t getStartIndex(Vertex v);
+		size_t getEndIndex(Vertex v);
 
-    private:
-        void sort();
-        Vertex *startIndex;
+	private:
+		void sort();
+		Vertex *startIndex;
 
-    };
+	};
 }
 
 #endif	/* CSRGRAPH_H */

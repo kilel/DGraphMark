@@ -25,36 +25,38 @@
 
 namespace dgmark {
 
-    class Benchmark : public Communicable {
-    public:
-        Benchmark(Intracomm *comm, Task *task, Validator *validator, Graph *graph, int numStarts);
-        Benchmark(const Benchmark& orig);
-        virtual ~Benchmark();
+	class Benchmark : public Communicable {
+	public:
+		Benchmark(Intracomm *comm, Task *task, Validator *validator,
+			Graph *graph, int numStarts);
+		Benchmark(const Benchmark& orig);
+		virtual ~Benchmark();
 
-        void run();
-        double getTaskOpeningTime();
-        virtual string getStatistics();
+		void run();
+		double getTaskOpeningTime();
+		virtual string getStatistics();
 
-    protected:
-        static const int statisticsPrecision = 5;
-        
-        Log log;
-        Task *task;
-        Validator *validator;
-        Graph *graph;
+	protected:
+		static const int statisticsPrecision = 5;
 
-        int numStarts;
-        bool isSuccessfullyFinished;
+		Log log;
+		Task *task;
+		Validator *validator;
+		Graph *graph;
 
-        vector<double> *taskRunningTimes;
-        vector<double> *validationTimes;
-        vector<double> *marks;
+		int numStarts;
+		bool isSuccessfullyFinished;
 
-        virtual bool runSingleTask(int startIndex) = 0;
-        string getStatistics(vector<double> *data, string name, const ios::fmtflags floatfieldFlag = ios::scientific);
-    private:
+		vector<double> *taskRunningTimes;
+		vector<double> *validationTimes;
+		vector<double> *marks;
 
-    };
+		virtual bool runSingleTask(int startIndex) = 0;
+		string getStatistics(vector<double> *data, string name,
+			const ios::fmtflags floatfieldFlag = ios::scientific);
+	private:
+
+	};
 }
 
 #endif	/* BENCHMARK_H */

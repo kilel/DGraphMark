@@ -21,59 +21,67 @@
 #include <string>
 
 namespace dgmark {
-    using namespace std;
+	using namespace std;
 
-    class Statistics {
-    public:
-        Statistics(vector<double>* data);
-        Statistics(const Statistics& orig);
-        virtual ~Statistics();
+	class Statistics {
+	public:
+		Statistics(vector<double>* data);
+		Statistics(const Statistics& orig);
+		virtual ~Statistics();
 
-    private:
-        double mean;
-        double stdDeviation;
-        double relStdDeviation;
+	private:
+		double mean;
+		double stdDeviation;
+		double relStdDeviation;
 
-        double minimum;
-        double firstQuartile;
-        double median;
-        double thirdQuartile;
-        double maximum;
+		double minimum;
+		double firstQuartile;
+		double median;
+		double thirdQuartile;
+		double maximum;
 
-    public: //getters
+	public: //getters
 
-        double getMean() {
-            return mean;
-        }
+		double getMean()
+		{
+			return mean;
+		}
 
-        double getStdDeviation() {
-            return stdDeviation;
-        }
+		double getStdDeviation()
+		{
+			return stdDeviation;
+		}
 
-        double getRelStdDeviation() {
-            return relStdDeviation;
-        }
+		double getRelStdDeviation()
+		{
+			return relStdDeviation;
+		}
 
-        double getMinimum() {
-            return minimum;
-        }
+		double getMinimum()
+		{
+			return minimum;
+		}
 
-        double getFirstQuartile() {
-            return firstQuartile;
-        }
+		double getFirstQuartile()
+		{
+			return firstQuartile;
+		}
 
-        double getMedian() {
-            return median;
-        }
+		double getMedian()
+		{
+			return median;
+		}
 
-        double getThirdQuartile() {
-            return thirdQuartile;
-        }
+		double getThirdQuartile()
+		{
+			return thirdQuartile;
+		}
 
-        double getMaximum() {
-            return maximum;
-        }
-    };
+		double getMaximum()
+		{
+			return maximum;
+		}
+	};
 }
 
 #endif	/* STATISTICS_H */

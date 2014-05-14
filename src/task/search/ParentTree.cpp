@@ -18,57 +18,69 @@
 
 namespace dgmark {
 
-    ParentTree::ParentTree(Intracomm *comm, Vertex root, Vertex *parent, Graph *graph, double taskRunTime) :
-    Result(comm), root(root), parent(parent), graph(graph),
-    taskRunTime(taskRunTime), traversedEdges(calculateTraversedEdges(graph)) {
-    }
+	ParentTree::ParentTree(Intracomm *comm, Vertex root, Vertex *parent, Graph *graph, double taskRunTime) :
+	Result(comm), root(root), parent(parent), graph(graph),
+	taskRunTime(taskRunTime), traversedEdges(calculateTraversedEdges(graph))
+	{
+	}
 
-    ParentTree::ParentTree(const ParentTree& orig) :
-    Result(orig.comm), root(orig.root), parent(orig.parent), graph(orig.graph),
-    taskRunTime(orig.taskRunTime), traversedEdges(orig.traversedEdges) {
-    }
+	ParentTree::ParentTree(const ParentTree& orig) :
+	Result(orig.comm), root(orig.root), parent(orig.parent), graph(orig.graph),
+	taskRunTime(orig.taskRunTime), traversedEdges(orig.traversedEdges)
+	{
+	}
 
-    ParentTree::~ParentTree() {
-        //delete parent;
-        Free_mem(parent);
-    }
+	ParentTree::~ParentTree()
+	{
+		//delete parent;
+		Free_mem(parent);
+	}
 
-    Vertex ParentTree::getRoot() {
-        return root;
-    }
+	Vertex ParentTree::getRoot()
+	{
+		return root;
+	}
 
-    Vertex* ParentTree::getParent() {
-        return parent;
-    }
+	Vertex* ParentTree::getParent()
+	{
+		return parent;
+	}
 
-    size_t ParentTree::getParentSize() {
-        return graph->numLocalVertex;
-    }
+	size_t ParentTree::getParentSize()
+	{
+		return graph->numLocalVertex;
+	}
 
-    Graph* ParentTree::getInitialGraph() {
-        return graph;
-    }
+	Graph* ParentTree::getInitialGraph()
+	{
+		return graph;
+	}
 
-    double ParentTree::getMark() {
-        return traversedEdges / taskRunTime;
-    }
+	double ParentTree::getMark()
+	{
+		return traversedEdges / taskRunTime;
+	}
 
-    double ParentTree::getTaskRunTime() {
-        return taskRunTime;
-    }
+	double ParentTree::getTaskRunTime()
+	{
+		return taskRunTime;
+	}
 
-    TaskType ParentTree::getTaskType() {
-        return SEARCH;
-    }
+	TaskType ParentTree::getTaskType()
+	{
+		return SEARCH;
+	}
 
-    double ParentTree::getTraversedEdges() {
-        return traversedEdges;
-    }
+	double ParentTree::getTraversedEdges()
+	{
+		return traversedEdges;
+	}
 
-    double ParentTree::calculateTraversedEdges(Graph *graph) {
-        double realTraversedEdges = graph->edges->size();
-        comm->Allreduce(IN_PLACE, &realTraversedEdges, 1, DOUBLE, SUM);
-        return realTraversedEdges;
-    }
+	double ParentTree::calculateTraversedEdges(Graph *graph)
+	{
+		double realTraversedEdges = graph->edges->size();
+		comm->Allreduce(IN_PLACE, &realTraversedEdges, 1, DOUBLE, SUM);
+		return realTraversedEdges;
+	}
 }
 

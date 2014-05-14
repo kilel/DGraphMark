@@ -22,38 +22,38 @@
 
 namespace dgmark {
 
-    using namespace MPI;
+	using namespace MPI;
 
-    class Communicable {
-    public:
+	class Communicable {
+	public:
 
-        Communicable(Intracomm *comm);
-        Communicable(const Communicable& orig);
-        virtual ~Communicable();
+		Communicable(Intracomm *comm);
+		Communicable(const Communicable& orig);
+		virtual ~Communicable();
 
-        void requestSynch(bool isSynchNeeded, int synchTag);
-        void requestSynch(bool isSynchNeeded, int toRank, int synchTag);
-        void endSynch(int synchTag);
+		void requestSynch(bool isSynchNeeded, int synchTag);
+		void requestSynch(bool isSynchNeeded, int toRank, int synchTag);
+		void endSynch(int synchTag);
 
-        bool waitSynch(int synchTag, int fromRank, Status &status);
-        bool waitSynch(int synchTag, int fromRank);
-        bool waitSynch(int synchTag, Status &status);
-        bool waitSynch(int synchTag);
-        
-        bool probeSynch(int synchTag, Status &status);
-        bool probeSynch(int synchTag);
+		bool waitSynch(int synchTag, int fromRank, Status &status);
+		bool waitSynch(int synchTag, int fromRank);
+		bool waitSynch(int synchTag, Status &status);
+		bool waitSynch(int synchTag);
 
-        void sendVertex(Vertex vertex, int toRank, int tag);
-        Vertex waitVertex(int fromRank, int tag, Status &status);
-        Vertex waitVertex(int fromRank, int tag);
-        Vertex waitVertex(int tag, Status &status);
-        Vertex waitVertex(int tag);
+		bool probeSynch(int synchTag, Status &status);
+		bool probeSynch(int synchTag);
 
-    protected:
-        Intracomm *comm;
-        int rank;
-        int size;
-    };
+		void sendVertex(Vertex vertex, int toRank, int tag);
+		Vertex waitVertex(int fromRank, int tag, Status &status);
+		Vertex waitVertex(int fromRank, int tag);
+		Vertex waitVertex(int tag, Status &status);
+		Vertex waitVertex(int tag);
+
+	protected:
+		Intracomm *comm;
+		int rank;
+		int size;
+	};
 }
 
 #endif	/* COMMUNICABLE_H */

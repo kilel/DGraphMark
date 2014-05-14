@@ -24,61 +24,71 @@
 #include "../graph/Edge.h"
 
 namespace dgmark {
-    using namespace std;
+	using namespace std;
 
-    class Log : public Communicable {
-    public:
+	class Log : public Communicable {
+	public:
 
-        Log() : Communicable(0) {
-        }
+		Log() : Communicable(0)
+		{
+		}
 
-        Log(Intracomm *comm) : Communicable(comm) {
-        }
+		Log(Intracomm *comm) : Communicable(comm)
+		{
+		}
 
-        Log(const Log& orig) : Communicable(orig.comm) {
-        }
+		Log(const Log& orig) : Communicable(orig.comm)
+		{
+		}
 
-        virtual ~Log() {
-        }
+		virtual ~Log()
+		{
+		}
 
-        Log& operator<<(string data) {
-            if (rank == 0)
-                printf("%s", data.c_str());//cout << data;
-            return *this;
-        }
+		Log& operator<<(string data)
+		{
+			if (rank == 0)
+				printf("%s", data.c_str()); //cout << data;
+			return *this;
+		}
 
-        Log& operator<<(char* data) {
-            if (rank == 0)
-                printf("%s", data);//cout << data;
-            return *this;
-        }
+		Log& operator<<(char* data)
+		{
+			if (rank == 0)
+				printf("%s", data); //cout << data;
+			return *this;
+		}
 
-        Log& operator<<(const char data[]) {
-            if (rank == 0)
-                printf("%s", &data[0]);//cout << data;
-            return *this;
-        }
+		Log& operator<<(const char data[])
+		{
+			if (rank == 0)
+				printf("%s", &data[0]); //cout << data;
+			return *this;
+		}
 
-        Log& operator<<(Vertex data) {
-            if (rank == 0)
-                printf("%ld", data);//cout << data;
-            return *this;
-        }
+		Log& operator<<(Vertex data)
+		{
+			if (rank == 0)
+				printf("%ld", data); //cout << data;
+			return *this;
+		}
 
-        Log& operator<<(int data) {
-            if (rank == 0)
-                printf("%d", data);//cout << data;
-            return *this;
-        }
+		Log& operator<<(int data)
+		{
+			if (rank == 0)
+				printf("%d", data); //cout << data;
+			return *this;
+		}
 
-        Log& operator<<(double data) {
-            if (rank == 0)
-                printf("%.5lf", data);//cout << data;
-            return *this;
-        }
+		Log& operator<<(double data)
+		{
+			if (rank == 0)
+				printf("%.5lf", data); //cout << data;
+			return *this;
+		}
 
-    private:
-    };
+	private:
+	};
 }
 
 #endif	/* LOG_H */

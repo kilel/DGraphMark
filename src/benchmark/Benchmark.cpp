@@ -21,17 +21,21 @@
 
 namespace dgmark {
 
-	Benchmark::Benchmark(Intracomm *comm, Task *task, Validator *validator, Graph *graph, int numStarts) :
-	Communicable(comm), task(task), validator(validator), graph(graph), numStarts(numStarts), log(comm)
+	Benchmark::Benchmark(Intracomm *comm, Task *task, Validator *validator,
+		Graph *graph, int numStarts) :
+	Communicable(comm), task(task), validator(validator), graph(graph),
+	numStarts(numStarts), log(comm)
 	{
 		taskRunningTimes = new vector<double>();
 		validationTimes = new vector<double>();
 		marks = new vector<double>();
 	}
 
-	Benchmark::Benchmark(const Benchmark& orig) : Communicable(orig.comm), task(orig.task),
-	validator(orig.validator), graph(orig.graph), numStarts(orig.numStarts), log(orig.comm),
-	taskRunningTimes(orig.taskRunningTimes), validationTimes(orig.validationTimes), marks(orig.marks)
+	Benchmark::Benchmark(const Benchmark& orig) : Communicable(orig.comm),
+	task(orig.task), validator(orig.validator), graph(orig.graph),
+	numStarts(orig.numStarts), log(orig.comm),
+	taskRunningTimes(orig.taskRunningTimes),
+	validationTimes(orig.validationTimes), marks(orig.marks)
 	{
 	}
 

@@ -22,18 +22,18 @@
 
 namespace dgmark {
 
-    class ParentTreeValidatorRMAFetch : public ParentTreeValidator {
-    public:
-        ParentTreeValidatorRMAFetch(Intracomm *comm);
-        ParentTreeValidatorRMAFetch(const ParentTreeValidatorRMAFetch& orig);
-        virtual ~ParentTreeValidatorRMAFetch();
+	class ParentTreeValidatorRMAFetch : public ParentTreeValidator {
+	public:
+		ParentTreeValidatorRMAFetch(Intracomm *comm);
+		ParentTreeValidatorRMAFetch(const ParentTreeValidatorRMAFetch& orig);
+		virtual ~ParentTreeValidatorRMAFetch();
 
-    protected:
-        virtual bool validateDepth(ParentTree *parentTree);
+	protected:
+		virtual bool validateDepth(ParentTree *parentTree);
 
-    private:
-        RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
-    };
+	private:
+		RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
+	};
 }
 #endif	/* PARENTTREEVALIDATORRMAFETCH_H */
 

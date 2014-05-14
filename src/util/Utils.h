@@ -19,18 +19,19 @@
 
 namespace dgmark {
 
-    class Utils {
-    public:
+	class Utils {
+	public:
 
-        static void printGraph(Intracomm *comm, Graph *graph) {
-            vector<Edge*> *edges = graph->edges;
+		static void printGraph(Intracomm *comm, Graph *graph)
+		{
+			vector<Edge*> *edges = graph->edges;
 
-            for (size_t i = 0; i < edges->size(); ++i) {
-                Edge *edge = edges->at(i);
-                printf("%d: %ld -> %ld\n", comm->Get_rank(), edge->from, edge->to);
-            }
-        }
-    };
+			for (size_t i = 0; i < edges->size(); ++i) {
+				Edge *edge = edges->at(i);
+				printf("%d: %ld -> %ld\n", comm->Get_rank(), edge->from, edge->to);
+			}
+		}
+	};
 
 }
 #endif	/* UTILS_H */

@@ -23,32 +23,32 @@
 
 namespace dgmark {
 
-    class Controller : public Communicable {
-    public:
+	class Controller : public Communicable {
+	public:
 
-        Controller(Intracomm *comm, int argc, char **argv);
-        Controller(const Controller& orig);
-        virtual ~Controller();
+		Controller(Intracomm *comm, int argc, char **argv);
+		Controller(const Controller& orig);
+		virtual ~Controller();
 
-        virtual void run(vector<Task*> *tasks) = 0;
-        virtual void clean(vector<Task*> *tasks) = 0;
-        void run(vector<Benchmark*> *benchmarks);
-        void clean(vector<Benchmark*> *benchmarks);
+		virtual void run(vector<Task*> *tasks) = 0;
+		virtual void clean(vector<Task*> *tasks) = 0;
+		void run(vector<Benchmark*> *benchmarks);
+		void clean(vector<Benchmark*> *benchmarks);
 
-    protected:
-        int grade;
-        int density;
-        int numStarts;
+	protected:
+		int grade;
+		int density;
+		int numStarts;
 
-        Log log;
-        static const int CONTROLLER_PRECISION = 5;
+		Log log;
+		static const int CONTROLLER_PRECISION = 5;
 
-        virtual string getAdditionalStatistics() = 0;
-    private:
-        string getInitialStatistics();
-        void parseArguments(int argc, char** argv);
-        void printResult(string stat);
-    };
+		virtual string getAdditionalStatistics() = 0;
+	private:
+		string getInitialStatistics();
+		void parseArguments(int argc, char** argv);
+		void printResult(string stat);
+	};
 }
 
 #endif	/* CONTROLLER_H */

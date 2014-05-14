@@ -23,22 +23,22 @@
 
 namespace dgmark {
 
-    class SearchController : public Controller {
-    public:
-        SearchController(Intracomm *comm, int argc, char **argv);
-        SearchController(const SearchController& orig);
-        virtual ~SearchController();
+	class SearchController : public Controller {
+	public:
+		SearchController(Intracomm *comm, int argc, char **argv);
+		SearchController(const SearchController& orig);
+		virtual ~SearchController();
 
-        virtual void run(vector<Task*> *tasks);
-        virtual void clean(vector<Task*> *tasks);
+		virtual void run(vector<Task*> *tasks);
+		virtual void clean(vector<Task*> *tasks);
 
-    protected:
-        virtual string getAdditionalStatistics();
-    private:
-        GraphGenerator *generator;
+	protected:
+		virtual string getAdditionalStatistics();
+	private:
+		GraphGenerator *generator;
 
-        
-    };
+
+	};
 }
 
 #endif	/* SEARCHCONTROLLER_H */

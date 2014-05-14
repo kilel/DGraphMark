@@ -19,41 +19,42 @@
 
 #include "GraphGenerator.h"
 #include "../util/Log.h"
+#include "../graph/GraphDistributor.h"
 
 namespace dgmark {
 
-    using namespace MPI;
+	using namespace MPI;
 
-    class SimpleGenerator : public GraphGenerator {
-    public:
-        /**
-         * Creates simple graph generator, distributed in communicator nodes.
-         * @param communicator MPI intracomm.
-         * @param grade Grade of vertices. Total number is 2^grade
-         * @param density Density of edges. Avg amount of edges per vertex.
-         */
-        SimpleGenerator(Intracomm *comm);
-        virtual ~SimpleGenerator();
+	class SimpleGenerator : public GraphGenerator {
+	public:
+		/**
+		 * Creates simple graph generator, distributed in communicator nodes.
+		 * @param communicator MPI intracomm.
+		 * @param grade Grade of vertices. Total number is 2^grade
+		 * @param density Density of edges. Avg amount of edges per vertex.
+		 */
+		SimpleGenerator(Intracomm *comm);
+		virtual ~SimpleGenerator();
 
-        virtual Graph* generate(int grade, int density);
-        virtual double getGenerationTime();
-        virtual double getDistributionTime();
+		virtual Graph* generate(int grade, int density);
+		virtual double getGenerationTime();
+		virtual double getDistributionTime();
 
-    protected:
-        /**
-         * Adds edges evenly with equal probabilities.
-         * @param graph Graph to add in.
-         * @param localVertex local vertex to start from.
-         * @param numEdges num edges to add from vertex.
-         */
-        virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
-        Random *random;
-        Log log;
+	protected:
+		/**
+		 * Adds edges evenly with equal probabilities.
+		 * @param graph Graph to add in.
+		 * @param localVertex local vertex to start from.
+		 * @param numEdges num edges to add from vertex.
+		 */
+		virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
+		Random *random;
+		Log log;
 
-    private:
-        double generationTime;
-        double distributionTime;
-    };
+	private:
+		double generationTime;
+		double distributionTime;
+	};
 }
 
 #endif	/* SIMPLEGENERATOR_H */

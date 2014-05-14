@@ -20,56 +20,63 @@
 
 namespace dgmark {
 
-    CSRGraph::CSRGraph(Graph *graph) : Graph(graph) {
-        startIndex = new Vertex[numLocalVertex + 1]; // the last one is numLocalVertex.
-        sort();
-    }
+	CSRGraph::CSRGraph(Graph *graph) : Graph(graph)
+	{
+		startIndex = new Vertex[numLocalVertex + 1]; // the last one is numLocalVertex.
+		sort();
+	}
 
-    CSRGraph::CSRGraph(const CSRGraph& orig) :
-    Graph(orig), startIndex(orig.startIndex) {
-    }
+	CSRGraph::CSRGraph(const CSRGraph& orig) :
+	Graph(orig), startIndex(orig.startIndex)
+	{
+	}
 
-    CSRGraph::~CSRGraph() {
-        delete startIndex;
-    }
+	CSRGraph::~CSRGraph()
+	{
+		delete startIndex;
+	}
 
-    bool compareEdge(Edge *first, Edge *second) {
-        if (first->from < second->from) {
-            return true;
-        } else if (first->from > second->from) {
-            return false;
-        } else if (first->to < second->to) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+	bool compareEdge(Edge *first, Edge *second)
+	{
+		if (first->from < second->from) {
+			return true;
+		} else if (first->from > second->from) {
+			return false;
+		} else if (first->to < second->to) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    void CSRGraph::sort() {
-        std::sort(edges->begin(), edges->end(), compareEdge);
+	void CSRGraph::sort()
+	{
+		std::sort(edges->begin(), edges->end(), compareEdge);
 
-        Vertex prev = 0;
-        for (size_t index = 0; index < edges->size();) {
-            Vertex localVertex = vertexToLocal(edges->at(index)->from);
+		Vertex prev = 0;
+		for (size_t index = 0; index < edges->size();) {
+			Vertex localVertex = vertexToLocal(edges->at(index)->from);
 
-            for (Vertex skipped = prev + 1; skipped < localVertex; ++skipped) {
-                startIndex[skipped] = startIndex[prev];
-            }
+			for (Vertex skipped = prev + 1; skipped < localVertex; ++skipped) {
+				startIndex[skipped] = startIndex[prev];
+			}
 
-            startIndex[localVertex] = index;
-            while (index < edges->size() && vertexToLocal(edges->at(index)->from) == localVertex) {
-                ++index;
-            }
-            prev = localVertex;
-        }
-        startIndex[numLocalVertex] = edges->size();
-    }
+			startIndex[localVertex] = index;
+			while (index < edges->size() && vertexToLocal(edges->at(index)->from) == localVertex) {
+				++index;
+			}
+			prev = localVertex;
+		}
+		startIndex[numLocalVertex] = edges->size();
+	}
 
-    size_t CSRGraph::getStartIndex(Vertex localVertex) {
-        return startIndex[localVertex];
-    }
+	size_t CSRGraph::getStartIndex(Vertex localVertex)
+	{
+		return startIndex[localVertex];
+	}
 
-    size_t CSRGraph::getEndIndex(Vertex localVertex) {
-        return startIndex[localVertex + 1];
-    }
+	size_t CSRGraph::getEndIndex(Vertex localVertex)
+	{
+		return startIndex[localVertex + 1];
+	}
 }

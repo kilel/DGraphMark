@@ -21,47 +21,50 @@
 
 namespace dgmark {
 
-    enum TaskType {
-        STUB, SEARCH
-    };
+	enum TaskType {
+		STUB, SEARCH
+	};
 
-    /**
-     * Shows, that object can be classified to some task type.
-     */
-    class Classifieble {
-    public:
+	/**
+	 * Shows, that object can be classified to some task type.
+	 */
+	class Classifieble {
+	public:
 
-        virtual ~Classifieble() {
-        }
+		virtual ~Classifieble()
+		{
+		}
 
-        /**
-         * @return Task type, in which  this object is classified.
-         */
-        virtual TaskType getTaskType() = 0;
-    };
+		/**
+		 * @return Task type, in which  this object is classified.
+		 */
+		virtual TaskType getTaskType() = 0;
+	};
 
-    /**
-     * Represents result of the task.
-     */
-    class Result : public Classifieble, public Communicable {
-    public:
+	/**
+	 * Represents result of the task.
+	 */
+	class Result : public Classifieble, public Communicable {
+	public:
 
-        Result(Intracomm *comm) : Communicable(comm) {
-        }
+		Result(Intracomm *comm) : Communicable(comm)
+		{
+		}
 
-        virtual ~Result() {
-        }
+		virtual ~Result()
+		{
+		}
 
-        /**
-         * @return performance mark of the result.
-         */
-        virtual double getMark() = 0;
-        
-        /**
-         * @return Time of running task for this result.
-         */
-        virtual double getTaskRunTime() = 0;
-    };
+		/**
+		 * @return performance mark of the result.
+		 */
+		virtual double getMark() = 0;
+
+		/**
+		 * @return Time of running task for this result.
+		 */
+		virtual double getTaskRunTime() = 0;
+	};
 }
 
 #endif	/* RESULT_H */

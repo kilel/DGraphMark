@@ -21,22 +21,22 @@
 
 namespace dgmark {
 
-    class ParentTreeValidatorP2PNoBlock : public ParentTreeValidator {
-    public:
-        ParentTreeValidatorP2PNoBlock(Intracomm *comm);
-        ParentTreeValidatorP2PNoBlock(const ParentTreeValidatorP2PNoBlock& orig);
-        virtual ~ParentTreeValidatorP2PNoBlock();
+	class ParentTreeValidatorP2PNoBlock : public ParentTreeValidator {
+	public:
+		ParentTreeValidatorP2PNoBlock(Intracomm *comm);
+		ParentTreeValidatorP2PNoBlock(const ParentTreeValidatorP2PNoBlock& orig);
+		virtual ~ParentTreeValidatorP2PNoBlock();
 
-    protected:
-        virtual bool validateDepth(ParentTree *parentTree);
+	protected:
+		virtual bool validateDepth(ParentTree *parentTree);
 
-    private:
-        Vertex* buildDepth(ParentTree *parentTree);
-        Vertex getDepth(Graph *graph, Vertex* depths, Vertex currVertex);
-        void synchAction(Vertex* depths);
-        
-        void waitForOthersToEnd(Vertex *depths);
-    };
+	private:
+		Vertex* buildDepth(ParentTree *parentTree);
+		Vertex getDepth(Graph *graph, Vertex* depths, Vertex currVertex);
+		void synchAction(Vertex* depths);
+
+		void waitForOthersToEnd(Vertex *depths);
+	};
 }
 #endif	/* PARENTTREEVALIDATORP2PNOBLOCK_H */
 

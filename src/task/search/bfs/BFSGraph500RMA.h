@@ -25,18 +25,18 @@
 
 namespace dgmark {
 
-    class BFSGraph500Optimized : public SearchTask {
-    public:
-        BFSGraph500Optimized(Intracomm *comm);
-        BFSGraph500Optimized(const BFSGraph500Optimized& orig);
-        virtual ~BFSGraph500Optimized();
+	class BFSGraph500Optimized : public SearchTask {
+	public:
+		BFSGraph500Optimized(Intracomm *comm);
+		BFSGraph500Optimized(const BFSGraph500Optimized& orig);
+		virtual ~BFSGraph500Optimized();
 
-        virtual ParentTree* run();
-        virtual string getName();
-    private:
-        void run_bfs(Vertex root, int64_t* parent);
+		virtual ParentTree* run();
+		virtual string getName();
+	private:
+		void run_bfs(Vertex root, int64_t* parent);
 
-    };
+	};
 }
 
 #endif	/* BFSGRAPH500_RMA_H */

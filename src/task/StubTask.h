@@ -20,44 +20,53 @@
 class StubResult : public Result {
 public:
 
-    virtual ~StubResult() {
-    }
+	virtual ~StubResult()
+	{
+	}
 
-    virtual TaskType getTaskType() {
-        return STUB;
-    }
-    
-    virtual double getMark() {
-        return 0;
-    }
+	virtual TaskType getTaskType()
+	{
+		return STUB;
+	}
+
+	virtual double getMark()
+	{
+		return 0;
+	}
 };
 
 class StubValidator : public Validator {
 public:
 
-    virtual ~StubValidator() {
-    }
+	virtual ~StubValidator()
+	{
+	}
 
-    TaskType getTaskType() {
-        return STUB;
-    }
+	TaskType getTaskType()
+	{
+		return STUB;
+	}
 
-    bool validate(Result *result) {
-        return true;
-    }
+	bool validate(Result *result)
+	{
+		return true;
+	}
 };
 
 class StubTask : public Task {
 public:
 
-    virtual ~StubTask() {
-    }
+	virtual ~StubTask()
+	{
+	}
 
-    TaskType getTaskType() {
-        return STUB;
-    }
+	TaskType getTaskType()
+	{
+		return STUB;
+	}
 
-    StubResult* run() {
-        return new StubResult();
-    }
+	StubResult* run()
+	{
+		return new StubResult();
+	}
 };

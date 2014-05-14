@@ -25,30 +25,30 @@
 
 namespace dgmark {
 
-    class BFSGraph500P2P : public SearchTask {
-    public:
-        BFSGraph500P2P(Intracomm *comm);
-        BFSGraph500P2P(const BFSGraph500P2P& orig);
-        virtual ~BFSGraph500P2P();
+	class BFSGraph500P2P : public SearchTask {
+	public:
+		BFSGraph500P2P(Intracomm *comm);
+		BFSGraph500P2P(const BFSGraph500P2P& orig);
+		virtual ~BFSGraph500P2P();
 
-        virtual ParentTree* run();
-        virtual string getName();
-        
-        virtual void open(Graph *newGraph);
-        virtual void close();
-    private:
-        void run_bfs(Vertex root, int64_t* parent);
+		virtual ParentTree* run();
+		virtual string getName();
 
-        int64_t* g_oldq;
-        int64_t* g_newq;
-        unsigned long* g_visited;
-        static const int coalescing_size = 256;
-        int64_t* g_outgoing;
-        size_t* g_outgoing_counts /* 2x actual count */;
-        MPI_Request* g_outgoing_reqs;
-        int* g_outgoing_reqs_active;
-        int64_t* g_recvbuf;
-    };
+		virtual void open(Graph *newGraph);
+		virtual void close();
+	private:
+		void run_bfs(Vertex root, int64_t* parent);
+
+		int64_t* g_oldq;
+		int64_t* g_newq;
+		unsigned long* g_visited;
+		static const int coalescing_size = 256;
+		int64_t* g_outgoing;
+		size_t* g_outgoing_counts /* 2x actual count */;
+		MPI_Request* g_outgoing_reqs;
+		int* g_outgoing_reqs_active;
+		int64_t* g_recvbuf;
+	};
 }
 
 #endif	/* BFSGRAPH500P2P_H */

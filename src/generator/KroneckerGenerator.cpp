@@ -18,26 +18,29 @@
 
 namespace dgmark {
 
-    KroneckerGenerator::KroneckerGenerator(Intracomm *comm) : SimpleGenerator(comm) {
-    }
-    
-    KroneckerGenerator::~KroneckerGenerator() {
-    }
-    
-    void KroneckerGenerator::addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges) {
-        vector<Edge*> *edges = graph->edges;
-        Vertex globalVertexFrom = graph->vertexToGlobal(localVertex);
-        for (int i = 0; i < numEdges; ++i) {
-            uint64_t rankTo = random->next(0, size);
-            uint64_t localVertexTo = random->next(0, graph->numGlobalVertex);
+	KroneckerGenerator::KroneckerGenerator(Intracomm *comm) : SimpleGenerator(comm)
+	{
+	}
 
-            Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
-            if (globalVertexFrom != globalVertexTo) {
-                edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
-            } else {
-                --i;
-                continue;
-            }
-        }
-    }
+	KroneckerGenerator::~KroneckerGenerator()
+	{
+	}
+
+	void KroneckerGenerator::addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges)
+	{
+		vector<Edge*> *edges = graph->edges;
+		Vertex globalVertexFrom = graph->vertexToGlobal(localVertex);
+		for (int i = 0; i < numEdges; ++i) {
+			uint64_t rankTo = random->next(0, size);
+			uint64_t localVertexTo = random->next(0, graph->numGlobalVertex);
+
+			Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
+			if (globalVertexFrom != globalVertexTo) {
+				edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
+			} else {
+				--i;
+				continue;
+			}
+		}
+	}
 }

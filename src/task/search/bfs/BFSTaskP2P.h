@@ -21,22 +21,22 @@
 
 namespace dgmark {
 
-    class BFSTaskP2P : public BFSdgmark {
-    public:
-        BFSTaskP2P(Intracomm *comm);
-        BFSTaskP2P(const BFSTaskP2P& orig);
-        virtual ~BFSTaskP2P();
+	class BFSTaskP2P : public BFSdgmark {
+	public:
+		BFSTaskP2P(Intracomm *comm);
+		BFSTaskP2P(const BFSTaskP2P& orig);
+		virtual ~BFSTaskP2P();
 
-        virtual string getName();
-        
-        virtual void open(Graph *newGraph);
-        virtual void close();
+		virtual string getName();
 
-    protected:
-        virtual bool performBFS();
-        virtual bool processGlobalChild(Vertex currVertex, Vertex child);
-        virtual bool performBFSSynch();
-    };
+		virtual void open(Graph *newGraph);
+		virtual void close();
+
+	protected:
+		virtual bool performBFS();
+		virtual bool processGlobalChild(Vertex currVertex, Vertex child);
+		virtual bool performBFSSynch();
+	};
 }
 
 #endif	/* BFSTASKP2P_H */

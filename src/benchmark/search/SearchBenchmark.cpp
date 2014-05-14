@@ -24,61 +24,66 @@
 
 namespace dgmark {
 
-    SearchBenchmark::SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts) :
-    //    Benchmark(comm, task, new ParentTreeValidatorP2P(comm), graph, numStarts),
-    Benchmark(comm, task, new ParentTreeValidatorP2PNoBlock(comm), graph, numStarts),
-    startRoots(generateStartRoots(graph->numGlobalVertex)) {
-    }
+	SearchBenchmark::SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts) :
+	//    Benchmark(comm, task, new ParentTreeValidatorP2P(comm), graph, numStarts),
+	Benchmark(comm, task, new ParentTreeValidatorP2PNoBlock(comm), graph, numStarts),
+	startRoots(generateStartRoots(graph->numGlobalVertex))
+	{
+	}
 
-    SearchBenchmark::SearchBenchmark(const SearchBenchmark& orig) :
-    Benchmark(orig.comm, orig.task, orig.validator, orig.graph, numStarts),
-    startRoots(orig.startRoots) {
-    }
+	SearchBenchmark::SearchBenchmark(const SearchBenchmark& orig) :
+	Benchmark(orig.comm, orig.task, orig.validator, orig.graph, numStarts),
+	startRoots(orig.startRoots)
+	{
+	}
 
-    SearchBenchmark::~SearchBenchmark() {
-        delete validator;
-        delete startRoots;
-    }
+	SearchBenchmark::~SearchBenchmark()
+	{
+		delete validator;
+		delete startRoots;
+	}
 
-    Vertex* SearchBenchmark::generateStartRoots(size_t maxStartRoot) {
-        log << "\nGenerating roots... ";
-        double startTime = Wtime();
-        Vertex* startRoots = new Vertex[numStarts];
-        Random *random = Random::getInstance(comm);
+	Vertex* SearchBenchmark::generateStartRoots(size_t maxStartRoot)
+	{
+		log << "\nGenerating roots... ";
+		double startTime = Wtime();
+		Vertex* startRoots = new Vertex[numStarts];
+		Random *random = Random::getInstance(comm);
 
-        if (rank == 0) {
-            for (int i = 0; i < numStarts; ++i) {
-                startRoots[i] = random->next(0, maxStartRoot);
-            }
-        }
+		if (rank == 0) {
+			for (int i = 0; i < numStarts; ++i) {
+				startRoots[i] = random->next(0, maxStartRoot);
+			}
+		}
 
-        comm->Bcast(startRoots, numStarts, VERTEX_TYPE, 0);
-        double rootsGenerationTime = Wtime() - startTime;
-        log << rootsGenerationTime << " s\n";
-        return startRoots;
-    }
+		comm->Bcast(startRoots, numStarts, VERTEX_TYPE, 0);
+		double rootsGenerationTime = Wtime() - startTime;
+		log << rootsGenerationTime << " s\n";
+		return startRoots;
+	}
 
-    bool SearchBenchmark::runSingleTask(int startIndex) {
-        assert(task->getTaskType() == SEARCH);
+	bool SearchBenchmark::runSingleTask(int startIndex)
+	{
+		assert(task->getTaskType() == SEARCH);
 
-        SearchTask *task = (SearchTask*) this->task;
-        task->setRoot(startRoots[startIndex]);
+		SearchTask *task = (SearchTask*) this->task;
+		task->setRoot(startRoots[startIndex]);
 
-        log << "Running search task (" << (startIndex + 1) << "/" << numStarts << ")\n";
-        ParentTree *result = task->run();
-        bool isValid = validator->validate(result);
+		log << "Running search task (" << (startIndex + 1) << "/" << numStarts << ")\n";
+		ParentTree *result = task->run();
+		bool isValid = validator->validate(result);
 
-        if (isValid) {
-            log << "Task mark: " << result->getMark() << " TEPS" << "\n\n";
-        }
+		if (isValid) {
+			log << "Task mark: " << result->getMark() << " TEPS" << "\n\n";
+		}
 
-        taskRunningTimes->push_back(result->getTaskRunTime());
-        marks->push_back(result->getMark());
-        validationTimes->push_back(validator->getValidationTime());
+		taskRunningTimes->push_back(result->getTaskRunTime());
+		marks->push_back(result->getMark());
+		validationTimes->push_back(validator->getValidationTime());
 
-        delete result;
-        return isValid;
-    }
+		delete result;
+		return isValid;
+	}
 
 
 

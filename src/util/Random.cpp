@@ -21,64 +21,71 @@
 #include <cstdio>
 
 namespace dgmark {
-    
-    Random* Random::instance;
 
-    Random::Random(uint64_t newSeed) : typeBitSize(64) {
-        seed = time(0) + newSeed;
-        srand(time(0) + newSeed);
-        srand(rand() + newSeed);
-        fillRandBitSize();
-    }
+	Random* Random::instance;
 
-    Random* Random::getInstance(Intracomm *comm) {
-        if(instance) {
-            return instance;
-        } else {
-            instance = new Random(comm->Get_rank());
-            return instance;
-        }
-    }
+	Random::Random(uint64_t newSeed) : typeBitSize(64)
+	{
+		seed = time(0) + newSeed;
+		srand(time(0) + newSeed);
+		srand(rand() + newSeed);
+		fillRandBitSize();
+	}
 
-    Random::Random(const Random& orig) : seed(orig.seed), typeBitSize(orig.typeBitSize) {
-        fillRandBitSize();
-    }
+	Random* Random::getInstance(Intracomm *comm)
+	{
+		if (instance) {
+			return instance;
+		} else {
+			instance = new Random(comm->Get_rank());
+			return instance;
+		}
+	}
 
-    Random::~Random() {
-    }
+	Random::Random(const Random& orig) : seed(orig.seed), typeBitSize(orig.typeBitSize)
+	{
+		fillRandBitSize();
+	}
 
-    void Random::fillRandBitSize() {
-        uint64_t randMax = RAND_MAX;
-        randBitSize = 0;
-        while (randMax > 0) {
-            randMax >>= 1;
-            randBitSize += 1;
-        }
-    }
+	Random::~Random()
+	{
+	}
 
-    uint64_t Random::next() {
-        uint64_t randomNumber = 0;
-        int typeBitSize = this->typeBitSize;
+	void Random::fillRandBitSize()
+	{
+		uint64_t randMax = RAND_MAX;
+		randBitSize = 0;
+		while (randMax > 0) {
+			randMax >>= 1;
+			randBitSize += 1;
+		}
+	}
 
-        while (typeBitSize / randBitSize > 0) {
-            randomNumber = randomNumber << randBitSize | rand();
-            typeBitSize -= randBitSize;
-        }
+	uint64_t Random::next()
+	{
+		uint64_t randomNumber = 0;
+		int typeBitSize = this->typeBitSize;
 
-        randomNumber = randomNumber << typeBitSize | (rand() & (1 << typeBitSize - 1));
-        return randomNumber;
-    }
+		while (typeBitSize / randBitSize > 0) {
+			randomNumber = randomNumber << randBitSize | rand();
+			typeBitSize -= randBitSize;
+		}
 
-    uint64_t Random::next(uint64_t min, uint64_t max) {
-        if (min > max) {
-            uint64_t temp = max;
-            max = min;
-            min = temp;
-        }
+		randomNumber = randomNumber << typeBitSize | (rand() & (1 << typeBitSize - 1));
+		return randomNumber;
+	}
 
-        uint64_t randomNumber = next();
-        randomNumber = min + randomNumber % (max - min);
-        return randomNumber;
-    }
+	uint64_t Random::next(uint64_t min, uint64_t max)
+	{
+		if (min > max) {
+			uint64_t temp = max;
+			max = min;
+			min = temp;
+		}
+
+		uint64_t randomNumber = next();
+		randomNumber = min + randomNumber % (max - min);
+		return randomNumber;
+	}
 }
 

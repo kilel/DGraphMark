@@ -23,46 +23,48 @@
 
 namespace dgmark {
 
-    /**
-     * Represents the task.
-     */
-    class Task : public Classifieble, public Communicable {
-    public:
+	/**
+	 * Represents the task.
+	 */
+	class Task : public Classifieble, public Communicable {
+	public:
 
-        Task(Intracomm *comm) : Communicable(comm) {
-        }
+		Task(Intracomm *comm) : Communicable(comm)
+		{
+		}
 
-        virtual ~Task() {
-        }
+		virtual ~Task()
+		{
+		}
 
-        /**
-         * Opens task for graph.
-         * @param graph Graph to run task on.
-         */
-        virtual void open(Graph *graph) = 0;
-        
-        /**
-         * @return Time of opening current or last task.
-         */
-        virtual double getTaskOpeningTime() = 0;
+		/**
+		 * Opens task for graph.
+		 * @param graph Graph to run task on.
+		 */
+		virtual void open(Graph *graph) = 0;
 
-        /**
-         * Run task on graph. Be sure to initialize all parameters before run.
-         * @return 
-         */
-        virtual Result* run() = 0;
+		/**
+		 * @return Time of opening current or last task.
+		 */
+		virtual double getTaskOpeningTime() = 0;
 
-        /**
-         * Close task for graph.
-         */
-        virtual void close() = 0;
-        
-        /**
-         * Returns name of the task, used in benchmark. No spaces allowed!
-         * @return name of the task.
-         */
-        virtual string getName() = 0;
-    };
+		/**
+		 * Run task on graph. Be sure to initialize all parameters before run.
+		 * @return 
+		 */
+		virtual Result* run() = 0;
+
+		/**
+		 * Close task for graph.
+		 */
+		virtual void close() = 0;
+
+		/**
+		 * Returns name of the task, used in benchmark. No spaces allowed!
+		 * @return name of the task.
+		 */
+		virtual string getName() = 0;
+	};
 
 }
 

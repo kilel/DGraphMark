@@ -23,33 +23,33 @@
 
 namespace dgmark {
 
-    class ParentTreeValidator : public Validator {
-    public:
-        ParentTreeValidator(Intracomm *comm);
-        ParentTreeValidator(const ParentTreeValidator& orig);
-        virtual ~ParentTreeValidator();
+	class ParentTreeValidator : public Validator {
+	public:
+		ParentTreeValidator(Intracomm *comm);
+		ParentTreeValidator(const ParentTreeValidator& orig);
+		virtual ~ParentTreeValidator();
 
-        virtual TaskType getTaskType();
-        virtual double getValidationTime();
-        virtual bool validate(Result *taskResult);
+		virtual TaskType getTaskType();
+		virtual double getValidationTime();
+		virtual bool validate(Result *taskResult);
 
-    protected:
-        static const int VALIDATOR_SYNCH_TAG = 28952;
-        static const int VALIDATOR_SYNCH_END_TAG = 5794;
-        static const int VALIDATOR_LOCAL_SEND_TAG = 245;
-        static const int VALIDATOR_DEPTH_SEND_TAG = 81;
-        
-        Log log;
-        
-        virtual bool validateDepth(ParentTree *parentTree) = 0;
-        bool doValidateDepth(ParentTree *parentTree, Vertex *depths);
-    private:
-        double validationTime;
+	protected:
+		static const int VALIDATOR_SYNCH_TAG = 28952;
+		static const int VALIDATOR_SYNCH_END_TAG = 5794;
+		static const int VALIDATOR_LOCAL_SEND_TAG = 245;
+		static const int VALIDATOR_DEPTH_SEND_TAG = 81;
 
-        bool doValidate(ParentTree *parentTree);
-        bool validateRanges(ParentTree *parentTree);
-        bool validateParents(ParentTree *parentTree);
-    };
+		Log log;
+
+		virtual bool validateDepth(ParentTree *parentTree) = 0;
+		bool doValidateDepth(ParentTree *parentTree, Vertex *depths);
+	private:
+		double validationTime;
+
+		bool doValidate(ParentTree *parentTree);
+		bool validateRanges(ParentTree *parentTree);
+		bool validateParents(ParentTree *parentTree);
+	};
 }
 #endif	/* PARENTTREEVALIDATOR_H */
 

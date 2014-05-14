@@ -21,87 +21,87 @@
 
 namespace dgmark {
 
-    template<class T>
-    class RMAWindow : public Communicable {
-    public:
-        RMAWindow(Intracomm *comm, size_t size, Datatype dataType);
-        RMAWindow(const RMAWindow& orig);
-        virtual ~RMAWindow();
+	template<class T>
+	class RMAWindow : public Communicable {
+	public:
+		RMAWindow(Intracomm *comm, size_t size, Datatype dataType);
+		RMAWindow(const RMAWindow& orig);
+		virtual ~RMAWindow();
 
-        T* getData();
-        size_t getDataSize();
+		T* getData();
+		size_t getDataSize();
 
-        /**
-         * Cleans data, stored in window.
-         */
-        void clean();
+		/**
+		 * Cleans data, stored in window.
+		 */
+		void clean();
 
-        /**
-         * Opens fence synchronization
-         * 
-         * @param assertType: MODE_NOPUT if no data putted. Can be 0, if no assertation used.
-         */
-        void fenceOpen(int assertType);
+		/**
+		 * Opens fence synchronization
+		 * 
+		 * @param assertType: MODE_NOPUT if no data putted. Can be 0, if no assertation used.
+		 */
+		void fenceOpen(int assertType);
 
-        /**
-         * Opens fence synchronization
-         * 
-         * @param assertType: MODE_NOSTORE if no data was stored (get method). Can be 0, if no assertation used.
-         */
-        void fenceClose(int assertType);
+		/**
+		 * Opens fence synchronization
+		 * 
+		 * @param assertType: MODE_NOSTORE if no data was stored (get method). Can be 0, if no assertation used.
+		 */
+		void fenceClose(int assertType);
 
-        /**
-         * Retrieves data wrom window. Be sure, thar targerank != this node rank.
-         * 
-         * @param dataToGet pointer to allocated place to store data.
-         * @param dataLength length of data.
-         * @param targetRank rank of node, where data lies.
-         * @param shift shift in target's data.
-         */
-        void get(T* dataToGet, size_t dataLength, int targetRank, size_t shift);
+		/**
+		 * Retrieves data wrom window. Be sure, thar targerank != this node rank.
+		 * 
+		 * @param dataToGet pointer to allocated place to store data.
+		 * @param dataLength length of data.
+		 * @param targetRank rank of node, where data lies.
+		 * @param shift shift in target's data.
+		 */
+		void get(T* dataToGet, size_t dataLength, int targetRank, size_t shift);
 
-        /**
-         * Puts data in target's storage. Be sure, thar targerank != this node rank.
-         * 
-         * @param dataToPut pointer to allocated place of data to put.
-         * @param dataLength length of data.
-         * @param targetRank rank of node, where data lies.
-         * @param shift shift in target's data.
-         */
-        void put(T* dataToPut, size_t dataLength, int targetRank, size_t shift);
+		/**
+		 * Puts data in target's storage. Be sure, thar targerank != this node rank.
+		 * 
+		 * @param dataToPut pointer to allocated place of data to put.
+		 * @param dataLength length of data.
+		 * @param targetRank rank of node, where data lies.
+		 * @param shift shift in target's data.
+		 */
+		void put(T* dataToPut, size_t dataLength, int targetRank, size_t shift);
 
-        /**
-         * Accumulates data in target's storege. Be sure, thar targerank != this node rank.
-         * @param dataToAcc pointer to allocated place of data to accumulate.
-         * @param dataLength length of data.
-         * @param targetRank rank of node, where data lies.
-         * @param shift shift in target's data.
-         * @param operation operation to accumulate with
-         */
-        void accumulate(T* dataToAcc, size_t dataLength, int targetRank, size_t shift, const Op &operation);
+		/**
+		 * Accumulates data in target's storege. Be sure, thar targerank != this node rank.
+		 * @param dataToAcc pointer to allocated place of data to accumulate.
+		 * @param dataLength length of data.
+		 * @param targetRank rank of node, where data lies.
+		 * @param shift shift in target's data.
+		 * @param operation operation to accumulate with
+		 */
+		void accumulate(T* dataToAcc, size_t dataLength, int targetRank, size_t shift, const Op &operation);
 
-        /**
-         * Sends synchronization bit with specified tag.
-         * 
-         * @param value synchronization bit.
-         * @paran tag int value, which marks send request.
-         */
-        void sendIsFenceNeeded(bool value, int tag);
+		/**
+		 * Sends synchronization bit with specified tag.
+		 * 
+		 * @param value synchronization bit.
+		 * @paran tag int value, which marks send request.
+		 */
+		void sendIsFenceNeeded(bool value, int tag);
 
-        /**
-         * Recieves synchronization bit.
-         * 
-         * @paran tag int value. Only requests with this tag would be recieved.
-         * @return synchronization bit.
-         */
-        bool recvIsFenceNeeded(int tag);
+		/**
+		 * Recieves synchronization bit.
+		 * 
+		 * @paran tag int value. Only requests with this tag would be recieved.
+		 * @return synchronization bit.
+		 */
+		bool recvIsFenceNeeded(int tag);
 
-    private:
-        T *data; //don't freed here
-        size_t dataSize;
-        Datatype dataType;
-        Win *win; //freed in ~RMAWindow
-    };
+	private:
+		T *data; //don't freed here
+		size_t dataSize;
+		Datatype dataType;
+		Win *win; //freed in ~RMAWindow
+	};
 }
 
 #endif	/* RMAWINDOW_H */

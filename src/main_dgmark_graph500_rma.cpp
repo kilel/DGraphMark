@@ -20,17 +20,18 @@
 
 using namespace dgmark;
 
-int main(int argc, char** argv) {
-    Init();
-    Intracomm *comm = &COMM_WORLD;
+int main(int argc, char** argv)
+{
+	Init();
+	Intracomm *comm = &COMM_WORLD;
 
-    vector<Task*> *tasks = new vector<Task*>();
-    tasks->push_back(new BFSGraph500Optimized(comm));
+	vector<Task*> *tasks = new vector<Task*>();
+	tasks->push_back(new BFSGraph500Optimized(comm));
 
-    SearchController *controller = new SearchController(comm, argc, argv);
-    controller->run(tasks);
-    controller->clean(tasks);
+	SearchController *controller = new SearchController(comm, argc, argv);
+	controller->run(tasks);
+	controller->clean(tasks);
 
-    Finalize();
-    return 0;
+	Finalize();
+	return 0;
 }

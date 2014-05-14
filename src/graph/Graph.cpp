@@ -15,127 +15,64 @@
  */
 
 #include "Graph.h"
+#include "GraphDistributor.h"
 #include "assert.h"
 
 namespace dgmark {
 
-    Graph::Graph(Intracomm *comm, int grade, int density) : Communicable(comm),
-    grade(grade), density(density), distributedEdges(0) {
-        initialize();
-        edges = new vector<Edge*>();
-    }
+	Graph::Graph(Intracomm *comm, int grade, int density) : Communicable(comm),
+	grade(grade), density(density)
+	{
+		initialize();
+		edges = new vector<Edge*>();
+	}
 
-    Graph::Graph(const Graph& orig) : Communicable(orig.comm), edges(orig.edges),
-    grade(orig.grade), diffGrade(orig.diffGrade), density(orig.density),
-    numLocalVertex(orig.numLocalVertex), numGlobalVertex(orig.numGlobalVertex) {
-    }
+	Graph::Graph(const Graph& orig) : Communicable(orig.comm), edges(orig.edges),
+	grade(orig.grade), diffGrade(orig.diffGrade), density(orig.density),
+	numLocalVertex(orig.numLocalVertex), numGlobalVertex(orig.numGlobalVertex)
+	{
+	}
 
-    Graph::Graph(const Graph *orig) : Communicable(orig->comm), edges(orig->edges),
-    grade(orig->grade), diffGrade(orig->diffGrade), density(orig->density),
-    numLocalVertex(orig->numLocalVertex), numGlobalVertex(orig->numGlobalVertex) {
-    }
+	Graph::Graph(const Graph *orig) : Communicable(orig->comm), edges(orig->edges),
+	grade(orig->grade), diffGrade(orig->diffGrade), density(orig->density),
+	numLocalVertex(orig->numLocalVertex), numGlobalVertex(orig->numGlobalVertex)
+	{
+	}
 
-    Graph::~Graph() {
-    }
+	Graph::~Graph()
+	{
+	}
 
-    void Graph::clear() {
-        edges->clear();
-        delete edges;
-    }
+	void Graph::clear()
+	{
+		edges->clear();
+		delete edges;
+	}
 
-    void Graph::distribute() {
-        size_t initialEdgesCount = edges->size();
-        Vertex *sendBuffer = (Vertex*) Alloc_mem(2 * sizeof(Vertex), INFO_NULL);
-	Vertex *recvBuffer = (Vertex*) Alloc_mem(2 * sizeof(Vertex), INFO_NULL);
-	Vertex *edgeMemory = new Vertex[2];
+	void Graph::initialize()
+	{
+		if (((size - 1) & size) != 0) {
+			if (rank == 0) {
+				printf("Number of MPI nodes must be 2^n. %d is not.\n", size);
+			}
+			assert(false);
+		}
+		int commSize = size;
+		int commGrade = 0;
+		while (commSize != 1) {
+			commSize >>= 1;
+			++commGrade;
+		}
 
-        for (size_t i = distributedEdges; i < initialEdgesCount; ++i) {
-            //send edge
-            sendEdge(edges->at(i), sendBuffer);
-            //try to recieve edge (by probe)
-            while (probeReadEdge(recvBuffer));
-        }
-        comm->Barrier(); //important. Wait, till all sends are done.
-        //recieve all other edges.
-        while (probeReadEdge(recvBuffer));
+		assert(commGrade < grade);
+		assert(commGrade >= 0);
+		assert(grade > 0);
+		assert(density > 0);
 
-        delete edgeMemory;
-	Free_mem(sendBuffer);
-	Free_mem(recvBuffer);
-        distributedEdges = edges->size();
-        comm->Barrier(); //important. Waits to complete distribution.
-	//printf("\n%d: %ld edges\n", rank, edges->size());
-    }
+		diffGrade = grade - commGrade;
 
-    bool Graph::isDistributed() {
-        return (distributedEdges == edges->size());
-    }
+		numLocalVertex = 1 << (diffGrade); //number of vertex in this graph locally (this node)
+		numGlobalVertex = 1 << (grade); //number of vertex globally (on all nodes)
+	}
 
-    Vertex Graph::vertexToLocal(const Vertex globalVertex) {
-        int rank = vertexRank(globalVertex);
-        return (rank << diffGrade) ^ globalVertex;
-    }
-
-    Vertex Graph::vertexToGlobal(const Vertex localVertex) {
-        return vertexToGlobal(rank, localVertex);
-    }
-
-    Vertex Graph::vertexToGlobal(const int rank, const Vertex localVertex) {
-        return (rank << diffGrade) | localVertex;
-    }
-
-    Vertex Graph::vertexRank(const Vertex globalVertex) {
-        return globalVertex >> diffGrade;
-    }
-
-    void Graph::initialize() {
-        if (((size - 1) & size) != 0) {
-            if (rank == 0) {
-                printf("Number of MPI nodes must be 2^n. %d is not.\n", size);
-            }
-            assert(false);
-        }
-        int commSize = size;
-        int commGrade = 0;
-        while (commSize != 1) {
-            commSize >>= 1;
-            ++commGrade;
-        }
-
-        assert(commGrade < grade);
-        assert(commGrade >= 0);
-        assert(grade > 0);
-        assert(density > 0);
-
-        diffGrade = grade - commGrade;
-
-        numLocalVertex = 1 << (diffGrade); //number of vertex in this graph locally (this node)
-        numGlobalVertex = 1 << (grade); //number of vertex globally (on all nodes)
-    }
-
-    void Graph::sendEdge(Edge* edge, Vertex* memory) {
-        memory[0] = edge->to;
-        memory[1] = edge->from;
-        int rankTo = vertexRank(memory[0]);
-        if (rankTo == rank) {
-            edges->push_back(new Edge(memory[0], memory[1]));
-        } else {
-            comm->Send(memory, 2, VERTEX_TYPE, rankTo, 0);
-        }
-    }
-
-    bool Graph::probeReadEdge(Vertex* memory) {
-        Status status;
-        comm->Iprobe(ANY_SOURCE, ANY_TAG, status);
-
-        int inputCount = status.Get_count(VERTEX_TYPE);
-        if (inputCount > 0) {
-            assert(inputCount == 2);
-            comm->Recv(memory, 2, VERTEX_TYPE, status.Get_source(), 0, status);
-            edges->push_back(new Edge(memory[0], memory[1]));
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

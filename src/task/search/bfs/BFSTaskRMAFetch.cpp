@@ -21,136 +21,146 @@
 
 namespace dgmark {
 
-    BFSTaskRMAFetch::BFSTaskRMAFetch(Intracomm *comm) : BFSdgmark(comm) {
-    }
+	BFSTaskRMAFetch::BFSTaskRMAFetch(Intracomm *comm) : BFSdgmark(comm)
+	{
+	}
 
-    BFSTaskRMAFetch::BFSTaskRMAFetch(const BFSTaskRMAFetch& orig) : BFSdgmark(orig.comm) {
-    }
+	BFSTaskRMAFetch::BFSTaskRMAFetch(const BFSTaskRMAFetch& orig) : BFSdgmark(orig.comm)
+	{
+	}
 
-    BFSTaskRMAFetch::~BFSTaskRMAFetch() {
-    }
+	BFSTaskRMAFetch::~BFSTaskRMAFetch()
+	{
+	}
 
-    void BFSTaskRMAFetch::open(Graph *newGraph) {
-        SearchTask::open(newGraph);
+	void BFSTaskRMAFetch::open(Graph *newGraph)
+	{
+		SearchTask::open(newGraph);
 
-        qWin = new RMAWindow<Vertex>(comm, getQueueSize(), VERTEX_TYPE);
-	nextQWin = new RMAWindow<Vertex>(comm, getQueueSize(), VERTEX_TYPE);
-        pWin = new RMAWindow<Vertex>(comm, numLocalVertex, VERTEX_TYPE);
-        queue = qWin->getData();
-	nextQueue = nextQWin->getData();
-        parent = pWin->getData();
-    }
+		qWin = new RMAWindow<Vertex>(comm, getQueueSize(), VERTEX_TYPE);
+		nextQWin = new RMAWindow<Vertex>(comm, getQueueSize(), VERTEX_TYPE);
+		pWin = new RMAWindow<Vertex>(comm, numLocalVertex, VERTEX_TYPE);
+		queue = qWin->getData();
+		nextQueue = nextQWin->getData();
+		parent = pWin->getData();
+	}
 
-    void BFSTaskRMAFetch::close() {
-        qWin->clean();
-	nextQWin->clean();
-        pWin->clean();
-        delete qWin;
-	delete nextQWin;
-        delete pWin;
-        SearchTask::close();
-    }
+	void BFSTaskRMAFetch::close()
+	{
+		qWin->clean();
+		nextQWin->clean();
+		pWin->clean();
+		delete qWin;
+		delete nextQWin;
+		delete pWin;
+		SearchTask::close();
+	}
 
-    string BFSTaskRMAFetch::getName() {
-        return "dgmark_BFS_RMA_Fetch";
-    }
-    
-    void BFSTaskRMAFetch::swapQueues() {
-	//swap RMA windows
-	RMAWindow<Vertex> *temp = qWin;
-	qWin = nextQWin;
-	nextQWin = temp;
-	BFSdgmark::swapQueues();
-    }
+	string BFSTaskRMAFetch::getName()
+	{
+		return "dgmark_BFS_RMA_Fetch";
+	}
 
-    bool BFSTaskRMAFetch::performBFS() {
-        bool isQueueEnlarged = false;
+	void BFSTaskRMAFetch::swapQueues()
+	{
+		//swap RMA windows
+		RMAWindow<Vertex> *temp = qWin;
+		qWin = nextQWin;
+		nextQWin = temp;
+		BFSdgmark::swapQueues();
+	}
 
-        for (int node = 0; node < size; ++node) {
-            if (rank == node) {
-                isQueueEnlarged = performBFSActualStep();
-                endSynch(BFS_SYNCH_TAG);
-            } else {
-                performBFSSynchRMA();
-            }
-            comm->Barrier();
-        }
+	bool BFSTaskRMAFetch::performBFS()
+	{
+		bool isQueueEnlarged = false;
 
-        comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
-	swapQueues();
-        return isQueueEnlarged;
-    }
+		for (int node = 0; node < size; ++node) {
+			if (rank == node) {
+				isQueueEnlarged = performBFSActualStep();
+				endSynch(BFS_SYNCH_TAG);
+			} else {
+				performBFSSynchRMA();
+			}
+			comm->Barrier();
+		}
 
-    void BFSTaskRMAFetch::performBFSSynchRMA() {
-        while (true) {
-            if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
-                pWin->fenceOpen(MODE_NOPUT); //allow read parent
-                pWin->fenceClose(MODE_NOSTORE);
+		comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
+		swapQueues();
+		return isQueueEnlarged;
+	}
 
-                if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
-                    pWin->fenceOpen(MODE_NOPUT); //allow to write to the parent
-                    pWin->fenceClose(MODE_NOSTORE);
-                    nextQWin->fenceOpen(MODE_NOPUT); //allow to read queue
-                    nextQWin->fenceClose(MODE_NOSTORE);
-                    nextQWin->fenceOpen(MODE_NOPUT); //allow to put to the queue
-                    nextQWin->fenceClose(MODE_NOSTORE);
-                    nextQWin->fenceOpen(MODE_NOPUT); //allow to accumulate queue
-                    nextQWin->fenceClose(MODE_NOSTORE);
-                }
-            } else { //if fence is not neaded mode
-                break;
-            }
-        }
-    }
+	void BFSTaskRMAFetch::performBFSSynchRMA()
+	{
+		while (true) {
+			if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
+				pWin->fenceOpen(MODE_NOPUT); //allow read parent
+				pWin->fenceClose(MODE_NOSTORE);
 
-    inline bool BFSTaskRMAFetch::processGlobalChild(Vertex currVertex, Vertex child) {
-        Vertex childLocal = graph->vertexToLocal(child);
-        int childRank = graph->vertexRank(child);
-        Vertex parentOfChild;
-        //printf("%d: Getting parent of child\n", rank);
+				if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
+					pWin->fenceOpen(MODE_NOPUT); //allow to write to the parent
+					pWin->fenceClose(MODE_NOSTORE);
+					nextQWin->fenceOpen(MODE_NOPUT); //allow to read queue
+					nextQWin->fenceClose(MODE_NOSTORE);
+					nextQWin->fenceOpen(MODE_NOPUT); //allow to put to the queue
+					nextQWin->fenceClose(MODE_NOSTORE);
+					nextQWin->fenceOpen(MODE_NOPUT); //allow to accumulate queue
+					nextQWin->fenceClose(MODE_NOSTORE);
+				}
+			} else { //if fence is not neaded mode
+				break;
+			}
+		}
+	}
 
-        pWin->sendIsFenceNeeded(true, BFS_SYNCH_TAG); //fence is needed now
-        pWin->fenceOpen(MODE_NOPUT);
-        pWin->get(&parentOfChild, 1, childRank, childLocal);
-        pWin->fenceClose(0);
+	inline bool BFSTaskRMAFetch::processGlobalChild(Vertex currVertex, Vertex child)
+	{
+		Vertex childLocal = graph->vertexToLocal(child);
+		int childRank = graph->vertexRank(child);
+		Vertex parentOfChild;
+		//printf("%d: Getting parent of child\n", rank);
 
-        //printf("%d: Parent of child is %ld\n", rank, parentOfChild, numLocalVertex);
-        assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
+		pWin->sendIsFenceNeeded(true, BFS_SYNCH_TAG); //fence is needed now
+		pWin->fenceOpen(MODE_NOPUT);
+		pWin->get(&parentOfChild, 1, childRank, childLocal);
+		pWin->fenceClose(0);
+
+		//printf("%d: Parent of child is %ld\n", rank, parentOfChild, numLocalVertex);
+		assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
 
 
-        bool isInnerFenceNeeded = (parentOfChild == graph->numGlobalVertex);
-        pWin->sendIsFenceNeeded(isInnerFenceNeeded, BFS_SYNCH_TAG); // call for inner fence if it is needed
+		bool isInnerFenceNeeded = (parentOfChild == graph->numGlobalVertex);
+		pWin->sendIsFenceNeeded(isInnerFenceNeeded, BFS_SYNCH_TAG); // call for inner fence if it is needed
 
-        if (isInnerFenceNeeded) {
-            //printf("%d: Putting child to the parent\n", rank);
-            pWin->fenceOpen(0);
-            pWin->put(&currVertex, 1, childRank, childLocal);
-            pWin->fenceClose(MODE_NOSTORE);
+		if (isInnerFenceNeeded) {
+			//printf("%d: Putting child to the parent\n", rank);
+			pWin->fenceOpen(0);
+			pWin->put(&currVertex, 1, childRank, childLocal);
+			pWin->fenceClose(MODE_NOSTORE);
 
-            //Updating queue
-            Vertex queueLastIndex;
-            //printf("%d: Getting last queue index\n", rank);
-            nextQWin->fenceOpen(MODE_NOPUT);
-            nextQWin->get(&queueLastIndex, 1, childRank, 1); // get queue[1]
-            nextQWin->fenceClose(0);
+			//Updating queue
+			Vertex queueLastIndex;
+			//printf("%d: Getting last queue index\n", rank);
+			nextQWin->fenceOpen(MODE_NOPUT);
+			nextQWin->get(&queueLastIndex, 1, childRank, 1); // get queue[1]
+			nextQWin->fenceClose(0);
 
-            //printf("%d: Last queue index is %ld\n", rank, queueLastIndex);
-            assert(0 <= queueLastIndex && queueLastIndex <= getQueueSize());
+			//printf("%d: Last queue index is %ld\n", rank, queueLastIndex);
+			assert(0 <= queueLastIndex && queueLastIndex <= getQueueSize());
 
-            //printf("%d: Putting child to the queue\n", rank);
-            nextQWin->fenceOpen(0);
-            nextQWin->put(&childLocal, 1, childRank, queueLastIndex);
-            nextQWin->fenceClose(MODE_NOSTORE);
+			//printf("%d: Putting child to the queue\n", rank);
+			nextQWin->fenceOpen(0);
+			nextQWin->put(&childLocal, 1, childRank, queueLastIndex);
+			nextQWin->fenceClose(MODE_NOSTORE);
 
-            //printf("%d: Incrementing left edge of the queue\n", rank);
-            Vertex one = 1;
-            nextQWin->fenceOpen(0);
-            nextQWin->accumulate(&one, 1, childRank, 1, SUM); // queue[1] += 1
-            nextQWin->fenceClose(0);
+			//printf("%d: Incrementing left edge of the queue\n", rank);
+			Vertex one = 1;
+			nextQWin->fenceOpen(0);
+			nextQWin->accumulate(&one, 1, childRank, 1, SUM); // queue[1] += 1
+			nextQWin->fenceClose(0);
 
-            return true; // queue is enlarged
-        } else {
-            return false; //queue was not enlarged
-        }
-    }
+			return true; // queue is enlarged
+		} else {
+			return false; //queue was not enlarged
+		}
+	}
 }

@@ -21,95 +21,95 @@
 
 namespace dgmark {
 
-    class BFSTaskP2PNoBlock : public BFSTaskP2P {
-    public:
-        BFSTaskP2PNoBlock(Intracomm *comm);
-        BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig);
-        virtual ~BFSTaskP2PNoBlock();
+	class BFSTaskP2PNoBlock : public BFSTaskP2P {
+	public:
+		BFSTaskP2PNoBlock(Intracomm *comm);
+		BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig);
+		virtual ~BFSTaskP2PNoBlock();
 
-        virtual string getName();
+		virtual string getName();
 
-        //redefune open/close to support creation of buffers.
-        virtual void open(Graph *newGraph);
-        virtual void close();
+		//redefune open/close to support creation of buffers.
+		virtual void open(Graph *newGraph);
+		virtual void close();
 
-    protected:
-        virtual bool performBFS();
-        virtual bool processLocalChild(Vertex currVertex, Vertex child);
-        virtual bool processGlobalChild(Vertex currVertex, Vertex child);
-        virtual bool probeBFSSynch();
-    private:
-        /**
-         * Quantity of elements to send with single package.
-         */
-        static const size_t itemsToSendCount = 512;
+	protected:
+		virtual bool performBFS();
+		virtual bool processLocalChild(Vertex currVertex, Vertex child);
+		virtual bool processGlobalChild(Vertex currVertex, Vertex child);
+		virtual bool probeBFSSynch();
+	private:
+		/**
+		 * Quantity of elements to send with single package.
+		 */
+		static const size_t itemsToSendCount = 512;
 
-        /**
-         * Cached requests for all nodes.
-         */
-        Request* requests;
+		/**
+		 * Cached requests for all nodes.
+		 */
+		Request* requests;
 
-        /**
-         * Cached recieve data request.
-         */
-        Request recvReq;
+		/**
+		 * Cached recieve data request.
+		 */
+		Request recvReq;
 
-        /**
-         * Recv request activity state.
-         * True means, that data is recieved in buffer completely.
-         */
-        bool isRecvActive;
+		/**
+		 * Recv request activity state.
+		 * True means, that data is recieved in buffer completely.
+		 */
+		bool isRecvActive;
 
-        /**
-         * Cached request activity states for nodes. 
-         * True, if request to node is still running.
-         */
-        bool* isRequestActive;
+		/**
+		 * Cached request activity states for nodes. 
+		 * True, if request to node is still running.
+		 */
+		bool* isRequestActive;
 
-        /**
-         * Buffers of data for all nodes. 
-         * Each node buffer contains itemsToSendCount elements.
-         */
-        Vertex** sendDataBuffer;
+		/**
+		 * Buffers of data for all nodes. 
+		 * Each node buffer contains itemsToSendCount elements.
+		 */
+		Vertex** sendDataBuffer;
 
-        /**
-         * Count of elements, which are ready to be sent.
-         */
-        size_t* sendDataCount;
+		/**
+		 * Count of elements, which are ready to be sent.
+		 */
+		size_t* sendDataCount;
 
-        /**
-         * Recieve buffer.
-         */
-        Vertex* recvBuffer;
+		/**
+		 * Recieve buffer.
+		 */
+		Vertex* recvBuffer;
 
-        /**
-         * Sends request to specified rank.
-         * @param toRank Reciever node rank.
-         */
-        void sendData(int toRank);
+		/**
+		 * Sends request to specified rank.
+		 * @param toRank Reciever node rank.
+		 */
+		void sendData(int toRank);
 
-        /**
-         * Sets buffers to default values.
-         */
-        void prepareBufers();
+		/**
+		 * Sets buffers to default values.
+		 */
+		void prepareBufers();
 
-        /**
-         * Sends all remaining data and assures, that it was recieved by other process.
-         * @return true, if queue was enlarged.
-         */
-        bool flushBuffers();
-        
-        /**
-         * Tests all active requests to see, if them are completed.
-         */
-        void refreshActivityState();
-        
-        /**
-         * Waits before all other nodes to enter this section.
-         * @return true, if queue was enlarged.
-         */
-        bool waitForOthersToEnd();
-    };
+		/**
+		 * Sends all remaining data and assures, that it was recieved by other process.
+		 * @return true, if queue was enlarged.
+		 */
+		bool flushBuffers();
+
+		/**
+		 * Tests all active requests to see, if them are completed.
+		 */
+		void refreshActivityState();
+
+		/**
+		 * Waits before all other nodes to enter this section.
+		 * @return true, if queue was enlarged.
+		 */
+		bool waitForOthersToEnd();
+	};
 }
 
 #endif	/* BFSTASKP2PNOBLOCK_H */

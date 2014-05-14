@@ -18,45 +18,53 @@
 
 namespace dgmark {
 
-    SearchTask::SearchTask(Intracomm *comm) : Task(comm), log(comm) {
-    }
+	SearchTask::SearchTask(Intracomm *comm) : Task(comm), log(comm)
+	{
+	}
 
-    SearchTask::SearchTask(const SearchTask& orig) : Task(orig.comm), log(orig.comm) {
-    }
+	SearchTask::SearchTask(const SearchTask& orig) : Task(orig.comm), log(orig.comm)
+	{
+	}
 
-    SearchTask::~SearchTask() {
-    }
+	SearchTask::~SearchTask()
+	{
+	}
 
-    TaskType SearchTask::getTaskType() {
-        return SEARCH;
-    }
+	TaskType SearchTask::getTaskType()
+	{
+		return SEARCH;
+	}
 
-    void SearchTask::open(Graph *newGraph) {
-        log << "Opening task... ";
-        comm->Barrier();
-        double startTime = Wtime();
-        graph = new CSRGraph(newGraph);
-        comm->Barrier();
-        taskOpeningTime = Wtime() - startTime;
-        log << taskOpeningTime << " s\n";
-        
-        numLocalVertex = graph->numLocalVertex;
-    }
+	void SearchTask::open(Graph *newGraph)
+	{
+		log << "Opening task... ";
+		comm->Barrier();
+		double startTime = Wtime();
+		graph = new CSRGraph(newGraph);
+		comm->Barrier();
+		taskOpeningTime = Wtime() - startTime;
+		log << taskOpeningTime << " s\n";
 
-    void SearchTask::close() {
-        comm->Barrier();
-        log << "Closing task... \n";
-        delete graph;
-        comm->Barrier();
-    }
+		numLocalVertex = graph->numLocalVertex;
+	}
 
-    double SearchTask::getTaskOpeningTime() {
-        return taskOpeningTime;
-    }
+	void SearchTask::close()
+	{
+		comm->Barrier();
+		log << "Closing task... \n";
+		delete graph;
+		comm->Barrier();
+	}
 
-    void SearchTask::setRoot(Vertex newRoot) {
-        root = newRoot;
-    }
+	double SearchTask::getTaskOpeningTime()
+	{
+		return taskOpeningTime;
+	}
+
+	void SearchTask::setRoot(Vertex newRoot)
+	{
+		root = newRoot;
+	}
 
 }
 

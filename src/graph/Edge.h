@@ -21,41 +21,44 @@
 #include <mpi.h>
 
 namespace dgmark {
-    using namespace MPI;
+	using namespace MPI;
 
-    /**
-     * Represents index of vertex of the graph.
-     */
-    typedef uint64_t Vertex;
+	/**
+	 * Represents index of vertex of the graph.
+	 */
+	typedef uint64_t Vertex;
 
-    const Datatype VERTEX_TYPE(MPI_UINT64_T);
+	const Datatype VERTEX_TYPE(MPI_UINT64_T);
 
-    /**
-     * Represents directed edge of the graph.
-     */
-    class Edge {
-    public:
-        Vertex from;
-        Vertex to;
+	/**
+	 * Represents directed edge of the graph.
+	 */
+	class Edge {
+	public:
+		Vertex from;
+		Vertex to;
 
-        /**
-         * Creates directed edge of the graph.
-         * @param from Start vertex.
-         * @param to End vertex.
-         */
-        Edge(Vertex from, Vertex to) : from(from), to(to) {
-        };
+		/**
+		 * Creates directed edge of the graph.
+		 * @param from Start vertex.
+		 * @param to End vertex.
+		 */
+		Edge(Vertex from, Vertex to) : from(from), to(to)
+		{
+		};
 
-        /**
-         * Copying edge from other.
-         * @param orig Original edge.
-         */
-        Edge(const Edge& orig) : from(orig.from), to(orig.to) {
-        }
+		/**
+		 * Copying edge from other.
+		 * @param orig Original edge.
+		 */
+		Edge(const Edge& orig) : from(orig.from), to(orig.to)
+		{
+		}
 
-        virtual ~Edge() {
-        }
-    };
+		virtual ~Edge()
+		{
+		}
+	};
 
 }
 #endif	/* EDGE_H */

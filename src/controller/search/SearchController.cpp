@@ -23,58 +23,64 @@
 
 namespace dgmark {
 
-    SearchController::SearchController(Intracomm *comm, int argc, char **argv) :
-    Controller(comm, argc, argv) {
-        generator = new SimpleGenerator(comm);
-    }
+	SearchController::SearchController(Intracomm *comm, int argc, char **argv) :
+	Controller(comm, argc, argv)
+	{
+		generator = new SimpleGenerator(comm);
+	}
 
-    SearchController::SearchController(const SearchController& orig) :
-    Controller(orig) {
-    }
+	SearchController::SearchController(const SearchController& orig) :
+	Controller(orig)
+	{
+	}
 
-    SearchController::~SearchController() {
-        delete generator;
-    }
+	SearchController::~SearchController()
+	{
+		delete generator;
+	}
 
-    void SearchController::run(vector<Task*> *tasks) {
-        Graph *graph = generator->generate(grade, density);
+	void SearchController::run(vector<Task*> *tasks)
+	{
+		Graph *graph = generator->generate(grade, density);
 
-        vector<Benchmark*> *benchmarks = new vector<Benchmark*>(0);
+		vector<Benchmark*> *benchmarks = new vector<Benchmark*>(0);
 
-        for (vector<Task*>::iterator taskIt = tasks->begin(); taskIt < tasks->end(); ++taskIt) {
-            Task *task = *taskIt;
-            assert(task->getTaskType() == SEARCH);
-            Benchmark* benchmark = new SearchBenchmark(comm, (SearchTask*) task, graph, numStarts);
-            benchmarks->push_back(benchmark);
-        }
+		for (vector<Task*>::iterator taskIt = tasks->begin(); taskIt < tasks->end(); ++taskIt) {
+			Task *task = *taskIt;
+			assert(task->getTaskType() == SEARCH);
+			Benchmark* benchmark = new SearchBenchmark(comm, (SearchTask*) task, graph, numStarts);
+			benchmarks->push_back(benchmark);
+		}
 
-        Controller::run(benchmarks);
-        Controller::clean(benchmarks);
+		Controller::run(benchmarks);
+		Controller::clean(benchmarks);
 
-        graph->clear();
-        delete graph;
-    }
+		graph->clear();
+		delete graph;
+	}
 
-    void SearchController::clean(vector<Task*> *tasks) {
-        for (size_t taskId = 0; taskId < tasks->size(); ++taskId) {
-            delete (tasks->at(taskId));
-        }
-        delete tasks;
-    }
+	void SearchController::clean(vector<Task*> *tasks)
+	{
+		for (size_t taskId = 0; taskId < tasks->size(); ++taskId) {
+			delete (tasks->at(taskId));
+		}
+		delete tasks;
+	}
 
-    string SearchController::getAdditionalStatistics() {
-        stringstream out;
-        out.precision(CONTROLLER_PRECISION);
-        out.setf(ios::fixed, ios::floatfield);
+	string SearchController::getAdditionalStatistics()
+	{
+		stringstream out;
+		out.precision(CONTROLLER_PRECISION);
+		out.setf(ios::fixed, ios::floatfield);
 
-        out << "#\n";
-        out << "#Duration of processes\n";
-        out << "#\n";
-        out << "time.graph.generation = " << generator->getGenerationTime() << "\n";
-        out << "time.graph.distribution = " << generator->getDistributionTime() << "\n";
+		out << "#\n";
+		out << "#Duration of processes\n";
+		out << "#\n";
+		out << "time.graph.generation = " << generator->getGenerationTime() << "\n";
+		out << "time.graph.distribution = " << generator->getDistributionTime() << "\n";
 
-        return out.str();
-    }
+		return out.str();
+	}
 
 }
 

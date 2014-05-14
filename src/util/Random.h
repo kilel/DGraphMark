@@ -22,26 +22,26 @@
 
 namespace dgmark {
 
-    class Random {
-    public:
-        Random(const Random& orig);
-        virtual ~Random();
-        
-        static Random* getInstance(Intracomm *comm);
+	class Random {
+	public:
+		Random(const Random& orig);
+		virtual ~Random();
 
-        uint64_t next();
-        uint64_t next(uint64_t min, uint64_t max);
-    private:
-        Random(uint64_t seed);
-        
-        uint64_t seed;
+		static Random* getInstance(Intracomm *comm);
 
-        int typeBitSize;
-        int randBitSize;
-        void fillRandBitSize();
-        
-        static Random *instance;
-    };
+		uint64_t next();
+		uint64_t next(uint64_t min, uint64_t max);
+	private:
+		Random(uint64_t seed);
+
+		uint64_t seed;
+
+		int typeBitSize;
+		int randBitSize;
+		void fillRandBitSize();
+
+		static Random *instance;
+	};
 }
 
 #endif	/* RANDOM_H */

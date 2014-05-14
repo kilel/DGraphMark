@@ -23,27 +23,29 @@
 
 namespace dgmark {
 
-    /**
-     * Generates Graphs.<br />
-     * Parameters for generation passes with constructor.
-     */
-    class GraphGenerator : public Communicable {
-    public:
+	/**
+	 * Generates Graphs.<br />
+	 * Parameters for generation passes with constructor.
+	 */
+	class GraphGenerator : public Communicable {
+	public:
 
-        GraphGenerator(Intracomm *comm) : Communicable(comm) {
-        }
+		GraphGenerator(Intracomm *comm) : Communicable(comm)
+		{
+		}
 
-        virtual ~GraphGenerator() {
-        }
+		virtual ~GraphGenerator()
+		{
+		}
 
-        /**
-         * Generates graph with specified parameters.
-         * @return Graph.
-         */
-        virtual Graph* generate(int grade, int density) = 0;
-        virtual double getGenerationTime() = 0;
-        virtual double getDistributionTime() = 0;
-    };
+		/**
+		 * Generates graph with specified parameters.
+		 * @return Graph.
+		 */
+		virtual Graph* generate(int grade, int density) = 0;
+		virtual double getGenerationTime() = 0;
+		virtual double getDistributionTime() = 0;
+	};
 
 }
 

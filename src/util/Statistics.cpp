@@ -20,46 +20,49 @@
 
 namespace dgmark {
 
-    Statistics::Statistics(vector<double>* data) {
-        size_t dataSize = data->size();
+	Statistics::Statistics(vector<double>* data)
+	{
+		size_t dataSize = data->size();
 
-        mean = 0;
-        for (vector<double>::iterator it = data->begin(); it < data->end(); ++it) {
-            mean += *it;
-        }
-        mean /= dataSize;
+		mean = 0;
+		for (vector<double>::iterator it = data->begin(); it < data->end(); ++it) {
+			mean += *it;
+		}
+		mean /= dataSize;
 
-        stdDeviation = 0;
-        for (vector<double>::iterator it = data->begin(); it < data->end(); ++it) {
-            stdDeviation += pow(*it - mean, 2.);
-        }
-        stdDeviation = sqrt(stdDeviation / (dataSize - 1));
+		stdDeviation = 0;
+		for (vector<double>::iterator it = data->begin(); it < data->end(); ++it) {
+			stdDeviation += pow(*it - mean, 2.);
+		}
+		stdDeviation = sqrt(stdDeviation / (dataSize - 1));
 
-        relStdDeviation = stdDeviation / mean;
+		relStdDeviation = stdDeviation / mean;
 
-        vector<double> *sortedData = new vector<double>();
-        sortedData->insert(sortedData->begin(), data->begin(), data->end());
+		vector<double> *sortedData = new vector<double>();
+		sortedData->insert(sortedData->begin(), data->begin(), data->end());
 
-        sort(sortedData->begin(), sortedData->end());
+		sort(sortedData->begin(), sortedData->end());
 
 
-        size_t quartile = dataSize / 4 < 1 ? 1 : dataSize / 4;
-        minimum = sortedData->front();
-        firstQuartile = sortedData->at(dataSize / 4);
-        median = sortedData->at(dataSize / 2);
-        thirdQuartile = sortedData->at(dataSize - quartile);
-        maximum = sortedData->back();
+		size_t quartile = dataSize / 4 < 1 ? 1 : dataSize / 4;
+		minimum = sortedData->front();
+		firstQuartile = sortedData->at(dataSize / 4);
+		median = sortedData->at(dataSize / 2);
+		thirdQuartile = sortedData->at(dataSize - quartile);
+		maximum = sortedData->back();
 
-        delete sortedData;
-    }
+		delete sortedData;
+	}
 
-    Statistics::Statistics(const Statistics& orig) : mean(orig.mean),
-    stdDeviation(orig.stdDeviation), relStdDeviation(orig.relStdDeviation),
-    minimum(orig.minimum), firstQuartile(orig.firstQuartile), median(orig.median),
-    thirdQuartile(orig.thirdQuartile), maximum(orig.maximum) {
-    }
+	Statistics::Statistics(const Statistics& orig) : mean(orig.mean),
+	stdDeviation(orig.stdDeviation), relStdDeviation(orig.relStdDeviation),
+	minimum(orig.minimum), firstQuartile(orig.firstQuartile), median(orig.median),
+	thirdQuartile(orig.thirdQuartile), maximum(orig.maximum)
+	{
+	}
 
-    Statistics::~Statistics() {
-    }
+	Statistics::~Statistics()
+	{
+	}
 
 }

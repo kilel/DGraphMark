@@ -22,35 +22,35 @@
 
 namespace dgmark {
 
-    class BFSTaskRMAFetch : public BFSdgmark {
-    public:
-        BFSTaskRMAFetch(Intracomm *comm);
-        BFSTaskRMAFetch(const BFSTaskRMAFetch& orig);
-        virtual ~BFSTaskRMAFetch();
+	class BFSTaskRMAFetch : public BFSdgmark {
+	public:
+		BFSTaskRMAFetch(Intracomm *comm);
+		BFSTaskRMAFetch(const BFSTaskRMAFetch& orig);
+		virtual ~BFSTaskRMAFetch();
 
-        virtual string getName();
+		virtual string getName();
 
-        virtual void open(Graph *newGraph);
-        virtual void close();
+		virtual void open(Graph *newGraph);
+		virtual void close();
 
-    protected:
-        RMAWindow<Vertex> *qWin;
-        RMAWindow<Vertex> *nextQWin;
-        RMAWindow<Vertex> *pWin;
+	protected:
+		RMAWindow<Vertex> *qWin;
+		RMAWindow<Vertex> *nextQWin;
+		RMAWindow<Vertex> *pWin;
 
-        virtual void swapQueues();
-        virtual bool performBFS();
-        virtual bool processGlobalChild(Vertex currVertex, Vertex child);
+		virtual void swapQueues();
+		virtual bool performBFS();
+		virtual bool processGlobalChild(Vertex currVertex, Vertex child);
 
-    private:
-        /**
-         * Performs RMA synchronization.
-         * Purpose is to allow main process in queue to perform actual BFS.
-         * @param qWin queue RMA window
-         * @param pWin parent RMA window
-         */
-        void performBFSSynchRMA();
-    };
+	private:
+		/**
+		 * Performs RMA synchronization.
+		 * Purpose is to allow main process in queue to perform actual BFS.
+		 * @param qWin queue RMA window
+		 * @param pWin parent RMA window
+		 */
+		void performBFSSynchRMA();
+	};
 }
 
 #endif	/* BFSTASKRMAFETCH_H */
