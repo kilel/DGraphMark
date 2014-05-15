@@ -39,8 +39,8 @@ namespace dgmark {
 		RMAWindow<Vertex> *pWin;
 
 		virtual void swapQueues();
-		virtual bool performBFS();
-		virtual bool processGlobalChild(Vertex currVertex, Vertex child);
+		virtual void performBFS();
+		virtual void processGlobalChild(Vertex currVertex, Vertex child);
 
 	private:
 		/**

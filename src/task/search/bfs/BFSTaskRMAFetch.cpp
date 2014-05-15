@@ -70,23 +70,18 @@ namespace dgmark {
 		BFSdgmark::swapQueues();
 	}
 
-	bool BFSTaskRMAFetch::performBFS()
+	void BFSTaskRMAFetch::performBFS()
 	{
-		bool isQueueEnlarged = false;
-
 		for (int node = 0; node < size; ++node) {
 			if (rank == node) {
-				isQueueEnlarged = performBFSActualStep();
+				performBFSActualStep();
 				endSynch(BFS_SYNCH_TAG);
 			} else {
 				performBFSSynchRMA();
 			}
 			comm->Barrier();
 		}
-
-		comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR); //finds OR for "isQueueEnlarged" in all processes.
 		swapQueues();
-		return isQueueEnlarged;
 	}
 
 	void BFSTaskRMAFetch::performBFSSynchRMA()
@@ -112,7 +107,7 @@ namespace dgmark {
 		}
 	}
 
-	inline bool BFSTaskRMAFetch::processGlobalChild(Vertex currVertex, Vertex child)
+	inline void BFSTaskRMAFetch::processGlobalChild(Vertex currVertex, Vertex child)
 	{
 		Vertex childLocal = graph->vertexToLocal(child);
 		int childRank = graph->vertexRank(child);
@@ -141,7 +136,7 @@ namespace dgmark {
 			Vertex queueLastIndex;
 			//printf("%d: Getting last queue index\n", rank);
 			nextQWin->fenceOpen(MODE_NOPUT);
-			nextQWin->get(&queueLastIndex, 1, childRank, 1); // get queue[1]
+			nextQWin->get(&queueLastIndex, 1, childRank, 0); // get queue[0]
 			nextQWin->fenceClose(0);
 
 			//printf("%d: Last queue index is %ld\n", rank, queueLastIndex);
@@ -149,18 +144,14 @@ namespace dgmark {
 
 			//printf("%d: Putting child to the queue\n", rank);
 			nextQWin->fenceOpen(0);
-			nextQWin->put(&childLocal, 1, childRank, queueLastIndex);
+			nextQWin->put(&childLocal, 1, childRank, queueLastIndex + 1);
 			nextQWin->fenceClose(MODE_NOSTORE);
 
 			//printf("%d: Incrementing left edge of the queue\n", rank);
 			Vertex one = 1;
 			nextQWin->fenceOpen(0);
-			nextQWin->accumulate(&one, 1, childRank, 1, SUM); // queue[1] += 1
+			nextQWin->accumulate(&one, 1, childRank, 0, SUM); // queue[0] += 1
 			nextQWin->fenceClose(0);
-
-			return true; // queue is enlarged
-		} else {
-			return false; //queue was not enlarged
 		}
 	}
 }

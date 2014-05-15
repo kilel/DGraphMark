@@ -33,9 +33,9 @@ namespace dgmark {
 		virtual void close();
 
 	protected:
-		virtual bool performBFS();
-		virtual bool processGlobalChild(Vertex currVertex, Vertex child);
-		virtual bool performBFSSynch();
+		virtual void performBFS();
+		virtual void processGlobalChild(Vertex currVertex, Vertex child);
+		virtual void performBFSSynch();
 	};
 }
 

@@ -29,15 +29,14 @@ namespace dgmark {
 
 		virtual string getName();
 
-		//redefune open/close to support creation of buffers.
+		//redefine open/close to support creation of buffers.
 		virtual void open(Graph *newGraph);
 		virtual void close();
 
 	protected:
-		virtual bool performBFS();
-		virtual bool processLocalChild(Vertex currVertex, Vertex child);
-		virtual bool processGlobalChild(Vertex currVertex, Vertex child);
-		virtual bool probeBFSSynch();
+		virtual void performBFS();
+		virtual void processGlobalChild(Vertex currVertex, Vertex child);
+		virtual void probeBFSSynch();
 	private:
 		/**
 		 * Quantity of elements to send with single package.

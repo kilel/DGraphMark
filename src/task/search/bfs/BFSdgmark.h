@@ -44,8 +44,8 @@ namespace dgmark {
 		 * queue is a queue of vertex (local).
 		 * Traversed vertex adds to the end of the queue.
 		 * When BFS performs, it looks on the first vertex (at queue[0] index)
-		 * queue[0] is a start index.
-		 * queue[1] is an index after the end.
+		 * queue[0] is a length
+		 * Elements are located in 1..queue[0] indecies.
 		 */
 		Vertex *queue;
 
@@ -65,25 +65,22 @@ namespace dgmark {
 
 		/**
 		 * Performs BFS step.
-		 * @return true, if more steps are needed.
 		 */
-		virtual bool performBFS() = 0;
+		virtual void performBFS() = 0;
 
 		/**
-		 * Performs actual BFS step. Probes synchronization by calling probeBFSSynch.
-		 * @return true, if some queuewas enlarged.
+		 * Performs actual BFS step.
 		 */
-		virtual bool performBFSActualStep();
+		virtual void performBFSActualStep();
 
 		/**
 		 * Processes local child. 
 		 * Adds it to local queue and sets it's parent, if it was not set.
 		 * 
-		 * @param currVertex current vertex (parent of child) (global notation)
-		 * @param child Child of current vertex (global notation)
-		 * @return true, if some queue is enlarged.
+		 * @param parentVertexGlobal Current vertex (parent of child) (global notation)
+		 * @param childVertexLocal Child of current vertex (local notation)
 		 */
-		virtual bool processLocalChild(Vertex currVertex, Vertex child);
+		virtual void processLocalChild(Vertex parentVertexGlobal, Vertex childVertexLocal);
 
 		/**
 		 * Processes global child. 
@@ -91,9 +88,8 @@ namespace dgmark {
 		 * 
 		 * @param currVertex current vertex (parent of child) (global notation)
 		 * @param child Child of current vertex (global notation)
-		 * @return true, if some queue is enlarged.
 		 */
-		virtual bool processGlobalChild(Vertex currVertex, Vertex child) = 0;
+		virtual void processGlobalChild(Vertex currVertex, Vertex child) = 0;
 
 		/**
 		 * Swaps queues.
@@ -114,6 +110,12 @@ namespace dgmark {
 		 * @return queue size.
 		 */
 		virtual Vertex getQueueSize();
+
+		/**
+		 * Calculaded need of next BFS step.
+		 * @return true, if next step needed.
+		 */
+		virtual bool isNextStepNeeded();
 	};
 }
 

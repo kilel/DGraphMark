@@ -39,30 +39,20 @@ namespace dgmark {
 		return "dgmark_BFS_P2P_no_block";
 	}
 
-	bool BFSTaskP2PNoBlock::performBFS()
+	void BFSTaskP2PNoBlock::performBFS()
 	{
 		prepareBufers();
-		bool isQueueEnlarged = performBFSActualStep();
-		isQueueEnlarged |= flushBuffers();
-		isQueueEnlarged |= waitForOthersToEnd();
+		performBFSActualStep();
+		flushBuffers();
+		waitForOthersToEnd();
 		swapQueues();
 
 		if (isRecvActive) {
 			recvReq.Cancel();
 		}
-
-		//finds OR for "isQueueEnlarged" in all processes.
-		comm->Allreduce(IN_PLACE, &isQueueEnlarged, 1, BOOL, LOR);
-		return isQueueEnlarged;
 	}
 
-	inline bool BFSTaskP2PNoBlock::processLocalChild(Vertex currVertex, Vertex child)
-	{
-		bool isQueueChanged = probeBFSSynch();
-		return BFSdgmark::processLocalChild(currVertex, child) || isQueueChanged;
-	}
-
-	inline bool BFSTaskP2PNoBlock::processGlobalChild(Vertex currVertex, Vertex child)
+	inline void BFSTaskP2PNoBlock::processGlobalChild(Vertex currVertex, Vertex child)
 	{
 		const Vertex childLocal = graph->vertexToLocal(child);
 		const int childRank = graph->vertexRank(child);
@@ -79,14 +69,12 @@ namespace dgmark {
 			sendData(childRank);
 		}
 
-		return probeBFSSynch();
+		probeBFSSynch();
 	}
 
-	inline bool BFSTaskP2PNoBlock::probeBFSSynch()
+	inline void BFSTaskP2PNoBlock::probeBFSSynch()
 	{
 		Status status;
-		bool isQueueChanged = false;
-
 		if (isRecvActive && recvReq.Test(status)) {
 			isRecvActive = false;
 			int elementsCount = status.Get_count(VERTEX_TYPE);
@@ -94,13 +82,7 @@ namespace dgmark {
 			for (size_t dataIndex = 0; dataIndex < elementsCount; dataIndex += 2) {
 				Vertex currLocal = recvBuffer[dataIndex];
 				Vertex parentGlobal = recvBuffer[dataIndex + 1];
-
-				if (parent[currLocal] == graph->numGlobalVertex) {
-					parent[currLocal] = parentGlobal;
-					nextQueue[nextQueue[1]++] = currLocal;
-					//assert(nextQueue[1] < getQueueSize());
-					isQueueChanged = true;
-				}
+				processLocalChild(parentGlobal, currLocal);
 			}
 		}
 
@@ -110,7 +92,6 @@ namespace dgmark {
 		}
 
 		refreshActivityState();
-		return isQueueChanged;
 	}
 
 	inline void BFSTaskP2PNoBlock::sendData(int toRank)
@@ -138,7 +119,7 @@ namespace dgmark {
 				sendData(reqIndex);
 			}
 			while (isRequestActive[reqIndex]) {
-				isQueueEnlarged |= probeBFSSynch();
+				probeBFSSynch();
 			}
 		}
 		return isQueueEnlarged;
@@ -151,13 +132,13 @@ namespace dgmark {
 		requestSynch(true, BFS_END_SYNCH_TAG);
 		int endedProcesses = 1;
 		while (endedProcesses < size) {
-			isQueueEnlarged |= probeBFSSynch();
+			probeBFSSynch();
 			while (probeSynch(BFS_END_SYNCH_TAG)) {
 				++endedProcesses;
 			}
 		}
 
-		isQueueEnlarged |= probeBFSSynch();
+		probeBFSSynch();
 		return isQueueEnlarged;
 	}
 
