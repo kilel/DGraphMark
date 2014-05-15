@@ -16,6 +16,7 @@
 
 #include "GraphDistributor.h"
 #include "assert.h"
+#include "../util/Utils.h"
 
 namespace dgmark {
 
@@ -30,7 +31,7 @@ namespace dgmark {
 	}
 
 	void GraphDistributor::distribute()
-	{
+	{	
 		prepareBuffers();
 		size_t initialEdgesCount = edges->size();
 
@@ -55,6 +56,7 @@ namespace dgmark {
 		edges->resize(edges->size(), 0); //Shrink size.
 		size_t numEdges = edges->size();
 		comm->Allreduce(IN_PLACE, &numEdges, 1, UNSIGNED_LONG_LONG, SUM);
+		
 		assert(numEdges == graph->numGlobalVertex * graph->density);
 	}
 

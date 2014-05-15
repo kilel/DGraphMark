@@ -45,6 +45,8 @@ namespace dgmark {
 			probeReadData();
 		}
 
+		//printf("%d: sending %ld data to %d\n", rank, countToSend[toRank], toRank);
+
 		sendRequest[toRank] = comm->Isend(
 			&sendBuffer[toRank][0],
 			countToSend[toRank],
@@ -62,8 +64,13 @@ namespace dgmark {
 
 		if (isRecvRequestActive && recvRequest.Test(status)) {
 			isRecvRequestActive = false;
-			int dataCount = status.Get_count(VERTEX_TYPE);
-			processRecvData(dataCount);
+			size_t dataCount = status.Get_count(VERTEX_TYPE);
+			//printf("%d: reading %ld data from %d\n", rank, dataCount, status.Get_source());
+			if (dataCount > 0) {
+				processRecvData(dataCount);
+			} else {
+				++countEnded;
+			}
 		}
 
 		if (!isRecvRequestActive) {
@@ -86,18 +93,28 @@ namespace dgmark {
 			isSendRequestActive[reqIndex] = false;
 		}
 		isRecvRequestActive = false;
+		countEnded = 0;
 	}
 
 	void BufferedDataDistributor::flushBuffers()
 	{
 		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
+			if (reqIndex == rank) {
+				continue;
+			}
+
+			//send all pending items
 			if (!isSendRequestActive[reqIndex] && countToSend[reqIndex] > 0) {
 				sendData(reqIndex);
 			}
 
+			//send empty message to guarantee end of communication
+			sendData(reqIndex);
+
 			while (isSendRequestActive[reqIndex]) {
 				probeReadData();
 			}
+
 		}
 	}
 
@@ -113,13 +130,14 @@ namespace dgmark {
 	void BufferedDataDistributor::waitForOthersToEnd()
 	{
 		// tell all processes, that you had been stopped;
-		requestSynch(true, END_TAG);
-		int endedProcesses = 1;
-		while (endedProcesses < size) {
+		//requestSynch(true, END_TAG);
+		++countEnded;
+		//int endedProcesses = 1;
+		while (countEnded < size) {
 			probeReadData();
-			while (probeSynch(END_TAG)) {
-				++endedProcesses;
-			}
+			//			while (probeSynch(END_TAG)) {
+			//				++endedProcesses;
+			//			}
 		}
 		probeReadData();
 	}

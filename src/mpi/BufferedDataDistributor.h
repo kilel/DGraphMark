@@ -54,6 +54,8 @@ namespace dgmark {
 		void flushBuffers();
 		void updateRequestsActivity();
 		void waitForOthersToEnd();
+	private:
+		int countEnded;
 	};
 }
 

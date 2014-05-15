@@ -18,96 +18,25 @@
 #define	BFSTASKP2PNOBLOCK_H
 
 #include "BFSTaskP2P.h"
+#include "../../../mpi/BufferedDataDistributor.h"
 
 namespace dgmark {
 
-	class BFSTaskP2PNoBlock : public BFSTaskP2P {
+	class BFSTaskP2PNoBlock : public BFSTaskP2P, public BufferedDataDistributor{
 	public:
 		BFSTaskP2PNoBlock(Intracomm *comm);
-		BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig);
+//		BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig);
 		virtual ~BFSTaskP2PNoBlock();
 
 		virtual string getName();
 
-		//redefine open/close to support creation of buffers.
-		virtual void open(Graph *newGraph);
-		virtual void close();
-
 	protected:
 		virtual void performBFS();
 		virtual void processGlobalChild(Vertex currVertex, Vertex child);
-		virtual void probeBFSSynch();
+		
+		virtual void processRecvData(size_t countToRead);
 	private:
-		/**
-		 * Quantity of elements to send with single package.
-		 */
-		static const size_t itemsToSendCount = 512;
 
-		/**
-		 * Cached requests for all nodes.
-		 */
-		Request* requests;
-
-		/**
-		 * Cached recieve data request.
-		 */
-		Request recvReq;
-
-		/**
-		 * Recv request activity state.
-		 * True means, that data is recieved in buffer completely.
-		 */
-		bool isRecvActive;
-
-		/**
-		 * Cached request activity states for nodes. 
-		 * True, if request to node is still running.
-		 */
-		bool* isRequestActive;
-
-		/**
-		 * Buffers of data for all nodes. 
-		 * Each node buffer contains itemsToSendCount elements.
-		 */
-		Vertex** sendDataBuffer;
-
-		/**
-		 * Count of elements, which are ready to be sent.
-		 */
-		size_t* sendDataCount;
-
-		/**
-		 * Recieve buffer.
-		 */
-		Vertex* recvBuffer;
-
-		/**
-		 * Sends request to specified rank.
-		 * @param toRank Reciever node rank.
-		 */
-		void sendData(int toRank);
-
-		/**
-		 * Sets buffers to default values.
-		 */
-		void prepareBufers();
-
-		/**
-		 * Sends all remaining data and assures, that it was recieved by other process.
-		 * @return true, if queue was enlarged.
-		 */
-		bool flushBuffers();
-
-		/**
-		 * Tests all active requests to see, if them are completed.
-		 */
-		void refreshActivityState();
-
-		/**
-		 * Waits before all other nodes to enter this section.
-		 * @return true, if queue was enlarged.
-		 */
-		bool waitForOthersToEnd();
 	};
 }
 
