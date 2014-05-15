@@ -36,6 +36,24 @@ namespace dgmark {
 		 * @param numEdges num edges to add from vertex.
 		 */
 		virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
+
+	private:
+		
+		/**
+		 * This map represents probability to connect vertices with.
+		 * Definition: vertice is strong, if it is in first half of table.
+		 * Definition: vertice is weak, if it is in second half of table.
+		 * Algorithm to connect is binary search. 
+		 * Each time we have to decide, if our vertice is weak or strong, 
+		 * and with which kind to connect.
+		 */
+		static const double probability[][] = {
+			{0.57, 0.19},
+			{0.19, 0.05}
+		};
+		
+		static const double probStrongToStrong = probability[0][0] / (probability[0][0] + probability[0][1]);
+		static const double probWeakToStrong = probability[1][0] / (probability[1][0] + probability[1][1]);
 	};
 }
 

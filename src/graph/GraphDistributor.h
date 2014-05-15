@@ -18,12 +18,13 @@
 #define	GRAPHDISTRIBUTOR_H
 
 #include "Graph.h"
+#include "../mpi/BufferedDataDistributor.h"
 
 namespace dgmark {
 
-	class GraphDistributor : Communicable {
+	class GraphDistributor : public BufferedDataDistributor {
 	public:
-		GraphDistributor(Intracomm* comm);
+		GraphDistributor(Intracomm* comm, Graph *graph);
 		virtual ~GraphDistributor();
 
 		/**
@@ -33,40 +34,20 @@ namespace dgmark {
 		 * 
 		 * @param graph Graph to distribute.
 		 */
-		void distribute(Graph *graph);
+		void distribute();
+
+	protected:
+		virtual void processRecvData(size_t countToRead);
 	private:
-		static const int DISTRIBUTION_TAG = 246;
-		static const int END_TAG = 643;
-		static const size_t sendPackageSize = 512;
-		Vertex **sendBuffer;
-		Vertex *countToSend;
-		Vertex *recvBuffer;
-		
-		Request *sendRequest;
-		Request recvRequest;
-		
-		bool *isSendRequestActive;
-		bool isRecvRequestActive;
+		Graph *graph;
+		vector<Edge*> *edges;
 
 		/**
 		 * Transfers edge to it's destination.
 		 * @param edge Edge
 		 * @param memory allocated memory to send edge.
 		 */
-		void sendEdge(Edge *edge, int toRank, vector<Edge*> *edges);
-		void sendEdges(int toRank, vector<Edge*> *edges);
-
-		/**
-		 * Tries to read edge from communicator.
-		 * @param memory allocated memory to read edge.
-		 * @return true, if edge is readed, false if there are nothig to read.
-		 */
-		bool probeReadEdge(vector<Edge*> *edges);
-		
-		void prepareBuffers();
-		void flushBuffers(vector<Edge*> *edges);
-		void updateRequestsActivity();
-		void waitForOthersToEnd(vector<Edge*> *edges);
+		void sendEdge(Edge *edge, int toRank);
 
 	};
 }

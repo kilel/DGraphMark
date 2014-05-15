@@ -52,8 +52,8 @@ namespace dgmark {
 		log << "Distributing graph... ";
 
 		//Here we make graph unoriended, by transfering edges between nodes.
-		GraphDistributor *distributor = new GraphDistributor(comm);
-		distributor->distribute(graph);
+		GraphDistributor *distributor = new GraphDistributor(comm, graph);
+		distributor->distribute();
 		delete distributor;
 
 		distributionTime = Wtime() - generationTime;

@@ -19,27 +19,19 @@
 
 namespace dgmark {
 
-	GraphDistributor::GraphDistributor(Intracomm *comm) : Communicable(comm)
+	GraphDistributor::GraphDistributor(Intracomm *comm, Graph *graph) :
+	//buffer for 256 elements consists of 2 vertex.
+	BufferedDataDistributor(comm, 2, 256), graph(graph), edges(graph->edges)
 	{
-		sendBuffer = new Vertex*[size];
-		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
-			sendBuffer[reqIndex] = (Vertex*) Alloc_mem(sendPackageSize * sizeof(Vertex), INFO_NULL);
-		}
-		recvBuffer = (Vertex*) Alloc_mem(sendPackageSize * sizeof(Vertex), INFO_NULL);
-		countToSend = new Vertex[size];
-		sendRequest = new Request[size];
-		isSendRequestActive = new bool[size];
-		isRecvRequestActive = false;
 	}
 
 	GraphDistributor::~GraphDistributor()
 	{
 	}
 
-	void GraphDistributor::distribute(Graph *graph)
+	void GraphDistributor::distribute()
 	{
 		prepareBuffers();
-		vector<Edge*> *edges = graph->edges;
 		size_t initialEdgesCount = edges->size();
 
 		for (size_t edgeIndex = 0; edgeIndex < initialEdgesCount; ++edgeIndex) {
@@ -48,113 +40,45 @@ namespace dgmark {
 			if (rankTo == rank) {
 				edges->push_back(new Edge(edge->to, edge->from));
 			} else {
-				sendEdge(edge, rankTo, edges);
+				sendEdge(edge, rankTo);
 			}
-			probeReadEdge(edges);
+			probeReadData();
 		}
 
-		flushBuffers(edges);
-		waitForOthersToEnd(edges);
+		flushBuffers();
+		waitForOthersToEnd();
 
 		if (isRecvRequestActive) {
 			recvRequest.Cancel();
 		}
 
 		edges->resize(edges->size(), 0); //Shrink size.
+		size_t numEdges = edges->size();
+		comm->Allreduce(IN_PLACE, &numEdges, 1, UNSIGNED_LONG_LONG, SUM);
+		assert(numEdges == graph->numGlobalVertex * graph->density);
 	}
 
-	void GraphDistributor::sendEdge(Edge* edge, int toRank, vector<Edge*> *edges)
+	void GraphDistributor::sendEdge(Edge* edge, int toRank)
 	{
 		size_t &currCount = countToSend[toRank];
 		Vertex *&currBuffer = sendBuffer[toRank];
+
 		currBuffer[currCount] = edge->to;
 		currBuffer[currCount + 1] = edge->from;
-		currCount += 2;
+		currCount += elementSize;
 
 		if (currCount == sendPackageSize) {
-			sendEdges(toRank, edges);
+			sendData(toRank);
 		}
 	}
 
-	void GraphDistributor::sendEdges(int toRank, vector<Edge*> *edges)
+	void GraphDistributor::processRecvData(size_t countToRead)
 	{
-		while (isSendRequestActive[toRank]) {
-			probeReadEdge(edges);
+		for (size_t index = 0; index < countToRead; index += elementSize) {
+			const Vertex from = recvBuffer[index];
+			const Vertex to = recvBuffer[index + 1];
+			edges->push_back(new Edge(from, to));
 		}
-
-		sendRequest[toRank] = comm->Isend(&sendBuffer[toRank][0],
-			countToSend[toRank], VERTEX_TYPE, toRank, DISTRIBUTION_TAG);
-		countToSend[toRank] = 0;
-		isSendRequestActive[toRank] = true;
-	}
-
-	bool GraphDistributor::probeReadEdge(vector<Edge*> *edges)
-	{
-		Status status;
-
-		if (isRecvRequestActive && recvRequest.Test(status)) {
-			isRecvRequestActive = false;
-			int dataCount = status.Get_count(VERTEX_TYPE);
-			for (int index = 0; index < dataCount; index += 2) {
-				const Vertex from = recvBuffer[index];
-				const Vertex to = recvBuffer[index + 1];
-				edges->push_back(new Edge(from, to));
-			}
-		}
-
-		if (!isRecvRequestActive) {
-			recvRequest = comm->Irecv(recvBuffer, sendPackageSize,
-				VERTEX_TYPE, ANY_SOURCE, DISTRIBUTION_TAG);
-			isRecvRequestActive = true;
-		}
-
-		updateRequestsActivity();
-	}
-
-	void GraphDistributor::prepareBuffers()
-	{
-		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
-			countToSend[reqIndex] = 0;
-			isSendRequestActive[reqIndex] = false;
-		}
-		isRecvRequestActive = false;
-	}
-
-	void GraphDistributor::flushBuffers(vector<Edge*> *edges)
-	{
-		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
-			if (!isSendRequestActive[reqIndex] && countToSend[reqIndex] > 0) {
-				sendEdges(reqIndex, edges);
-			}
-
-			while (isSendRequestActive[reqIndex]) {
-				probeReadEdge(edges);
-			}
-		}
-	}
-
-	void GraphDistributor::updateRequestsActivity()
-	{
-		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
-			if (isSendRequestActive[reqIndex]) {
-				isSendRequestActive[reqIndex] &= !sendRequest[reqIndex].Test();
-			}
-		}
-	}
-
-	void GraphDistributor::waitForOthersToEnd(vector<Edge*> *edges)
-	{
-		// tell all processes, that you had been stopped;
-		requestSynch(true, END_TAG);
-		int endedProcesses = 1;
-		while (endedProcesses < size) {
-			probeReadEdge(edges);
-			while (probeSynch(END_TAG)) {
-				++endedProcesses;
-			}
-		}
-
-		probeReadEdge(edges);
 	}
 }
 
