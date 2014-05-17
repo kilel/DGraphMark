@@ -18,13 +18,13 @@
 
 namespace dgmark {
 
-	ParentTreeValidatorP2PNoBlock::ParentTreeValidatorP2PNoBlock(Intracomm *comm) :
-	ParentTreeValidator(comm)
+	ParentTreeValidatorP2PNoBlock::ParentTreeValidatorP2PNoBlock(Intracomm *comm, Graph *graph) :
+	ParentTreeValidator(comm, graph)
 	{
 	}
 
 	ParentTreeValidatorP2PNoBlock::ParentTreeValidatorP2PNoBlock(const ParentTreeValidatorP2PNoBlock& orig) :
-	ParentTreeValidator(orig.comm)
+	ParentTreeValidator(orig.comm, orig.graph)
 	{
 	}
 
@@ -35,7 +35,11 @@ namespace dgmark {
 	bool ParentTreeValidatorP2PNoBlock::validateDepth(ParentTree *parentTree)
 	{
 		Vertex *depths = buildDepth(parentTree);
-		const bool isValid = doValidateDepth(parentTree, depths);
+		if (depths == 0) {
+			log << "Cycle in graph detected!\n";
+			return false;
+		}
+		const bool isValid = doValidateDepth(parentTree, (Vertex *) depths);
 		delete[] depths;
 		return isValid;
 	}

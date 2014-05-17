@@ -18,12 +18,13 @@
 #define	PARENTTREEVALIDATORP2PNOBLOCK_H
 
 #include "../ParentTreeValidator.h"
+#include "DepthBuilderBuffered.h"
 
 namespace dgmark {
 
 	class ParentTreeValidatorP2PNoBlock : public ParentTreeValidator {
 	public:
-		ParentTreeValidatorP2PNoBlock(Intracomm *comm);
+		ParentTreeValidatorP2PNoBlock(Intracomm *comm, Graph *graph);
 		ParentTreeValidatorP2PNoBlock(const ParentTreeValidatorP2PNoBlock& orig);
 		virtual ~ParentTreeValidatorP2PNoBlock();
 

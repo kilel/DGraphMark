@@ -33,17 +33,13 @@ namespace dgmark {
 		Graph* graph = new Graph(comm, grade, density);
 		Vertex numLocalVertex = graph->numLocalVertex;
 
-		int numEdgesPerVertex = density / 2;
-		int additionalEdgeFlag = density % 2;
-
 		log << "Generating graph... ";
 		comm->Barrier();
 		double startTime = Wtime();
 
 		//Here we create density/2 oriented edges from each of local
 		for (Vertex vertex = 0; vertex < numLocalVertex; ++vertex) {
-			int numEdges = numEdgesPerVertex + (vertex & 1) * additionalEdgeFlag;
-			addEdgeFromVertex(graph, vertex, numEdges);
+			addEdgeFromVertex(graph, vertex, density);
 		}
 
 		comm->Barrier();

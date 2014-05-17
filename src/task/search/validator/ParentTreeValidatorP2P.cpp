@@ -18,13 +18,13 @@
 
 namespace dgmark {
 
-	ParentTreeValidatorP2P::ParentTreeValidatorP2P(Intracomm *comm) :
-	ParentTreeValidator(comm)
+	ParentTreeValidatorP2P::ParentTreeValidatorP2P(Intracomm *comm, Graph *graph) :
+	ParentTreeValidator(comm, graph)
 	{
 	}
 
 	ParentTreeValidatorP2P::ParentTreeValidatorP2P(const ParentTreeValidatorP2P& orig) :
-	ParentTreeValidator(orig.comm)
+	ParentTreeValidator(orig.comm, orig.graph)
 	{
 	}
 

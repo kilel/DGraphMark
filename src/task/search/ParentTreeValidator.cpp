@@ -15,20 +15,26 @@
  */
 
 #include "ParentTreeValidator.h"
+#include "validator/DepthBuilderBuffered.h"
+#include "validator/DepthBuilderP2PNoBlock.h"
 
 namespace dgmark {
 
-	ParentTreeValidator::ParentTreeValidator(Intracomm *comm) : Validator(comm), log(comm)
+	ParentTreeValidator::ParentTreeValidator(Intracomm *comm, Graph *graph) :
+	Validator(comm), log(comm), graph(graph)
 	{
+		//builder = new DepthBuilderBuffered(comm, graph);
+		builder = new DepthBuilderP2PNoBlock(comm, graph);
 	}
 
 	ParentTreeValidator::ParentTreeValidator(const ParentTreeValidator& orig) :
-	Validator(orig.comm), log(orig.comm)
+	Validator(orig.comm), log(orig.comm), builder(orig.builder)
 	{
 	}
 
 	ParentTreeValidator::~ParentTreeValidator()
 	{
+		delete builder;
 	}
 
 	TaskType ParentTreeValidator::getTaskType()
@@ -85,7 +91,6 @@ namespace dgmark {
 		bool isValid = true;
 		size_t parentSize = parentTree->getParentSize();
 		Vertex *parent = parentTree->getParent();
-		Graph *graph = parentTree->getInitialGraph();
 
 		for (size_t i = 0; i < parentSize; ++i) {
 			isValid &= (0 <= parent[i] && parent[i] < graph->numGlobalVertex);
@@ -105,7 +110,6 @@ namespace dgmark {
 		bool isValid = true;
 		size_t parentSize = parentTree->getParentSize();
 		Vertex *parent = parentTree->getParent();
-		Graph *graph = parentTree->getInitialGraph();
 		Vertex root = parentTree->getRoot();
 		Vertex rootLocal = graph->vertexToLocal(root);
 
@@ -131,12 +135,17 @@ namespace dgmark {
 		return isValid;
 	}
 
+	bool ParentTreeValidator::validateDepth(ParentTree *parentTree)
+	{
+		Vertex *depths = builder->buildDepth(parentTree);
+		const bool isValid = doValidateDepth(parentTree, depths);
+		return isValid;
+	}
+
 	bool ParentTreeValidator::doValidateDepth(ParentTree *parentTree, Vertex *depths)
 	{
 		bool isValid = true;
 
-		Graph *graph = parentTree->getInitialGraph();
-		Vertex *parent = parentTree->getParent();
 		size_t parentSize = parentTree->getParentSize();
 		size_t depthsMaxValue = graph->numGlobalVertex;
 

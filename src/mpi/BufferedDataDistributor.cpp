@@ -98,6 +98,7 @@ namespace dgmark {
 
 	void BufferedDataDistributor::flushBuffers()
 	{
+		//printf("%d: flush\n", rank);
 		for (int reqIndex = 0; reqIndex < size; ++reqIndex) {
 			if (reqIndex == rank) {
 				continue;
@@ -107,7 +108,8 @@ namespace dgmark {
 			if (!isSendRequestActive[reqIndex] && countToSend[reqIndex] > 0) {
 				sendData(reqIndex);
 			}
-
+			
+			//printf("%d: send empty\n", rank);
 			//send empty message to guarantee end of communication
 			sendData(reqIndex);
 
@@ -129,6 +131,7 @@ namespace dgmark {
 
 	void BufferedDataDistributor::waitForOthersToEnd()
 	{
+		//printf("%d: wait end\n", rank);
 		// tell all processes, that you had been stopped;
 		//requestSynch(true, END_TAG);
 		++countEnded;

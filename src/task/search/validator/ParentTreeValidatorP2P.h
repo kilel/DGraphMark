@@ -23,7 +23,7 @@ namespace dgmark {
 
 	class ParentTreeValidatorP2P : public ParentTreeValidator {
 	public:
-		ParentTreeValidatorP2P(Intracomm *comm);
+		ParentTreeValidatorP2P(Intracomm *comm, Graph *graph);
 		ParentTreeValidatorP2P(const ParentTreeValidatorP2P& orig);
 		virtual ~ParentTreeValidatorP2P();
 

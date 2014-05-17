@@ -14,26 +14,30 @@
  *   limitations under the License.
  */
 
-#ifndef PARENTTREEVALIDATORRMAFETCH_H
-#define	PARENTTREEVALIDATORRMAFETCH_H
+#ifndef DEPTHBUILDERP2PNOBLOCK_H
+#define	DEPTHBUILDERP2PNOBLOCK_H
 
-#include "../ParentTreeValidator.h"
-#include "../../../mpi/RMAWindow.h"
+#include "../../../mpi/Communicable.h"
+#include "DepthBuilder.h"
 
 namespace dgmark {
 
-	class ParentTreeValidatorRMAFetch : public ParentTreeValidator {
+	class DepthBuilderP2PNoBlock : public Communicable, public DepthBuilder {
 	public:
-		ParentTreeValidatorRMAFetch(Intracomm *comm, Graph *graph);
-		ParentTreeValidatorRMAFetch(const ParentTreeValidatorRMAFetch& orig);
-		virtual ~ParentTreeValidatorRMAFetch();
+		DepthBuilderP2PNoBlock(Intracomm *comm, Graph *graph);
+		virtual ~DepthBuilderP2PNoBlock();
 
 	protected:
-		virtual bool validateDepth(ParentTree *parentTree);
+		virtual void buildNextStep();
+		virtual void prepare(Vertex root);
 
 	private:
-		RMAWindow<Vertex>* buildDepth(ParentTree *parentTree);
+		Vertex getDepth(Vertex currVertex);
+		void synchAction();
+
+		void waitForOthersToEnd();
 	};
 }
-#endif	/* PARENTTREEVALIDATORRMAFETCH_H */
+
+#endif	/* DEPTHBUILDERP2PNOBLOCK_H */
 

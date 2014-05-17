@@ -19,13 +19,13 @@
 
 namespace dgmark {
 
-	ParentTreeValidatorRMAFetch::ParentTreeValidatorRMAFetch(Intracomm *comm) :
-	ParentTreeValidator(comm)
+	ParentTreeValidatorRMAFetch::ParentTreeValidatorRMAFetch(Intracomm *comm, Graph *graph) :
+	ParentTreeValidator(comm, graph)
 	{
 	}
 
 	ParentTreeValidatorRMAFetch::ParentTreeValidatorRMAFetch(const ParentTreeValidatorRMAFetch& orig) :
-	ParentTreeValidator(orig.comm)
+	ParentTreeValidator(orig.comm, orig.graph)
 	{
 	}
 

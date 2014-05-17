@@ -31,7 +31,7 @@ namespace dgmark {
 	}
 
 	void GraphDistributor::distribute()
-	{	
+	{
 		prepareBuffers();
 		size_t initialEdgesCount = edges->size();
 
@@ -56,8 +56,9 @@ namespace dgmark {
 		edges->resize(edges->size(), 0); //Shrink size.
 		size_t numEdges = edges->size();
 		comm->Allreduce(IN_PLACE, &numEdges, 1, UNSIGNED_LONG_LONG, SUM);
-		
-		assert(numEdges == graph->numGlobalVertex * graph->density);
+
+		//For each vertex there are density edges, each presented by two oriented.
+		assert(numEdges == graph->numGlobalVertex * graph->density * 2);
 	}
 
 	void GraphDistributor::sendEdge(Edge* edge, int toRank)

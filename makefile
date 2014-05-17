@@ -55,7 +55,7 @@ GRAPH = Graph CSRGraph GraphDistributor
 MPI = Communicable RMAWindow BufferedDataDistributor
 TASK = ParentTree ParentTreeValidator SearchTask
 BFS = BFSdgmark BFSGraph500P2P BFSGraph500RMA BFSTaskRMAFetch BFSTaskP2P BFSTaskP2PNoBlock
-VALIDATOR = ParentTreeValidatorRMAFetch ParentTreeValidatorP2PNoBlock #ParentTreeValidatorP2P
+VALIDATOR = DepthBuilderBuffered DepthBuilderP2PNoBlock
 UTIL = Statistics Random
 
 #separated, because if use all, it is too long, error occurred in build.

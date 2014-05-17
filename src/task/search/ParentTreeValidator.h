@@ -20,12 +20,13 @@
 #include "../../util/Log.h"
 #include "../Validator.h"
 #include "ParentTree.h"
+#include "validator/DepthBuilder.h"
 
 namespace dgmark {
 
 	class ParentTreeValidator : public Validator {
 	public:
-		ParentTreeValidator(Intracomm *comm);
+		ParentTreeValidator(Intracomm *comm, Graph *graph);
 		ParentTreeValidator(const ParentTreeValidator& orig);
 		virtual ~ParentTreeValidator();
 
@@ -39,12 +40,14 @@ namespace dgmark {
 		static const int VALIDATOR_LOCAL_SEND_TAG = 245;
 		static const int VALIDATOR_DEPTH_SEND_TAG = 81;
 
+		Graph* graph;
 		Log log;
 
-		virtual bool validateDepth(ParentTree *parentTree) = 0;
+		virtual bool validateDepth(ParentTree *parentTree);
 		bool doValidateDepth(ParentTree *parentTree, Vertex *depths);
 	private:
 		double validationTime;
+		DepthBuilder *builder;
 
 		bool doValidate(ParentTree *parentTree);
 		bool validateRanges(ParentTree *parentTree);
