@@ -17,49 +17,49 @@
 #ifndef KRONECKERGENERATOR_H
 #define	KRONECKERGENERATOR_H
 
-#include "GraphGenerator.h"
-#include "UniformGenerator.h"
-
+#include "RandomGenerator.h"
 
 namespace dgmark {
 
-	class KroneckerGenerator : SimpleGenerator {
+	class KroneckerGenerator : public RandomGenerator {
 	public:
-
-		KroneckerGenerator(Intracomm *comm) :
-			SimpleGenerator(comm)
-		{
-
-		}
+		KroneckerGenerator(Intracomm *comm);
 		virtual ~KroneckerGenerator();
-	protected:
 
+	protected:
 		/**
 		 * Adds edges with kronecker algorithm 2x2. Equals to R-MAT.
 		 * @param graph Graph to add in.
 		 * @param localVertex local vertex to start from.
 		 * @param numEdges num edges to add from vertex.
 		 */
-		virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
+		virtual void generateInternal(Graph *graph);
 
 	private:
+		Edge* generateEdge(Graph *graph);
 
-		/**
-		 * This map represents probability to connect vertices with.
-		 * Definition: vertice is strong, if it is in first half of table.
-		 * Definition: vertice is weak, if it is in second half of table.
-		 * Algorithm to connect is binary search. 
-		 * Each time we have to decide, if our vertice is weak or strong, 
-		 * and with which kind to connect.
-		 */
-		static const double probability[][] = {
-			{0.57, 0.19},
-			{0.19, 0.05}
-		};
-
-		static const double probStrongToStrong = probability[0][0] / (probability[0][0] + probability[0][1]);
-		static const double probWeakToStrong = probability[1][0] / (probability[1][0] + probability[1][1]);
+		void moveBinary(Vertex &left, Vertex &right, int dest);
+		Vertex revert(Vertex source, int grade);
+		void getKroneckerDest(int &fromDest, int &toDest);
 	};
+
+	/**
+	 * This map represents probability to connect vertices with.
+	 * Definition: vertice is strong, if it is in first half of table.
+	 * Definition: vertice is weak, if it is in second half of table.
+	 * Algorithm to connect is binary search. 
+	 * Each time we have to decide, if our vertice is weak or strong, 
+	 * and with which kind to connect.
+	 */
+	static const double kronecker2x2Probability[2][2] = {
+		{0.57, 0.19},
+		{0.19, 0.05}
+	};
+
+	static const double KPStrongToStrong = kronecker2x2Probability[0][0];
+	static const double KPStrongToWeak = KPStrongToStrong + kronecker2x2Probability[0][1];
+	static const double KPWeakToStrong = KPStrongToWeak + kronecker2x2Probability[1][0];
+	static const double KPWeakToWeak = KPStrongToWeak + kronecker2x2Probability[1][1];
 }
 
 #endif	/* KRONECKERGENERATOR_H */

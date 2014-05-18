@@ -17,6 +17,7 @@
 #include <algorithm>
 #include "CSRGraph.h"
 #include "../util/Log.h"
+#include "../util/Utils.h"
 
 namespace dgmark {
 
@@ -78,7 +79,19 @@ namespace dgmark {
 			startIndex[localVertex] = currEdgeIndex;
 			previousVertex = localVertex;
 		}
+
+		for (Vertex skipped = previousVertex + 1; skipped < numLocalVertex; ++skipped) {
+			startIndex[skipped] = edges->size();
+		}
+
 		startIndex[numLocalVertex] = edges->size();
+
+		//Utils::printGraph(comm, this);
+
+		//Log log(comm);
+		//for (Vertex i = 0; i < numLocalVertex + 1; ++i) {
+		//	log << i << "starts with " << startIndex[i] << "\n";
+		//}
 	}
 
 	size_t CSRGraph::getStartIndex(Vertex localVertex) const

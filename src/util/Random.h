@@ -29,8 +29,25 @@ namespace dgmark {
 
 		static Random* getInstance(Intracomm *comm);
 
+		/**
+		 * Generates 64-bit random number.
+		 * @return random number.
+		 */
 		uint64_t next();
+
+		/**
+		 * Generates 64-bit random number.
+		 * @param min Min bourder.
+		 * @param max Max bourder.
+		 * @return random number.
+		 */
 		uint64_t next(uint64_t min, uint64_t max);
+
+		/**
+		 * Generates dandom double [0..1)
+		 * @return random double.
+		 */
+		double nextDouble();
 	private:
 		Random(uint64_t seed);
 

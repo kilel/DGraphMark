@@ -55,7 +55,7 @@ namespace dgmark {
 
 	string BFSGraph500P2P::getName()
 	{
-		return "Graph500_BFS_RMA";
+		return "Graph500_BFS_P2P";
 	}
 
 	ParentTree* BFSGraph500P2P::run()
@@ -191,7 +191,7 @@ namespace dgmark {
 				CHECK_MPI_REQS;
 				assert(graph->vertexRank(oldq[i]) == rank);
 				assert(pred[graph->vertexToLocal(oldq[i])] >= 0
-					&& pred[graph->vertexToLocal(oldq[i])] < graph->numGlobalVertex);
+				&& pred[graph->vertexToLocal(oldq[i])] < graph->numGlobalVertex);
 				int64_t src = oldq[i];
 				/* Iterate through its incident edges. */
 				size_t j, j_end = graph->getEndIndex(graph->vertexToLocal(oldq[i]));

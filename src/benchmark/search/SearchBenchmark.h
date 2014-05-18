@@ -36,7 +36,8 @@ namespace dgmark {
 		Vertex *startRoots;
 		vector<double> *traversedEdges;
 
-		Vertex* generateStartRoots(size_t maxStartRoot);
+		Vertex* generateStartRoots(Vertex maxStartRoot);
+		Vertex generateOutstandingRoot();
 		virtual void printBenchmarkStatistics(stringstream &out);
 	};
 }

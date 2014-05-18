@@ -14,7 +14,12 @@
  *   limitations under the License.
  */
 
+#include "task/search/bfs/BFSGraph500P2P.h"
+#include "task/search/bfs/BFSGraph500RMA.h"
+#include "task/search/bfs/BFSTaskP2P.h"
 #include "task/search/bfs/BFSTaskP2PNoBlock.h"
+#include "task/search/bfs/BFSTaskRMAFetch.h"
+
 #include "controller/search/SearchController.h"
 
 using namespace dgmark;
@@ -25,7 +30,20 @@ int main(int argc, char** argv)
 	Intracomm *comm = &COMM_WORLD;
 
 	vector<Task*> *tasks = new vector<Task*>();
+
+	#ifdef TASK_TYPE_dgmark_p2p
+	tasks->push_back(new BFSTaskP2P(comm));
+	#elif TASK_TYPE_dgmark_p2p_noblock
 	tasks->push_back(new BFSTaskP2PNoBlock(comm));
+	#elif TASK_TYPE_dgmark_rma
+	tasks->push_back(new BFSTaskRMAFetch(comm));
+	#elif TASK_TYPE_graph500_p2p
+	tasks->push_back(new BFSGraph500P2P(comm));
+	#elif TASK_TYPE_graph500_rma
+	tasks->push_back(new BFSGraph500Optimized(comm));
+	#else 
+	tasks->push_back(new BFSTaskP2PNoBlock(comm));
+	#endif
 
 	SearchController *controller = new SearchController(comm, argc, argv);
 	controller->run(tasks);

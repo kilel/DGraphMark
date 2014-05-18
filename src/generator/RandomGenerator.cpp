@@ -32,7 +32,11 @@ namespace dgmark {
 	{
 		Graph* graph = new Graph(comm, grade, density);
 		doGenerate(graph);
+
+		#ifdef GRAPH_DISTRIBUTION
 		doDistribute(graph);
+		#endif
+
 		return graph;
 	}
 

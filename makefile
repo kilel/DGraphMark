@@ -15,15 +15,35 @@
 
 # true of false to use or not of OpenMP in compilation
 OPENMP = false
+
+#true to enable building of graph500 bfs task runners
 BUILD_GRAPH500_BFS = true
+
+#true to enable graph distribution
+GRAPH_DISTRIBUTION = false
+
+#Type of used generator. Use KRONECKER or UNIFORM.
+#Illegal type will produce failure on start.
+GRAPH_GENERATOR_TYPE = UNIFORM
+
+#Type of depth builder used in validator. Use BUFFERED of P2PNOBLOCK.
+#BUFFERED is faster on small amount of local vertex ( ~2^10 is limit).
+#P2PNOBLOCK is stable builder, for other uses.
+VALIDATOR_DEPTH_BUILDER_TYPE = BUFFERED
 
 #compile flags
 OPENMP_FLAG = -fopenmp
 MPICPP = mpic++
-CPPFLAGS = -Ofast #-std=c++11
+CPPFLAGS = -Ofast -std=c++98 #-std=c++11
+CPPFLAGS += -DGENERATOR_TYPE_$(GRAPH_GENERATOR_TYPE)
+CPPFLAGS += -DDEPTH_BUILDER_TYPE_$(VALIDATOR_DEPTH_BUILDER_TYPE)
 
 ifeq ($(OPENMP), true)
 	CPPFLAGS += $(OPENMP_FLAG)
+endif
+
+ifeq ($(GRAPH_DISTRIBUTION), true)
+	CPPFLAGS += -DGRAPH_DISTRIBUTION
 endif
 
 #directories definition
@@ -50,7 +70,7 @@ OBJ_DIR_PATHS = $(addprefix $(OBJ_DIR), \
 #Definitions of sources to compile
 BENCHMARK = Benchmark search/SearchBenchmark
 CONTROLLER = Controller search/SearchController
-GENERATOR = RandomGenerator UniformGenerator #KroneckerGenerator
+GENERATOR = RandomGenerator UniformGenerator KroneckerGenerator
 GRAPH = Graph CSRGraph GraphDistributor
 MPI = Communicable RMAWindow BufferedDataDistributor
 TASK = ParentTree ParentTreeValidator SearchTask
@@ -67,38 +87,39 @@ FILES_LIST = $(addprefix $(BENCHMARK_DIR), $(BENCHMARK)) \
 FILES_LIST += $(addprefix $(TASK_DIR), $(TASK)) \
 	    $(addprefix $(BFS_DIR), $(BFS)) \
 	    $(addprefix $(VALIDATOR_DIR), $(VALIDATOR)) \
-	    $(addprefix $(UTIL_DIR), $(UTIL)) 
+	    $(addprefix $(UTIL_DIR), $(UTIL)) \
+	    main_dgmark
+
 #full sources and objects paths
 SOURCES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(FILES_LIST)))
 OBJECTS = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES_LIST)))
 
 #build targets
-BUILD = dgmark dgmark_p2p dgmark_p2p_noblock dgmark_rma_fetch
+BUILD = dgmark dgmark_p2p dgmark_p2p_noblock dgmark_rma
 
 ifeq ($(BUILD_GRAPH500_BFS), true)
-	BUILD += dgmark_graph500_p2p dgmark_graph500_rma
+	BUILD += graph500_p2p graph500_rma
 endif
 
-
 #build rules
+.PHONY : all
 all: $(BUILD)
 
 # prepairing directories.
 $(OBJ_DIR_PATHS):					    
 	mkdir -p $@
 
-# basic build
-dgmark : $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark.o
-	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
-
 # extended builds
-dgmark_% : $(OBJ_DIR_PATHS) $(OBJECTS) $(OBJ_DIR)main_dgmark_%.o
-	$(MPICPP) $(CPPFLAGS) $(OBJECTS) $(OBJ_DIR)main_$@.o -o $(addprefix $(BIN_DIR), $@)
+dgmark dgmark_% graph500% : $(OBJ_DIR_PATHS) $(OBJECTS)
+	rm -f $(OBJ_DIR)main_dgmark.o;
+	$(MPICPP) $(CPPFLAGS) -DTASK_TYPE_$@ -c $(SRC_DIR)main_dgmark.cpp -o $(OBJ_DIR)main_dgmark.o
+	$(MPICPP) $(CPPFLAGS) $(OBJECTS) -o $(BIN_DIR)$@;
 
 #building of sources
 $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
 	$(MPICPP) $(CPPFLAGS) -c $< -o $@
 
 #cleaning binaries
+.PHONY : clean
 clean:
 	rm -rf $(BIN_DIR)*

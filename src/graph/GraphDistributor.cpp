@@ -23,7 +23,9 @@ namespace dgmark {
 	GraphDistributor::GraphDistributor(Intracomm *comm, Graph *graph) :
 	BufferedDataDistributor(comm, ELEMENT_SIZE, BUFFERED_ELEMENTS),
 	graph(graph),
-	edges(graph->edges)
+	edges(graph->edges),
+	isOpen(false),
+	log(comm)
 	{
 	}
 
@@ -33,14 +35,14 @@ namespace dgmark {
 
 	void GraphDistributor::distribute()
 	{
-		prepareBuffers();
-		distributeEdges();
-		flushBuffers();
-		waitForOthersToEnd();
-
-		if (isRecvRequestActive) {
-			recvRequest.Cancel();
+		if (isOpen) {
+			log << "\nGraph distribution usage mixed up!\n";
+			assert(false);
 		}
+
+		open();
+		distributeEdges();
+		close();
 
 		size_t numEdges = edges->size();
 		edges->resize(numEdges, 0); //Shrink size.
@@ -56,23 +58,29 @@ namespace dgmark {
 		const size_t initialEdgesCount = edges->size();
 		for (size_t edgeIndex = 0; edgeIndex < initialEdgesCount; ++edgeIndex) {
 			const Edge * const edge = edges->at(edgeIndex);
-			const int rankTo = graph->vertexRank(edge->to);
-			if (rankTo == rank) {
-				edges->push_back(new Edge(edge->to, edge->from));
-			} else {
-				sendEdge(edge, rankTo);
-			}
-			probeSynchData();
+			sendEdge(edge->to, edge->from);
 		}
 	}
 
-	void GraphDistributor::sendEdge(const Edge * const edge, int toRank)
+	void GraphDistributor::sendEdge(Vertex from, Vertex to)
+	{
+		//printf("%d: send edge [%ld, %ld] to %d\n", rank, from, to, graph->vertexRank(from));
+		const int toRank = graph->vertexRank(from);
+		if (toRank == rank) {
+			edges->push_back(new Edge(from, to));
+		} else {
+			sendEdgeExternal(from, to, toRank);
+		}
+		probeSynchData();
+	}
+
+	void GraphDistributor::sendEdgeExternal(Vertex from, Vertex to, int toRank)
 	{
 		size_t &currCount = countToSend[toRank];
 		Vertex *&currBuffer = sendBuffer[toRank];
 
-		currBuffer[currCount] = edge->to;
-		currBuffer[currCount + 1] = edge->from;
+		currBuffer[currCount] = from;
+		currBuffer[currCount + 1] = to;
 		currCount += elementSize;
 
 		if (currCount == sendPackageSize) {
@@ -86,6 +94,33 @@ namespace dgmark {
 			const Vertex from = recvBuffer[index];
 			const Vertex to = recvBuffer[index + 1];
 			edges->push_back(new Edge(from, to));
+		}
+	}
+
+	void GraphDistributor::open()
+	{
+		if (isOpen) {
+			log << "\nDouble openning distributor!\n";
+			return;
+		}
+		isOpen = true;
+		prepareBuffers();
+
+	}
+
+	void GraphDistributor::close()
+	{
+		if (!isOpen) {
+			log << "\nClosing not openned distributor!\n";
+			return;
+		}
+
+		isOpen = false;
+		flushBuffers();
+		waitForOthersToEnd();
+
+		if (isRecvRequestActive) {
+			recvRequest.Cancel();
 		}
 	}
 }

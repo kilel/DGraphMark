@@ -19,9 +19,18 @@
 
 #include "Graph.h"
 #include "../mpi/BufferedDataDistributor.h"
+#include "../util/Log.h"
 
 namespace dgmark {
 
+	/**
+	 * Universal class to distribute graph edges.
+	 * 2 usages:
+	 * 1) clone all edges and distribute them
+	 * 2) open -> send required edges to graph -> close.
+	 * @param comm
+	 * @param graph
+	 */
 	class GraphDistributor : public BufferedDataDistributor {
 	public:
 		GraphDistributor(Intracomm* comm, Graph *graph);
@@ -35,6 +44,23 @@ namespace dgmark {
 		 * @param graph Graph to distribute.
 		 */
 		void distribute();
+
+		/**
+		 * Transfers edge to "edge->to" referenced node.
+		 * Swaps "to" and "from" before sending.
+		 * @param edge Edge
+		 */
+		void sendEdge(Vertex from, Vertex to);
+
+		/**
+		 * Starts communication.
+		 */
+		void open();
+
+		/**
+		 * Ends communication.
+		 */
+		void close();
 
 	protected:
 		virtual void processRecvData(size_t countToRead);
@@ -52,12 +78,15 @@ namespace dgmark {
 		void distributeEdges();
 
 		/**
-		 * Transfers edge to it's destination.
+		 * Transfers edge to "edge->to" referenced node.
+		 * Swaps "to" and "from" before sending.
 		 * @param edge Edge
-		 * @param memory allocated memory to send edge.
+		 * @param toRank
 		 */
-		void sendEdge(const Edge * const edge, int toRank);
+		void sendEdgeExternal(Vertex from, Vertex to, int toRank);
 
+		bool isOpen;
+		Log log;
 	};
 }
 

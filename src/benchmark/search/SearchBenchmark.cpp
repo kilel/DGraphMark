@@ -54,7 +54,16 @@ namespace dgmark {
 		delete traversedEdges;
 	}
 
-	Vertex* SearchBenchmark::generateStartRoots(size_t maxStartRoot)
+	Vertex SearchBenchmark::generateOutstandingRoot()
+	{
+		Vertex newRoot;
+		if (rank == 0) {
+			Random *random = Random::getInstance(comm);
+			newRoot = random->next(0, graph->numGlobalVertex);
+		}
+	}
+
+	Vertex* SearchBenchmark::generateStartRoots(Vertex maxStartRoot)
 	{
 		log << "\nGenerating roots... ";
 		double startTime = Wtime();
@@ -82,10 +91,25 @@ namespace dgmark {
 
 		log << "Running search task (" << (startIndex + 1) << "/" << numStarts << ")\n";
 		ParentTree *result = task->run();
+
+		int restartCount = 0;
+		const int maxRestarts = 5;
+		while (result->getTraversedEdges() < 1 && ++restartCount <= maxRestarts) {
+			log << "Error running BFS: no edges going from root.\n";
+			log << "Restart " << restartCount << "\n";
+			delete result;
+			task->setRoot(generateOutstandingRoot());
+			result = task->run();
+		}
+
+		if (result->getTraversedEdges() < 1) {
+			log << "Error running BFS: graph is too sparse\n";
+		}
+
 		bool isValid = validator->validate(result);
 
 		if (isValid) {
-			log << "Traversed edges: " << result->getTraversedEdges() << "\n";
+			log << "Traversed edges: " << (size_t) result->getTraversedEdges() << "\n";
 			log << "Task mark: " << result->getMark() << " TEPS" << "\n\n";
 		}
 

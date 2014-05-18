@@ -62,7 +62,6 @@ namespace dgmark {
 	void BufferedDataDistributor::probeSynchData()
 	{
 		Status status;
-		probeRecv();
 
 		if (isRecvRequestActive && recvRequest.Test(status)) {
 			isRecvRequestActive = false;

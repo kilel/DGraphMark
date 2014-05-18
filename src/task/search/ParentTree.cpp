@@ -15,6 +15,7 @@
  */
 
 #include "ParentTree.h"
+#include "../../util/Log.h"
 
 namespace dgmark {
 
@@ -91,8 +92,11 @@ namespace dgmark {
 						const CSRGraph * const graph)
 	{
 		double realTraversedEdges = 0;
+		//Log log(comm);
+		//log << "calc traversed :\n";
 		for (Vertex localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
 			const size_t traversedMax = graph->getEndIndex(localVertex) - graph->getStartIndex(localVertex);
+			//log << "add " << traversedMax << " visited == " << parent[localVertex] << "\n";
 			realTraversedEdges += parent[localVertex] != graph->numGlobalVertex ? traversedMax : 0;
 		}
 

@@ -87,5 +87,10 @@ namespace dgmark {
 		randomNumber = min + randomNumber % (max - min);
 		return randomNumber;
 	}
+
+	double Random::nextDouble()
+	{
+		return((double) rand()) / RAND_MAX;
+	}
 }
 

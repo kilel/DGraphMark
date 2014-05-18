@@ -14,11 +14,12 @@
  *   limitations under the License.
  */
 
-#include "KroneckerGenerator.h"
+#include "KroneckerGenerator.h" 
 
 namespace dgmark {
 
-	KroneckerGenerator::KroneckerGenerator(Intracomm *comm) : SimpleGenerator(comm)
+	KroneckerGenerator::KroneckerGenerator(Intracomm *comm) :
+	RandomGenerator(comm)
 	{
 	}
 
@@ -26,21 +27,94 @@ namespace dgmark {
 	{
 	}
 
-	void KroneckerGenerator::addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges)
+	void KroneckerGenerator::generateInternal(Graph* graph)
 	{
-		vector<Edge*> *edges = graph->edges;
-		Vertex globalVertexFrom = graph->vertexToGlobal(localVertex);
-		for (int i = 0; i < numEdges; ++i) {
-			uint64_t rankTo = random->next(0, size);
-			uint64_t localVertexTo = random->next(0, graph->numGlobalVertex);
+		GraphDistributor *distributor = new GraphDistributor(comm, graph);
+		distributor->open();
 
-			Vertex globalVertexTo = graph->vertexToGlobal(rankTo, localVertexTo);
-			if (globalVertexFrom != globalVertexTo) {
-				edges->push_back(new Edge(globalVertexFrom, globalVertexTo));
-			} else {
-				--i;
-				continue;
+		for (Vertex LocalVertex = 0; LocalVertex < graph->numLocalVertex; ++LocalVertex) {
+			for (int i = 0; i < graph->density; ++i) {
+				Edge * edge = generateEdge(graph);
+				while (edge->from == edge->to) {
+					delete edge;
+					edge = generateEdge(graph);
+				}
+				//log << edge->from << " | " << edge->to << "\n";
+				distributor->sendEdge(edge->from, edge->to);
+				delete edge;
+				
+				//log << "size: " << graph->edges->size() << "\n";
 			}
 		}
+
+		distributor->close();
+		delete distributor;
 	}
+
+	Edge* KroneckerGenerator::generateEdge(Graph *graph)
+	{
+		Vertex fromL = 0;
+		Vertex fromR = graph->numGlobalVertex - 1;
+
+		Vertex toL = 0;
+		Vertex toR = graph->numGlobalVertex - 1;
+
+		int toDest, fromDest;
+
+		while (fromR - fromL != 1 && toR - toL != 1) {
+			//log << fromL << " | " << toL << " generating\n";
+			getKroneckerDest(fromDest, toDest);
+			moveBinary(fromL, fromR, fromDest);
+			moveBinary(toL, toR, toDest);
+		}
+
+		getKroneckerDest(fromDest, toDest);
+		fromL += fromDest;
+		toL += toDest;
+
+		return new Edge(revert(fromL, graph->grade),
+				revert(toL, graph->grade));
+	}
+
+	void KroneckerGenerator::moveBinary(Vertex &left, Vertex &right, int dest)
+	{
+		if (dest == 1) {
+			left += (right - left) / 2;
+		} else {
+			right -= (right - left) / 2;
+		}
+	}
+
+	Vertex KroneckerGenerator::revert(Vertex source, int grade)
+	{
+		Vertex result = 0;
+		for (int i = 0; i < grade; ++i) {
+			//log << result << " | " << source << " reverting\n";
+			result = result << 1 | source & 1;
+			source = source >> 1;
+		}
+		return result;
+	}
+
+	void KroneckerGenerator::getKroneckerDest(int &fromDest, int &toDest)
+	{
+
+		double prob = random->nextDouble();
+
+		if (prob < KPStrongToStrong) {
+			fromDest = 0;
+			toDest = 0;
+		} else if (prob < KPStrongToWeak) {
+			fromDest = 0;
+			toDest = 1;
+		} else if (prob < KPWeakToStrong) {
+			fromDest = 1;
+			toDest = 0;
+		} else {
+			fromDest = 1;
+			toDest = 1;
+		}
+	}
+
+
 }

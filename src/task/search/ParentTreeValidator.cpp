@@ -17,16 +17,33 @@
 #include "ParentTreeValidator.h"
 #include "validator/DepthBuilderBuffered.h"
 #include "validator/DepthBuilderP2PNoBlock.h"
+#include <assert.h>
 
 namespace dgmark {
 
 	DepthBuilder* ParentTreeValidator::createBuilder(Intracomm *comm,
 							Graph *graph)
 	{
-		DepthBuilder *builder;
-		//builder = new DepthBuilderBuffered(comm, graph);
-		builder = new DepthBuilderP2PNoBlock(comm, graph);
-		return builder;
+		Log log(comm);
+		#ifdef DEPTH_BUILDER_TYPE_P2PNOBLOCK 
+		{
+			log << "Using p2p noblock depth builder\n";
+			return new DepthBuilderP2PNoBlock(comm, graph);
+		}
+		#elif DEPTH_BUILDER_TYPE_BUFFERED
+		{
+			log << "Using buffered depth builder\n";
+			return new DepthBuilderBuffered(comm, graph);
+		}
+		#else
+		{
+			log << "\n\nDepth builder was not defined in makefile";
+			log << " (variable VALIDATOR_DEPTH_BUILDER_TYPE)\n\n";
+			assert(false);
+			return 0;
+		}
+		#endif
+
 	}
 
 	ParentTreeValidator::ParentTreeValidator(Intracomm *comm,

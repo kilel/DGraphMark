@@ -21,12 +21,32 @@
 #include "../../benchmark/search/SearchBenchmark.h"
 
 #include "../../generator/UniformGenerator.h"
+#include "../../generator/KroneckerGenerator.h"
 
 namespace dgmark {
 
 	GraphGenerator* SearchController::createGenerator()
 	{
-		return new UniformGenerator(comm);
+		Log log(comm);
+		#ifdef GENERATOR_TYPE_UNIFORM
+		{
+			log << "Using uniform gerenator\n";
+			return new UniformGenerator(comm);
+		}
+		#elif GENERATOR_TYPE_KRONECKER
+		{
+			log << "Using Kronecker gerenator\n";
+			return new KroneckerGenerator(comm);
+		}
+		#else
+		{
+			log << "\n\nCan't determine graph generator no create\n";
+			log << "Generator was not defined in makefile";
+			log << " (variable GRAPH_GENERATOR_TYPE)\n\n";
+			assert(false);
+			return 0;
+		}
+		#endif
 	}
 
 	SearchController::SearchController(Intracomm *comm, int argc, char **argv) :
