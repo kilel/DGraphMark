@@ -33,7 +33,7 @@ namespace dgmark {
 		Graph* graph = new Graph(comm, grade, density);
 		doGenerate(graph);
 
-		#ifdef GRAPH_DISTRIBUTION
+		#ifdef GRAPH_IS_UNORIENTED
 		doDistribute(graph);
 		#endif
 

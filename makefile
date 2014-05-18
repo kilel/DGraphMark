@@ -19,8 +19,8 @@ OPENMP = false
 #true to enable building of graph500 bfs task runners
 BUILD_GRAPH500_BFS = true
 
-#true to enable graph distribution
-GRAPH_DISTRIBUTION = false
+#false to make graph unoriented
+IS_GRAPH_ORIENTED = false
 
 #Type of used generator. Use KRONECKER or UNIFORM.
 #Illegal type will produce failure on start.
@@ -29,7 +29,7 @@ GRAPH_GENERATOR_TYPE = UNIFORM
 #Type of depth builder used in validator. Use BUFFERED of P2PNOBLOCK.
 #BUFFERED is faster on small amount of local vertex ( ~2^10 is limit).
 #P2PNOBLOCK is stable builder, for other uses.
-VALIDATOR_DEPTH_BUILDER_TYPE = BUFFERED
+VALIDATOR_DEPTH_BUILDER_TYPE = P2PNOBLOCK
 
 #compile flags
 OPENMP_FLAG = -fopenmp
@@ -42,8 +42,8 @@ ifeq ($(OPENMP), true)
 	CPPFLAGS += $(OPENMP_FLAG)
 endif
 
-ifeq ($(GRAPH_DISTRIBUTION), true)
-	CPPFLAGS += -DGRAPH_DISTRIBUTION
+ifeq ($(IS_GRAPH_ORIENTED), false)
+	CPPFLAGS += -DGRAPH_IS_UNORIENTED
 endif
 
 #directories definition
