@@ -17,7 +17,7 @@
 #ifndef PARENTTREE_H
 #define	PARENTTREE_H
 
-#include "../../graph/Graph.h"
+#include "../../graph/CSRGraph.h"
 #include "../Result.h"
 
 namespace dgmark {
@@ -32,7 +32,7 @@ namespace dgmark {
 		 * @param graph initial graph os result.
 		 * @param duration Duration of tree-making task in seconds (MPI::Wtime)
 		 */
-		ParentTree(Intracomm *comm, Vertex root, Vertex *parent, Graph *graph, double duration);
+		ParentTree(Intracomm *comm, Vertex root, Vertex *parent, CSRGraph *graph, double duration);
 		ParentTree(const ParentTree& orig);
 		virtual ~ParentTree();
 
@@ -47,16 +47,16 @@ namespace dgmark {
 		Vertex getRoot();
 		Vertex* getParent();
 		size_t getParentSize();
-		Graph* getInitialGraph();
+		CSRGraph* getInitialGraph();
 		double getTraversedEdges();
 	private:
 		Vertex root;
 		Vertex *parent;
-		Graph *graph;
+		CSRGraph *graph;
 		double taskRunTime;
 		size_t traversedEdges;
 
-		double calculateTraversedEdges(Graph *graph);
+		double calculateTraversedEdges(Vertex* parent, CSRGraph *graph);
 	};
 }
 

@@ -71,6 +71,7 @@ namespace dgmark {
 		bool isValid = validator->validate(result);
 
 		if (isValid) {
+			log << "Traversed edges: " << result->getTraversedEdges() << "\n";
 			log << "Task mark: " << result->getMark() << " TEPS" << "\n\n";
 		}
 

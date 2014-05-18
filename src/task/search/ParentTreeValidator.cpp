@@ -20,15 +20,30 @@
 
 namespace dgmark {
 
-	ParentTreeValidator::ParentTreeValidator(Intracomm *comm, Graph *graph) :
-	Validator(comm), log(comm), graph(graph)
+	DepthBuilder* ParentTreeValidator::createBuilder(Intracomm *comm, Graph *graph)
 	{
+		DepthBuilder *builder;
 		//builder = new DepthBuilderBuffered(comm, graph);
 		builder = new DepthBuilderP2PNoBlock(comm, graph);
+		return builder;
+	}
+
+	ParentTreeValidator::ParentTreeValidator(Intracomm *comm, Graph *graph) :
+	Validator(comm),
+	log(comm),
+	graph(graph),
+	builder(createBuilder(comm, graph)),
+	illegalDepth(graph->numGlobalVertex),
+	illegalParent(graph->numGlobalVertex)
+	{
+
 	}
 
 	ParentTreeValidator::ParentTreeValidator(const ParentTreeValidator& orig) :
-	Validator(orig.comm), log(orig.comm), builder(orig.builder)
+	Validator(orig.comm),
+	log(orig.comm),
+	illegalDepth(orig.illegalDepth),
+	illegalParent(orig.illegalParent)
 	{
 	}
 
@@ -89,17 +104,16 @@ namespace dgmark {
 	bool ParentTreeValidator::validateRanges(ParentTree *parentTree)
 	{
 		bool isValid = true;
-		size_t parentSize = parentTree->getParentSize();
 		Vertex *parent = parentTree->getParent();
 
-		for (size_t i = 0; i < parentSize; ++i) {
-			isValid &= (0 <= parent[i] && parent[i] < graph->numGlobalVertex);
+		for (Vertex v = 0; v < graph->numLocalVertex; ++v) {
+			isValid &= (0 <= parent[v] && parent[v] <= illegalParent);
 		}
 
 		comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
 
 		if (!isValid) {
-			log << "\nError validating: some vertices are out of tree (perhabs graph is not connected)\n";
+			log << "\nError validating: illegal value ranges of parent tree\n";
 		}
 
 		return isValid;
@@ -108,7 +122,6 @@ namespace dgmark {
 	bool ParentTreeValidator::validateParents(ParentTree *parentTree)
 	{
 		bool isValid = true;
-		size_t parentSize = parentTree->getParentSize();
 		Vertex *parent = parentTree->getParent();
 		Vertex root = parentTree->getRoot();
 		Vertex rootLocal = graph->vertexToLocal(root);
@@ -121,15 +134,15 @@ namespace dgmark {
 		}
 
 		if (isValid) {
-			for (size_t i = 0; i < parentSize; ++i) {
-				isValid &= (parent[i] != graph->vertexToGlobal(i) || i == rootLocal);
+			for (Vertex v = 0; v < graph->numLocalVertex; ++v) {
+				isValid &= (parent[v] != graph->vertexToGlobal(v) || v == rootLocal);
 			}
 		}
 
 		comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
 
 		if (!isValid) {
-			log << "\nError validating: some vertices are self parents, or root is not a parent it itself\n";
+			log << "\nError validating: some vertices are self parents, or root is not a parent of itself\n";
 		}
 
 		return isValid;
@@ -137,23 +150,33 @@ namespace dgmark {
 
 	bool ParentTreeValidator::validateDepth(ParentTree *parentTree)
 	{
-		Vertex *depths = builder->buildDepth(parentTree);
-		const bool isValid = doValidateDepth(parentTree, depths);
-		return isValid;
-	}
+		//no need to clean, array cached in depth builder.
+		Vertex *depth = builder->buildDepth(parentTree);
 
-	bool ParentTreeValidator::doValidateDepth(ParentTree *parentTree, Vertex *depths)
-	{
+		if (depth == 0) {
+
+			return false;
+		}
+
 		bool isValid = true;
 
-		size_t parentSize = parentTree->getParentSize();
-		size_t depthsMaxValue = graph->numGlobalVertex;
+		Vertex *parent = parentTree->getParent();
 
-		for (size_t localVertex = 0; localVertex < parentSize; ++localVertex) {
-			if (depths[localVertex] >= depthsMaxValue) {
-				printf("\nError: depths builded not for all verticies\n");
-				return false; // not all depths builded.
-			}
+		//Depth must be built, when vertex was visited, and not, if it was not;
+		//Depth is a value from [0, illegalDepth].
+		//Valid value is in [0, illegalDepth)
+
+		for (size_t localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
+			const Vertex currDepth = depth[localVertex];
+			isValid &= !(parent[localVertex] < illegalParent
+				^ currDepth < illegalDepth);
+			isValid &= 0 <= currDepth && currDepth <= illegalDepth;
+		}
+
+		comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
+
+		if (!isValid) {
+			log << "\nError: depths builded not for all visited verticies (or for some of unvisited)\n";
 		}
 
 		return isValid;

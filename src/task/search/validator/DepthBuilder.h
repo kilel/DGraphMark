@@ -24,16 +24,8 @@ namespace dgmark {
 	class DepthBuilder {
 	public:
 
-		DepthBuilder(Graph *graph) :
-				graph(graph)
-		{
-			depth = new Vertex[graph->numLocalVertex];
-		}
-
-		virtual ~DepthBuilder()
-		{
-			delete[] depth;
-		}
+		DepthBuilder(Graph *graph);
+		virtual ~DepthBuilder();
 
 		/**
 		 * Builds depth. Do not clean array, it is reusable.
@@ -41,22 +33,7 @@ namespace dgmark {
 		 * @param parentTree Source of parent tree.
 		 * @return Depths array of verticies. 0 if failed to build array.
 		 */
-		Vertex* buildDepth(ParentTree *parentTree)
-		{
-			prepare(parentTree->getRoot());
-			parent = parentTree->getParent();
-
-			while (buildState == buildStateNextStepRequired) {
-				//printf("%d: step\n\n", rank);
-				buildNextStep();
-			}
-
-			if (buildState == buildStateError) {
-				return 0;
-			}
-
-			return depth;
-		}
+		Vertex* buildDepth(ParentTree *parentTree);
 
 	protected:
 		static const int SYNCH_END_TAG = 24067;
@@ -73,17 +50,7 @@ namespace dgmark {
 		static const short buildStateSuccess = 2;
 
 		virtual void buildNextStep() = 0;
-
-		virtual void prepare(Vertex root)
-		{
-			buildState = buildStateNextStepRequired;
-
-			for (Vertex localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
-				depth[localVertex] = graph->numGlobalVertex;
-			}
-		}
-	private:
-
+		virtual void prepare(Vertex root);
 	};
 }
 

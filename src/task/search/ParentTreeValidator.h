@@ -35,11 +35,6 @@ namespace dgmark {
 		virtual bool validate(Result *taskResult);
 
 	protected:
-		static const int VALIDATOR_SYNCH_TAG = 28952;
-		static const int VALIDATOR_SYNCH_END_TAG = 5794;
-		static const int VALIDATOR_LOCAL_SEND_TAG = 245;
-		static const int VALIDATOR_DEPTH_SEND_TAG = 81;
-
 		Graph* graph;
 		Log log;
 
@@ -49,9 +44,14 @@ namespace dgmark {
 		double validationTime;
 		DepthBuilder *builder;
 
+		const Vertex illegalDepth;
+		const Vertex illegalParent;
+
 		bool doValidate(ParentTree *parentTree);
 		bool validateRanges(ParentTree *parentTree);
 		bool validateParents(ParentTree *parentTree);
+
+		static DepthBuilder* createBuilder(Intracomm *comm, Graph *graph);
 	};
 }
 #endif	/* PARENTTREEVALIDATOR_H */

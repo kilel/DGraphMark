@@ -34,6 +34,12 @@ namespace dgmark {
 
 		for (size_t localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
 			const Vertex currParent = parent[localVertex];
+
+			//was not visited
+			if (currParent == graph->numGlobalVertex) {
+				continue;
+			}
+
 			const Vertex currDepth = depth[localVertex];
 			const Vertex parentDepth = getDepth(currParent);
 
@@ -83,13 +89,16 @@ namespace dgmark {
 		if (tgtRank == rank) {
 			tgtDepth = depth[tgtLocal];
 		} else {
+			if (tgtRank == size) {
+				printf("%d: [%ld]\n", rank, tgtVertex);
+			}
 			Request sendReq = comm->Isend(&tgtLocal, 1, VERTEX_TYPE, tgtRank, LOCAL_SEND_TAG);
 			Request recvReq = comm->Irecv(&tgtDepth, 1, VERTEX_TYPE, tgtRank, DEPTH_SEND_TAG);
 
 			while (!sendReq.Test() || !recvReq.Test()) {
 				synchAction();
 			}
-			
+
 			assert(0 <= tgtDepth && tgtDepth <= graph->numGlobalVertex);
 		}
 		return tgtDepth;
