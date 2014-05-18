@@ -35,7 +35,6 @@ namespace dgmark {
 		parent = parentTree->getParent();
 
 		while (buildState == buildStateNextStepRequired) {
-			//printf("%d: step\n\n", rank);
 			buildNextStep();
 		}
 

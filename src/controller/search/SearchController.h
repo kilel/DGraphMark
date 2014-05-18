@@ -33,11 +33,10 @@ namespace dgmark {
 		virtual void clean(vector<Task*> *tasks);
 
 	protected:
-		virtual string getAdditionalStatistics();
+		virtual string getSpecificStatistics();
 	private:
 		GraphGenerator *generator;
-
-
+		GraphGenerator* createGenerator();
 	};
 }
 

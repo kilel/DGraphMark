@@ -40,7 +40,7 @@ namespace dgmark {
 		void setRoot(Vertex newRoot);
 
 	protected:
-		CSRGraph *graph;
+		const CSRGraph * graph;
 		Vertex root;
 		Log log;
 	private:

@@ -48,7 +48,8 @@ namespace dgmark {
 		bool isRecvRequestActive;
 
 		void sendData(int toRank);
-		void probeReadData();
+		void probeSynchData();
+		void probeRecv();
 
 		void prepareBuffers();
 		void flushBuffers();

@@ -30,9 +30,28 @@ namespace dgmark {
 		Controller(const Controller& orig);
 		virtual ~Controller();
 
+		/**
+		 * Creates benchmarks for tasks and runs them.
+		 * @param tasks Tasks.
+		 */
 		virtual void run(vector<Task*> *tasks) = 0;
+
+		/**
+		 * Cleans tasks array.
+		 * @param tasks Tasks.
+		 */
 		virtual void clean(vector<Task*> *tasks) = 0;
+
+		/**
+		 * Runs benchmarks.
+		 * @param benchmarks Bencharks.
+		 */
 		void run(vector<Benchmark*> *benchmarks);
+
+		/**
+		 * Cleans benchmarks array.
+		 * @param benchmarks Bencharks.
+		 */
 		void clean(vector<Benchmark*> *benchmarks);
 
 	protected:
@@ -43,7 +62,11 @@ namespace dgmark {
 		Log log;
 		static const int CONTROLLER_PRECISION = 5;
 
-		virtual string getAdditionalStatistics() = 0;
+		/**
+		 * Returns task-specific statistics.
+		 * @return Statistics string.
+		 */
+		virtual string getSpecificStatistics() = 0;
 	private:
 		string getInitialStatistics();
 		void parseArguments(int argc, char** argv);

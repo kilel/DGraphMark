@@ -24,15 +24,11 @@ namespace dgmark {
 
 	BFSTaskP2PNoBlock::BFSTaskP2PNoBlock(Intracomm *comm) :
 	BFSTaskP2P(comm),
-	BufferedDataDistributor(comm, 2, 256)
+	BufferedDataDistributor(comm,
+				ELEMENT_SIZE,
+				BUFFERED_ELEMENTS)
 	{
 	}
-
-//	BFSTaskP2PNoBlock::BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig) :
-//	BFSTaskP2P(orig.comm),
-//	BufferedDataDistributor(orig.comm, 2, 256)
-//	{
-//	}
 
 	BFSTaskP2PNoBlock::~BFSTaskP2PNoBlock()
 	{
@@ -62,7 +58,7 @@ namespace dgmark {
 		const int childRank = graph->vertexRank(child);
 
 		while (isSendRequestActive[childRank]) {
-			probeReadData();
+			probeSynchData();
 		}
 
 		size_t &currCount = countToSend[childRank];
@@ -76,14 +72,14 @@ namespace dgmark {
 			sendData(childRank);
 		}
 
-		probeReadData();
+		probeSynchData();
 	}
 
 	void BFSTaskP2PNoBlock::processRecvData(size_t countToRead)
 	{
 		for (size_t dataIndex = 0; dataIndex < countToRead; dataIndex += 2) {
-			Vertex currLocal = recvBuffer[dataIndex];
-			Vertex parentGlobal = recvBuffer[dataIndex + 1];
+			const Vertex currLocal = recvBuffer[dataIndex];
+			const Vertex parentGlobal = recvBuffer[dataIndex + 1];
 			processLocalChild(parentGlobal, currLocal);
 		}
 	}

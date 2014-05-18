@@ -20,7 +20,8 @@
 
 namespace dgmark {
 
-	DepthBuilder* ParentTreeValidator::createBuilder(Intracomm *comm, Graph *graph)
+	DepthBuilder* ParentTreeValidator::createBuilder(Intracomm *comm,
+							Graph *graph)
 	{
 		DepthBuilder *builder;
 		//builder = new DepthBuilderBuffered(comm, graph);
@@ -28,7 +29,8 @@ namespace dgmark {
 		return builder;
 	}
 
-	ParentTreeValidator::ParentTreeValidator(Intracomm *comm, Graph *graph) :
+	ParentTreeValidator::ParentTreeValidator(Intracomm *comm,
+						Graph *graph) :
 	Validator(comm),
 	log(comm),
 	graph(graph),
@@ -42,6 +44,7 @@ namespace dgmark {
 	ParentTreeValidator::ParentTreeValidator(const ParentTreeValidator& orig) :
 	Validator(orig.comm),
 	log(orig.comm),
+	graph(orig.graph),
 	illegalDepth(orig.illegalDepth),
 	illegalParent(orig.illegalParent)
 	{
@@ -104,10 +107,11 @@ namespace dgmark {
 	bool ParentTreeValidator::validateRanges(ParentTree *parentTree)
 	{
 		bool isValid = true;
-		Vertex *parent = parentTree->getParent();
+		const Vertex *parent = parentTree->getParent();
 
-		for (Vertex v = 0; v < graph->numLocalVertex; ++v) {
-			isValid &= (0 <= parent[v] && parent[v] <= illegalParent);
+		for (Vertex localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
+			isValid &= 0 <= parent[localVertex]
+				&& parent[localVertex] <= illegalParent;
 		}
 
 		comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
@@ -122,9 +126,9 @@ namespace dgmark {
 	bool ParentTreeValidator::validateParents(ParentTree *parentTree)
 	{
 		bool isValid = true;
-		Vertex *parent = parentTree->getParent();
-		Vertex root = parentTree->getRoot();
-		Vertex rootLocal = graph->vertexToLocal(root);
+		const Vertex *parent = parentTree->getParent();
+		const Vertex root = parentTree->getRoot();
+		const Vertex rootLocal = graph->vertexToLocal(root);
 
 		if (graph->vertexRank(root) == rank) {
 			if (root != parent[rootLocal]) {
@@ -134,8 +138,9 @@ namespace dgmark {
 		}
 
 		if (isValid) {
-			for (Vertex v = 0; v < graph->numLocalVertex; ++v) {
-				isValid &= (parent[v] != graph->vertexToGlobal(v) || v == rootLocal);
+			for (Vertex localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
+				isValid &= parent[localVertex] != graph->vertexToGlobal(localVertex)
+					|| localVertex == rootLocal;
 			}
 		}
 
@@ -154,13 +159,13 @@ namespace dgmark {
 		Vertex *depth = builder->buildDepth(parentTree);
 
 		if (depth == 0) {
-
+			log << "\nError: cycle detected in result\n";
 			return false;
 		}
 
 		bool isValid = true;
 
-		Vertex *parent = parentTree->getParent();
+		const Vertex *parent = parentTree->getParent();
 
 		//Depth must be built, when vertex was visited, and not, if it was not;
 		//Depth is a value from [0, illegalDepth].

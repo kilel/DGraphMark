@@ -35,11 +35,9 @@ namespace dgmark {
 		virtual bool validate(Result *taskResult);
 
 	protected:
-		Graph* graph;
+		const Graph * const graph;
 		Log log;
 
-		virtual bool validateDepth(ParentTree *parentTree);
-		bool doValidateDepth(ParentTree *parentTree, Vertex *depths);
 	private:
 		double validationTime;
 		DepthBuilder *builder;
@@ -50,6 +48,7 @@ namespace dgmark {
 		bool doValidate(ParentTree *parentTree);
 		bool validateRanges(ParentTree *parentTree);
 		bool validateParents(ParentTree *parentTree);
+		bool validateDepth(ParentTree *parentTree);
 
 		static DepthBuilder* createBuilder(Intracomm *comm, Graph *graph);
 	};

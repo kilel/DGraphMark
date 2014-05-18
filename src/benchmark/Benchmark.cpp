@@ -14,29 +14,40 @@
  *   limitations under the License.
  */
 
-#include <sstream>
 #include <fstream>
 #include "../util/Statistics.h"
 #include "Benchmark.h"
 
 namespace dgmark {
 
-	Benchmark::Benchmark(Intracomm *comm, Task *task, Validator *validator,
-		Graph *graph, int numStarts) :
-	Communicable(comm), task(task), validator(validator), graph(graph),
-	numStarts(numStarts), log(comm)
+	Benchmark::Benchmark(Intracomm *comm,
+			Task *task,
+			Validator *validator,
+			Graph *graph,
+			int numStarts) :
+	Communicable(comm),
+	task(task),
+	validator(validator),
+	graph(graph),
+	numStarts(numStarts),
+	log(comm)
 	{
 		taskRunningTimes = new vector<double>();
 		validationTimes = new vector<double>();
 		marks = new vector<double>();
 	}
 
-	Benchmark::Benchmark(const Benchmark& orig) : Communicable(orig.comm),
-	task(orig.task), validator(orig.validator), graph(orig.graph),
-	numStarts(orig.numStarts), log(orig.comm),
-	taskRunningTimes(orig.taskRunningTimes),
-	validationTimes(orig.validationTimes), marks(orig.marks)
+	Benchmark::Benchmark(const Benchmark& orig) :
+	Communicable(orig.comm),
+	task(orig.task),
+	validator(orig.validator),
+	graph(orig.graph),
+	numStarts(orig.numStarts),
+	log(orig.comm)
 	{
+		taskRunningTimes = new vector<double>();
+		validationTimes = new vector<double>();
+		marks = new vector<double>();
 	}
 
 	Benchmark::~Benchmark()
@@ -83,12 +94,7 @@ namespace dgmark {
 
 		if (isSuccessfullyFinished) {
 			out << name << ".time.taskOpening = " << task->getTaskOpeningTime() << "\n";
-			out << "#\n";
-			out << getStatistics(taskRunningTimes, name + (".time.singleRun"), ios::fixed);
-			out << "#\n";
-			out << getStatistics(validationTimes, name + (".time.validation"), ios::fixed);
-			out << "#\n";
-			out << getStatistics(marks, name + (".mark"), ios::fixed);
+			printBenchmarkStatistics(out);
 		} else {
 			out << "\n#There were errors while running benchmark, no statistics available.\n";
 		}
@@ -96,14 +102,28 @@ namespace dgmark {
 		return out.str();
 	}
 
-	string Benchmark::getStatistics(vector<double> *data, string statName,
-		const ios::fmtflags floatfieldFlag)
+	void Benchmark::printBenchmarkStatistics(stringstream &out)
 	{
+		out << "#\n";
+		out << getStatistics(taskRunningTimes, ".time.singleRun", ios::fixed);
+		out << "#\n";
+		out << getStatistics(validationTimes, ".time.validation", ios::fixed);
+		out << "#\n";
+		out << getStatistics(marks, ".mark", ios::fixed);
+	}
+
+	string Benchmark::getStatistics(vector<double> *data,
+					string statName,
+					const ios::fmtflags floatfieldFlag,
+					int precision)
+	{
+		statName = task->getName() + statName;
 		Statistics* stat = new Statistics(data);
 
 		stringstream out;
 		out.precision(statisticsPrecision);
 		out.setf(floatfieldFlag, ios::floatfield);
+		out.precision(precision);
 
 		out << statName << ".mean = " << stat->getMean() << "\n";
 		out << statName << ".stdDeviation = " << stat->getStdDeviation() << "\n";

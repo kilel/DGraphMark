@@ -18,24 +18,18 @@
 
 namespace dgmark {
 
-	Communicable::Communicable(Intracomm *comm) : comm(comm)
+	Communicable::Communicable(Intracomm *comm) :
+	comm(comm),
+	rank(comm->Get_rank()),
+	size(comm->Get_size())
 	{
-		if (comm != 0) {
-			rank = comm->Get_rank();
-			size = comm->Get_size();
-		} else {
-			rank = size = 0;
-		}
 	}
 
-	Communicable::Communicable(const Communicable& orig) : comm(orig.comm)
+	Communicable::Communicable(const Communicable& orig) :
+	comm(orig.comm),
+	rank(orig.comm->Get_rank()),
+	size(orig.comm->Get_size())
 	{
-		if (comm != 0) {
-			rank = comm->Get_rank();
-			size = comm->Get_size();
-		} else {
-			rank = size = 0;
-		}
 	}
 
 	Communicable::~Communicable()

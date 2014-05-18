@@ -31,6 +31,11 @@ namespace dgmark {
 		Communicable(const Communicable& orig);
 		virtual ~Communicable();
 
+	protected:
+		Intracomm *comm;
+		const int rank;
+		const int size;
+
 		void requestSynch(bool isSynchNeeded, int synchTag);
 		void requestSynch(bool isSynchNeeded, int toRank, int synchTag);
 		void endSynch(int synchTag);
@@ -48,11 +53,6 @@ namespace dgmark {
 		Vertex waitVertex(int fromRank, int tag);
 		Vertex waitVertex(int tag, Status &status);
 		Vertex waitVertex(int tag);
-
-	protected:
-		Intracomm *comm;
-		int rank;
-		int size;
 	};
 }
 

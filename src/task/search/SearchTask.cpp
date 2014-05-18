@@ -18,11 +18,15 @@
 
 namespace dgmark {
 
-	SearchTask::SearchTask(Intracomm *comm) : Task(comm), log(comm)
+	SearchTask::SearchTask(Intracomm *comm) :
+	Task(comm),
+	log(comm)
 	{
 	}
 
-	SearchTask::SearchTask(const SearchTask& orig) : Task(orig.comm), log(orig.comm)
+	SearchTask::SearchTask(const SearchTask& orig) :
+	Task(orig.comm),
+	log(orig.comm)
 	{
 	}
 
@@ -40,7 +44,9 @@ namespace dgmark {
 		log << "Opening task... ";
 		comm->Barrier();
 		double startTime = Wtime();
+
 		graph = new CSRGraph(newGraph);
+
 		comm->Barrier();
 		taskOpeningTime = Wtime() - startTime;
 		log << taskOpeningTime << " s\n";

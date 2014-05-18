@@ -29,11 +29,11 @@ namespace dgmark {
 	 */
 	class Graph : public Communicable {
 	public:
-		vector<Edge*> *edges;
+		vector<Edge*> * const edges;
 		const int grade;
 		const int density;
-		Vertex numLocalVertex;
-		Vertex numGlobalVertex;
+		const Vertex numLocalVertex;
+		const Vertex numGlobalVertex;
 
 		/**
 		 * Creates graph.
@@ -115,6 +115,17 @@ namespace dgmark {
 
 		void initialize();
 	};
+
+	inline static int getLog2(int value)
+	{
+		int log2value = 0;
+		while (value != 1) {
+			value >>= 1;
+			++log2value;
+		}
+		return log2value;
+	}
+
 }
 
 #endif	/* GRAPH_H */

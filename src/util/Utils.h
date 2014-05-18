@@ -24,10 +24,10 @@ namespace dgmark {
 
 		static void printGraph(Intracomm *comm, Graph *graph)
 		{
-			vector<Edge*> *edges = graph->edges;
+			const vector<Edge*> * const edges = graph->edges;
 
 			for (size_t i = 0; i < edges->size(); ++i) {
-				Edge *edge = edges->at(i);
+				const Edge *edge = edges->at(i);
 				printf("%d: %ld -> %ld\n", comm->Get_rank(), edge->from, edge->to);
 			}
 		}

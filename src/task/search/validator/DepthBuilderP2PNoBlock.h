@@ -34,8 +34,13 @@ namespace dgmark {
 	private:
 		Vertex getDepth(Vertex currVertex);
 		void synchAction();
+		void startRecv();
 
 		void waitForOthersToEnd();
+		
+		Request recvRequest;
+		bool isRecvActive;
+		Vertex requestedVertex;
 	};
 }
 

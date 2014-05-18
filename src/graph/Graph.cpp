@@ -20,22 +20,36 @@
 
 namespace dgmark {
 
-	Graph::Graph(Intracomm *comm, int grade, int density) : Communicable(comm),
-	grade(grade), density(density)
+	Graph::Graph(Intracomm *comm, int grade, int density) :
+	Communicable(comm),
+	edges(new vector<Edge*>()),
+	grade(grade),
+	density(density),
+	numGlobalVertex(1 << grade),
+	numLocalVertex(1 << grade - getLog2(comm->Get_size()))
 	{
 		initialize();
-		edges = new vector<Edge*>();
 	}
 
-	Graph::Graph(const Graph& orig) : Communicable(orig.comm), edges(orig.edges),
-	grade(orig.grade), diffGrade(orig.diffGrade), density(orig.density),
-	numLocalVertex(orig.numLocalVertex), numGlobalVertex(orig.numGlobalVertex)
+	Graph::Graph(const Graph& orig) :
+	Communicable(orig.comm),
+	edges(orig.edges),
+	grade(orig.grade),
+	diffGrade(orig.diffGrade),
+	density(orig.density),
+	numGlobalVertex(orig.numGlobalVertex),
+	numLocalVertex(orig.numLocalVertex)
 	{
 	}
 
-	Graph::Graph(const Graph *orig) : Communicable(orig->comm), edges(orig->edges),
-	grade(orig->grade), diffGrade(orig->diffGrade), density(orig->density),
-	numLocalVertex(orig->numLocalVertex), numGlobalVertex(orig->numGlobalVertex)
+	Graph::Graph(const Graph *orig) :
+	Communicable(orig->comm),
+	edges(orig->edges),
+	grade(orig->grade),
+	diffGrade(orig->diffGrade),
+	density(orig->density),
+	numGlobalVertex(orig->numGlobalVertex),
+	numLocalVertex(orig->numLocalVertex)
 	{
 	}
 
@@ -57,12 +71,8 @@ namespace dgmark {
 			}
 			assert(false);
 		}
-		int commSize = size;
-		int commGrade = 0;
-		while (commSize != 1) {
-			commSize >>= 1;
-			++commGrade;
-		}
+
+		int commGrade = getLog2(size);
 
 		assert(commGrade < grade);
 		assert(commGrade >= 0);
@@ -70,9 +80,6 @@ namespace dgmark {
 		assert(density > 0);
 
 		diffGrade = grade - commGrade;
-
-		numLocalVertex = 1 << (diffGrade); //number of vertex in this graph locally (this node)
-		numGlobalVertex = 1 << (grade); //number of vertex globally (on all nodes)
 	}
 
 }

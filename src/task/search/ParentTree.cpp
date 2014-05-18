@@ -18,7 +18,11 @@
 
 namespace dgmark {
 
-	ParentTree::ParentTree(Intracomm *comm, Vertex root, Vertex *parent, CSRGraph *graph, double taskRunTime) :
+	ParentTree::ParentTree(Intracomm *comm,
+			Vertex root,
+			Vertex *parent,
+			const CSRGraph *graph,
+			double taskRunTime) :
 	Result(comm),
 	root(root),
 	parent(parent),
@@ -40,7 +44,6 @@ namespace dgmark {
 
 	ParentTree::~ParentTree()
 	{
-		//delete parent;
 		Free_mem(parent);
 	}
 
@@ -49,7 +52,7 @@ namespace dgmark {
 		return root;
 	}
 
-	Vertex* ParentTree::getParent()
+	const Vertex* ParentTree::getParent()
 	{
 		return parent;
 	}
@@ -59,7 +62,7 @@ namespace dgmark {
 		return graph->numLocalVertex;
 	}
 
-	CSRGraph* ParentTree::getInitialGraph()
+	const CSRGraph* ParentTree::getInitialGraph()
 	{
 		return graph;
 	}
@@ -84,12 +87,12 @@ namespace dgmark {
 		return traversedEdges;
 	}
 
-	double ParentTree::calculateTraversedEdges(Vertex* parent, CSRGraph *graph)
+	double ParentTree::calculateTraversedEdges(const Vertex * const parent,
+						const CSRGraph * const graph)
 	{
-		double realTraversedEdges = 0; //graph->edges->size();
-
+		double realTraversedEdges = 0;
 		for (Vertex localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
-			size_t traversedMax = graph->getEndIndex(localVertex) - graph->getStartIndex(localVertex);
+			const size_t traversedMax = graph->getEndIndex(localVertex) - graph->getStartIndex(localVertex);
 			realTraversedEdges += parent[localVertex] != graph->numGlobalVertex ? traversedMax : 0;
 		}
 

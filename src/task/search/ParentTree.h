@@ -32,31 +32,32 @@ namespace dgmark {
 		 * @param graph initial graph os result.
 		 * @param duration Duration of tree-making task in seconds (MPI::Wtime)
 		 */
-		ParentTree(Intracomm *comm, Vertex root, Vertex *parent, CSRGraph *graph, double duration);
+		ParentTree(Intracomm *comm, Vertex root, Vertex *parent, const CSRGraph *graph, double duration);
 		ParentTree(const ParentTree& orig);
 		virtual ~ParentTree();
 
 		/**
-		 * Traversed egdes per second is a 
-		 * @return 
-		 */
-		virtual double getMark();
-		virtual double getTaskRunTime();
-		virtual TaskType getTaskType();
+		 * Traversed egdes per second is a mark of this kind of task.
+		 * TEPS.
+		 * @return mark for task result.
+		 */virtual
+		double getMark();
+		double getTaskRunTime();
+		TaskType getTaskType();
 
 		Vertex getRoot();
-		Vertex* getParent();
+		const Vertex* getParent();
 		size_t getParentSize();
-		CSRGraph* getInitialGraph();
+		const CSRGraph* getInitialGraph();
 		double getTraversedEdges();
 	private:
 		Vertex root;
-		Vertex *parent;
-		CSRGraph *graph;
+		Vertex * const parent;
+		const CSRGraph * const graph;
 		double taskRunTime;
 		size_t traversedEdges;
 
-		double calculateTraversedEdges(Vertex* parent, CSRGraph *graph);
+		double calculateTraversedEdges(const Vertex * const parent, const CSRGraph * const graph);
 	};
 }
 

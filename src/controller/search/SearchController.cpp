@@ -19,19 +19,26 @@
 #include <cstdlib>
 #include "SearchController.h"
 #include "../../benchmark/search/SearchBenchmark.h"
-#include "../../generator/SimpleGenerator.h"
+
+#include "../../generator/UniformGenerator.h"
 
 namespace dgmark {
+
+	GraphGenerator* SearchController::createGenerator()
+	{
+		return new UniformGenerator(comm);
+	}
 
 	SearchController::SearchController(Intracomm *comm, int argc, char **argv) :
 	Controller(comm, argc, argv)
 	{
-		generator = new SimpleGenerator(comm);
+		generator = createGenerator();
 	}
 
 	SearchController::SearchController(const SearchController& orig) :
 	Controller(orig)
 	{
+		generator = createGenerator();
 	}
 
 	SearchController::~SearchController()
@@ -67,7 +74,7 @@ namespace dgmark {
 		delete tasks;
 	}
 
-	string SearchController::getAdditionalStatistics()
+	string SearchController::getSpecificStatistics()
 	{
 		stringstream out;
 		out.precision(CONTROLLER_PRECISION);

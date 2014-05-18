@@ -54,8 +54,8 @@ namespace dgmark {
 
 	inline void BFSTaskP2P::processGlobalChild(Vertex currVertex, Vertex child)
 	{
-		Vertex childLocal = graph->vertexToLocal(child);
-		int childRank = graph->vertexRank(child);
+		const Vertex childLocal = graph->vertexToLocal(child);
+		const int childRank = graph->vertexRank(child);
 		Vertex memory[2] = {childLocal, currVertex};
 
 		requestSynch(true, childRank, BFS_SYNCH_TAG);

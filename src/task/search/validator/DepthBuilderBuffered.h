@@ -34,6 +34,9 @@ namespace dgmark {
 		virtual void prepare(Vertex root);
 		
 	private:
+		static const size_t ELEMENT_SIZE = 2;
+		static const size_t BUFFERED_ELEMENTS = 256;
+		
 		short *vertexState;
 		static const short stateInitial = 0;
 		static const short stateJustFilled = 1;

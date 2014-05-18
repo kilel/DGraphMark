@@ -32,13 +32,17 @@ namespace dgmark {
 		CSRGraph(const CSRGraph& orig);
 		virtual ~CSRGraph();
 
-		size_t getStartIndex(Vertex v);
-		size_t getEndIndex(Vertex v);
+		size_t getStartIndex(Vertex v) const;
+		size_t getEndIndex(Vertex v) const;
 
 	private:
-		void sort();
-		Vertex *startIndex;
+		/**
+		 * Builds CSR graph from existing. 
+		 * First, sorts edges by source, then builds an array of start index for each vertex.
+		 */
+		void buildCSR();
 
+		Vertex *startIndex;
 	};
 }
 

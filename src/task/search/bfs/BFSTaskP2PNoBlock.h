@@ -22,10 +22,9 @@
 
 namespace dgmark {
 
-	class BFSTaskP2PNoBlock : public BFSTaskP2P, public BufferedDataDistributor{
+	class BFSTaskP2PNoBlock : public BFSTaskP2P, public BufferedDataDistributor {
 	public:
 		BFSTaskP2PNoBlock(Intracomm *comm);
-//		BFSTaskP2PNoBlock(const BFSTaskP2PNoBlock& orig);
 		virtual ~BFSTaskP2PNoBlock();
 
 		virtual string getName();
@@ -33,9 +32,11 @@ namespace dgmark {
 	protected:
 		virtual void performBFS();
 		virtual void processGlobalChild(Vertex currVertex, Vertex child);
-		
+
 		virtual void processRecvData(size_t countToRead);
 	private:
+		static const size_t ELEMENT_SIZE = 2;
+		static const size_t BUFFERED_ELEMENTS = 256;
 
 	};
 }

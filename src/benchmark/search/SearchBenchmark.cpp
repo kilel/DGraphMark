@@ -22,22 +22,36 @@
 
 namespace dgmark {
 
-	SearchBenchmark::SearchBenchmark(Intracomm *comm, SearchTask *task, Graph *graph, int numStarts) :
-	Benchmark(comm, task, new ParentTreeValidator(comm, graph), graph, numStarts),
+	SearchBenchmark::SearchBenchmark(Intracomm *comm,
+					SearchTask *task,
+					Graph *graph,
+					int numStarts) :
+	Benchmark(comm,
+		task,
+		new ParentTreeValidator(comm, graph),
+		graph,
+		numStarts),
 	startRoots(generateStartRoots(graph->numGlobalVertex))
 	{
+		traversedEdges = new vector<double>();
 	}
 
 	SearchBenchmark::SearchBenchmark(const SearchBenchmark& orig) :
-	Benchmark(orig.comm, orig.task, orig.validator, orig.graph, numStarts),
-	startRoots(orig.startRoots)
+	Benchmark(orig.comm,
+		orig.task,
+		new ParentTreeValidator(orig.comm, orig.graph),
+		orig.graph,
+		orig.numStarts),
+	startRoots(generateStartRoots(graph->numGlobalVertex))
 	{
+		traversedEdges = new vector<double>();
 	}
 
 	SearchBenchmark::~SearchBenchmark()
 	{
 		delete validator;
 		delete startRoots;
+		delete traversedEdges;
 	}
 
 	Vertex* SearchBenchmark::generateStartRoots(size_t maxStartRoot)
@@ -75,15 +89,22 @@ namespace dgmark {
 			log << "Task mark: " << result->getMark() << " TEPS" << "\n\n";
 		}
 
+		traversedEdges->push_back(result->getTraversedEdges());
 		taskRunningTimes->push_back(result->getTaskRunTime());
-		marks->push_back(result->getMark());
 		validationTimes->push_back(validator->getValidationTime());
+		marks->push_back(result->getMark());
 
 		delete result;
 		return isValid;
 	}
 
+	void SearchBenchmark::printBenchmarkStatistics(stringstream &out)
+	{
+		out << "#\n";
+		out << getStatistics(traversedEdges, ".traversedEdges", ios::fixed, 0);
 
+		Benchmark::printBenchmarkStatistics(out);
+	}
 
 }
 

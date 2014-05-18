@@ -23,13 +23,18 @@
 namespace dgmark {
 
 	Controller::Controller(Intracomm *comm, int argc, char **argv) :
-	Communicable(comm), log(comm)
+	Communicable(comm),
+	log(comm)
 	{
 		parseArguments(argc, argv);
 	}
 
 	Controller::Controller(const Controller& orig) :
-	Communicable(orig.comm), log(orig.comm), grade(orig.grade), density(orig.density), numStarts(orig.numStarts)
+	Communicable(orig.comm),
+	log(orig.comm),
+	grade(orig.grade),
+	density(orig.density),
+	numStarts(orig.numStarts)
 	{
 	}
 
@@ -39,7 +44,7 @@ namespace dgmark {
 
 	void Controller::run(vector<Benchmark*> *benchmarks)
 	{
-		string statistics = getInitialStatistics() + getAdditionalStatistics();
+		string statistics = getInitialStatistics() + getSpecificStatistics();
 
 		for (size_t bmark = 0; bmark < benchmarks->size(); ++bmark) {
 			Benchmark *benchmark = benchmarks->at(bmark);
@@ -78,29 +83,36 @@ namespace dgmark {
 
 	void Controller::printResult(string stat)
 	{
+		if (rank != 0) {
+			return;
+		}
+
 		log << stat;
 
-		if (rank == 0) {
-			time_t datetime = time(0);
-			tm *date = localtime(&datetime);
-
-			int mkdirResult = system("mkdir -p dgmarkStatistics");
-
-			stringstream fileName;
-			fileName << "dgmarkStatistics/dgmark_stat_"
-				<< (date->tm_year + 1900) << "-"
-				<< (date->tm_mon + 1) << "-"
-				<< date->tm_mday << "_"
-				<< date->tm_hour << "-"
-				<< date->tm_min << "-"
-				<< date->tm_sec
-				<< ".properties";
-
-			ofstream fileOut;
-			fileOut.open(fileName.str().c_str());
-			fileOut << stat;
-			fileOut.close();
+		int mkdirResult = system("mkdir -p dgmarkStatistics");
+		if (mkdirResult) { //if can't create file
+			log << "\nCan't create statistics file. "
+				<< "Mkdir error code " << mkdirResult << "\n";
+			return;
 		}
+
+		time_t datetime = time(0);
+		tm *date = localtime(&datetime);
+
+		stringstream fileName;
+		fileName << "dgmarkStatistics/dgmark_stat_"
+			<< (date->tm_year + 1900) << "-"
+			<< (date->tm_mon + 1) << "-"
+			<< date->tm_mday << "_"
+			<< date->tm_hour << "-"
+			<< date->tm_min << "-"
+			<< date->tm_sec
+			<< ".properties";
+
+		ofstream fileOut;
+		fileOut.open(fileName.str().c_str());
+		fileOut << stat;
+		fileOut.close();
 	}
 
 	void Controller::parseArguments(int argc, char** argv)

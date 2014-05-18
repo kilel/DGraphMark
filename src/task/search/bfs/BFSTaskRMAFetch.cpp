@@ -87,11 +87,11 @@ namespace dgmark {
 	void BFSTaskRMAFetch::performBFSSynchRMA()
 	{
 		while (true) {
-			if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
+			if (waitSynch(BFS_SYNCH_TAG)) {
 				pWin->fenceOpen(MODE_NOPUT); //allow read parent
 				pWin->fenceClose(MODE_NOSTORE);
 
-				if (pWin->recvIsFenceNeeded(BFS_SYNCH_TAG)) {
+				if (waitSynch(BFS_SYNCH_TAG)) {
 					pWin->fenceOpen(MODE_NOPUT); //allow to write to the parent
 					pWin->fenceClose(MODE_NOSTORE);
 					nextQWin->fenceOpen(MODE_NOPUT); //allow to read queue
@@ -110,11 +110,11 @@ namespace dgmark {
 	inline void BFSTaskRMAFetch::processGlobalChild(Vertex currVertex, Vertex child)
 	{
 		Vertex childLocal = graph->vertexToLocal(child);
-		int childRank = graph->vertexRank(child);
+		const int childRank = graph->vertexRank(child);
 		Vertex parentOfChild;
+		
 		//printf("%d: Getting parent of child\n", rank);
-
-		pWin->sendIsFenceNeeded(true, BFS_SYNCH_TAG); //fence is needed now
+		requestSynch(true, childRank, BFS_SYNCH_TAG); //fence is needed now
 		pWin->fenceOpen(MODE_NOPUT);
 		pWin->get(&parentOfChild, 1, childRank, childLocal);
 		pWin->fenceClose(0);
@@ -122,9 +122,8 @@ namespace dgmark {
 		//printf("%d: Parent of child is %ld\n", rank, parentOfChild, numLocalVertex);
 		assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
 
-
 		bool isInnerFenceNeeded = (parentOfChild == graph->numGlobalVertex);
-		pWin->sendIsFenceNeeded(isInnerFenceNeeded, BFS_SYNCH_TAG); // call for inner fence if it is needed
+		requestSynch(isInnerFenceNeeded, childRank, BFS_SYNCH_TAG); // call for inner fence if it is needed
 
 		if (isInnerFenceNeeded) {
 			//printf("%d: Putting child to the parent\n", rank);

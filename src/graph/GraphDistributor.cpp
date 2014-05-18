@@ -21,8 +21,9 @@
 namespace dgmark {
 
 	GraphDistributor::GraphDistributor(Intracomm *comm, Graph *graph) :
-	//buffer for 256 elements consists of 2 vertex.
-	BufferedDataDistributor(comm, 2, 256), graph(graph), edges(graph->edges)
+	BufferedDataDistributor(comm, ELEMENT_SIZE, BUFFERED_ELEMENTS),
+	graph(graph),
+	edges(graph->edges)
 	{
 	}
 
@@ -33,19 +34,7 @@ namespace dgmark {
 	void GraphDistributor::distribute()
 	{
 		prepareBuffers();
-		size_t initialEdgesCount = edges->size();
-
-		for (size_t edgeIndex = 0; edgeIndex < initialEdgesCount; ++edgeIndex) {
-			Edge *edge = edges->at(edgeIndex);
-			const int rankTo = graph->vertexRank(edge->to);
-			if (rankTo == rank) {
-				edges->push_back(new Edge(edge->to, edge->from));
-			} else {
-				sendEdge(edge, rankTo);
-			}
-			probeReadData();
-		}
-
+		distributeEdges();
 		flushBuffers();
 		waitForOthersToEnd();
 
@@ -53,15 +42,31 @@ namespace dgmark {
 			recvRequest.Cancel();
 		}
 
-		edges->resize(edges->size(), 0); //Shrink size.
 		size_t numEdges = edges->size();
+		edges->resize(numEdges, 0); //Shrink size.
+
 		comm->Allreduce(IN_PLACE, &numEdges, 1, UNSIGNED_LONG_LONG, SUM);
 
 		//For each vertex there are density edges, each presented by two oriented.
 		assert(numEdges == graph->numGlobalVertex * graph->density * 2);
 	}
 
-	void GraphDistributor::sendEdge(Edge* edge, int toRank)
+	void GraphDistributor::distributeEdges()
+	{
+		const size_t initialEdgesCount = edges->size();
+		for (size_t edgeIndex = 0; edgeIndex < initialEdgesCount; ++edgeIndex) {
+			const Edge * const edge = edges->at(edgeIndex);
+			const int rankTo = graph->vertexRank(edge->to);
+			if (rankTo == rank) {
+				edges->push_back(new Edge(edge->to, edge->from));
+			} else {
+				sendEdge(edge, rankTo);
+			}
+			probeSynchData();
+		}
+	}
+
+	void GraphDistributor::sendEdge(const Edge * const edge, int toRank)
 	{
 		size_t &currCount = countToSend[toRank];
 		Vertex *&currBuffer = sendBuffer[toRank];

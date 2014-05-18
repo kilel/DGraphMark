@@ -22,6 +22,7 @@
 #include "../task/Task.h"
 #include "../task/Validator.h"
 #include "../util/Log.h"
+#include <sstream>
 
 namespace dgmark {
 
@@ -39,7 +40,6 @@ namespace dgmark {
 	protected:
 		static const int statisticsPrecision = 5;
 
-		Log log;
 		Task *task;
 		Validator *validator;
 		Graph *graph;
@@ -51,10 +51,33 @@ namespace dgmark {
 		vector<double> *validationTimes;
 		vector<double> *marks;
 
+		Log log;
+
+		/**
+		 * Runs single benchmark task with index "startIndex".
+		 * @param startIndex Index of task to start.
+		 * @return true, if finished successfully.
+		 */
 		virtual bool runSingleTask(int startIndex) = 0;
-		string getStatistics(vector<double> *data, string name,
-			const ios::fmtflags floatfieldFlag = ios::scientific);
-	private:
+
+		/**
+		 * Prints statistics to output stream.
+		 * @param out Output stream.
+		 */
+		virtual void printBenchmarkStatistics(stringstream &out);
+
+		/**
+		 * Prints statistics of data to string.
+		 * @param data Data to get statistics from.
+		 * @param statName Name of ststistics field. Example: ".statName".
+		 * @param floatfieldFlag ios::scientific or ios::fixed. Format of printing.
+		 * @param precision Precision if ios:fixed format.
+		 * @return Statistics string.
+		 */
+		string getStatistics(vector<double> *data,
+				string statName,
+				const ios::fmtflags floatfieldFlag = ios::scientific,
+				int precision = statisticsPrecision);
 
 	};
 }

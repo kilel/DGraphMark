@@ -18,8 +18,11 @@
 
 namespace dgmark {
 
-	DepthBuilderBuffered::DepthBuilderBuffered(Intracomm *comm, Graph *graph) :
-	BufferedDataDistributor(comm, 2, 256),
+	DepthBuilderBuffered::DepthBuilderBuffered(Intracomm *comm,
+						Graph *graph) :
+	BufferedDataDistributor(comm,
+				ELEMENT_SIZE,
+				BUFFERED_ELEMENTS),
 	DepthBuilder(graph)
 	{
 		vertexState = new short[graph->numLocalVertex];
@@ -49,7 +52,7 @@ namespace dgmark {
 				break;
 			}
 
-			probeReadData();
+			probeSynchData();
 		}
 
 		flushBuffers();

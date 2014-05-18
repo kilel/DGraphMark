@@ -30,7 +30,8 @@ namespace dgmark {
 	class GraphGenerator : public Communicable {
 	public:
 
-		GraphGenerator(Intracomm *comm) : Communicable(comm)
+		GraphGenerator(Intracomm *comm) :
+			Communicable(comm)
 		{
 		}
 
@@ -40,6 +41,8 @@ namespace dgmark {
 
 		/**
 		 * Generates graph with specified parameters.
+		 * @param grade Log[2] of total vertices count
+		 * @param density Average edges count, connected to vertex. 
 		 * @return Graph.
 		 */
 		virtual Graph* generate(int grade, int density) = 0;

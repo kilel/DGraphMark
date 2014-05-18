@@ -20,15 +20,19 @@
 
 namespace dgmark {
 
-	CSRGraph::CSRGraph(Graph *graph) : Graph(graph)
+	CSRGraph::CSRGraph(Graph *graph) :
+	Graph(graph)
 	{
 		startIndex = new Vertex[numLocalVertex + 1]; // the last one is numLocalVertex.
-		sort();
+		buildCSR();
 	}
 
 	CSRGraph::CSRGraph(const CSRGraph& orig) :
-	Graph(orig), startIndex(orig.startIndex)
+	Graph(orig)
 	{
+		startIndex = new Vertex[numLocalVertex + 1];
+		Vertex *origSI = orig.startIndex;
+		copy(origSI, origSI + numLocalVertex + 1, startIndex);
 	}
 
 	CSRGraph::~CSRGraph()
@@ -49,33 +53,40 @@ namespace dgmark {
 		}
 	}
 
-	void CSRGraph::sort()
+	void CSRGraph::buildCSR()
 	{
-		std::sort(edges->begin(), edges->end(), compareEdge);
+		//std::sort(edges->begin(), edges->end(), compareEdge);
+		//Array of edges is half sorted. 
+		//This kind of sort gives better performance.
+		std::stable_sort(edges->begin(), edges->end(), compareEdge);
 
-		Vertex prev = 0;
-		for (size_t index = 0; index < edges->size();) {
-			Vertex localVertex = vertexToLocal(edges->at(index)->from);
+		Vertex previousVertex = -1;
+		for (size_t currEdgeIndex = 0; currEdgeIndex < edges->size(); ++currEdgeIndex) {
+			const Edge * const currEdge = edges->at(currEdgeIndex);
+			const Vertex localVertex = vertexToLocal(currEdge->from);
 
-			for (Vertex skipped = prev + 1; skipped < localVertex; ++skipped) {
-				startIndex[skipped] = startIndex[prev];
+			if (previousVertex == localVertex) {
+				continue;
 			}
 
-			startIndex[localVertex] = index;
-			while (index < edges->size() && vertexToLocal(edges->at(index)->from) == localVertex) {
-				++index;
+			//filling skipped edges with index of current.
+			//This makes they endIndex - startIndex == 0
+			for (Vertex skipped = previousVertex + 1; skipped < localVertex; ++skipped) {
+				startIndex[skipped] = currEdgeIndex;
 			}
-			prev = localVertex;
+
+			startIndex[localVertex] = currEdgeIndex;
+			previousVertex = localVertex;
 		}
 		startIndex[numLocalVertex] = edges->size();
 	}
 
-	size_t CSRGraph::getStartIndex(Vertex localVertex)
+	size_t CSRGraph::getStartIndex(Vertex localVertex) const
 	{
 		return startIndex[localVertex];
 	}
 
-	size_t CSRGraph::getEndIndex(Vertex localVertex)
+	size_t CSRGraph::getEndIndex(Vertex localVertex) const
 	{
 		return startIndex[localVertex + 1];
 	}

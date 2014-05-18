@@ -18,14 +18,19 @@
 #define	KRONECKERGENERATOR_H
 
 #include "GraphGenerator.h"
-#include "SimpleGenerator.h"
+#include "UniformGenerator.h"
 
 
 namespace dgmark {
 
 	class KroneckerGenerator : SimpleGenerator {
 	public:
-		KroneckerGenerator(Intracomm *comm);
+
+		KroneckerGenerator(Intracomm *comm) :
+			SimpleGenerator(comm)
+		{
+
+		}
 		virtual ~KroneckerGenerator();
 	protected:
 
@@ -38,7 +43,7 @@ namespace dgmark {
 		virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
 
 	private:
-		
+
 		/**
 		 * This map represents probability to connect vertices with.
 		 * Definition: vertice is strong, if it is in first half of table.
@@ -51,7 +56,7 @@ namespace dgmark {
 			{0.57, 0.19},
 			{0.19, 0.05}
 		};
-		
+
 		static const double probStrongToStrong = probability[0][0] / (probability[0][0] + probability[0][1]);
 		static const double probWeakToStrong = probability[1][0] / (probability[1][0] + probability[1][1]);
 	};

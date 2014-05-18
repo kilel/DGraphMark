@@ -14,7 +14,7 @@
 
 
 # true of false to use or not of OpenMP in compilation
-OPENMP = true
+OPENMP = false
 BUILD_GRAPH500_BFS = true
 
 #compile flags
@@ -50,7 +50,7 @@ OBJ_DIR_PATHS = $(addprefix $(OBJ_DIR), \
 #Definitions of sources to compile
 BENCHMARK = Benchmark search/SearchBenchmark
 CONTROLLER = Controller search/SearchController
-GENERATOR = SimpleGenerator #KroneckerGenerator
+GENERATOR = RandomGenerator UniformGenerator #KroneckerGenerator
 GRAPH = Graph CSRGraph GraphDistributor
 MPI = Communicable RMAWindow BufferedDataDistributor
 TASK = ParentTree ParentTreeValidator SearchTask

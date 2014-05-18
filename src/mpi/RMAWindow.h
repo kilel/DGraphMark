@@ -80,26 +80,10 @@ namespace dgmark {
 		 */
 		void accumulate(T* dataToAcc, size_t dataLength, int targetRank, size_t shift, const Op &operation);
 
-		/**
-		 * Sends synchronization bit with specified tag.
-		 * 
-		 * @param value synchronization bit.
-		 * @paran tag int value, which marks send request.
-		 */
-		void sendIsFenceNeeded(bool value, int tag);
-
-		/**
-		 * Recieves synchronization bit.
-		 * 
-		 * @paran tag int value. Only requests with this tag would be recieved.
-		 * @return synchronization bit.
-		 */
-		bool recvIsFenceNeeded(int tag);
-
 	private:
 		T *data; //don't freed here
-		size_t dataSize;
-		Datatype dataType;
+		const size_t dataSize;
+		const Datatype dataType;
 		Win *win; //freed in ~RMAWindow
 	};
 }

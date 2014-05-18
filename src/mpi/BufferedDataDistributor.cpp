@@ -19,7 +19,8 @@
 namespace dgmark {
 
 	BufferedDataDistributor::BufferedDataDistributor(Intracomm *comm,
-		size_t elementSize, size_t bufferedElementsCount) :
+							size_t elementSize,
+							size_t bufferedElementsCount) :
 	Communicable(comm),
 	elementSize(elementSize),
 	sendPackageSize(elementSize * bufferedElementsCount)
@@ -42,29 +43,30 @@ namespace dgmark {
 	void BufferedDataDistributor::sendData(int toRank)
 	{
 		while (isSendRequestActive[toRank]) {
-			probeReadData();
+			probeSynchData();
 		}
 
 		//printf("%d: sending %ld data to %d\n", rank, countToSend[toRank], toRank);
 
 		sendRequest[toRank] = comm->Isend(
-			&sendBuffer[toRank][0],
-			countToSend[toRank],
-			VERTEX_TYPE,
-			toRank,
-			DISTRIBUTION_TAG);
+						&sendBuffer[toRank][0],
+						countToSend[toRank],
+						VERTEX_TYPE,
+						toRank,
+						DISTRIBUTION_TAG);
 
 		countToSend[toRank] = 0;
 		isSendRequestActive[toRank] = true;
 	}
 
-	void BufferedDataDistributor::probeReadData()
+	void BufferedDataDistributor::probeSynchData()
 	{
 		Status status;
+		probeRecv();
 
 		if (isRecvRequestActive && recvRequest.Test(status)) {
 			isRecvRequestActive = false;
-			size_t dataCount = status.Get_count(VERTEX_TYPE);
+			const size_t dataCount = status.Get_count(VERTEX_TYPE);
 			//printf("%d: reading %ld data from %d\n", rank, dataCount, status.Get_source());
 			if (dataCount > 0) {
 				processRecvData(dataCount);
@@ -73,17 +75,22 @@ namespace dgmark {
 			}
 		}
 
+		probeRecv();
+
+		updateRequestsActivity();
+	}
+
+	void BufferedDataDistributor::probeRecv()
+	{
 		if (!isRecvRequestActive) {
 			isRecvRequestActive = true;
 			recvRequest = comm->Irecv(
-				recvBuffer,
-				sendPackageSize,
-				VERTEX_TYPE,
-				ANY_SOURCE,
-				DISTRIBUTION_TAG);
+						recvBuffer,
+						sendPackageSize,
+						VERTEX_TYPE,
+						ANY_SOURCE,
+						DISTRIBUTION_TAG);
 		}
-
-		updateRequestsActivity();
 	}
 
 	void BufferedDataDistributor::prepareBuffers()
@@ -108,15 +115,13 @@ namespace dgmark {
 			if (!isSendRequestActive[reqIndex] && countToSend[reqIndex] > 0) {
 				sendData(reqIndex);
 			}
-			
-			//printf("%d: send empty\n", rank);
-			//send empty message to guarantee end of communication
+
+			//sending empty array in end of communication.
 			sendData(reqIndex);
 
 			while (isSendRequestActive[reqIndex]) {
-				probeReadData();
+				probeSynchData();
 			}
-
 		}
 	}
 
@@ -133,15 +138,10 @@ namespace dgmark {
 	{
 		//printf("%d: wait end\n", rank);
 		// tell all processes, that you had been stopped;
-		//requestSynch(true, END_TAG);
 		++countEnded;
-		//int endedProcesses = 1;
 		while (countEnded < size) {
-			probeReadData();
-			//			while (probeSynch(END_TAG)) {
-			//				++endedProcesses;
-			//			}
+			probeSynchData();
 		}
-		probeReadData();
+		probeSynchData();
 	}
 }

@@ -38,16 +38,25 @@ namespace dgmark {
 
 	protected:
 		virtual void processRecvData(size_t countToRead);
+
 	private:
-		Graph *graph;
-		vector<Edge*> *edges;
+		static const size_t ELEMENT_SIZE = 2;
+		static const size_t BUFFERED_ELEMENTS = 256;
+
+		const Graph * const graph;
+		vector<Edge*> * const edges;
+
+		/**
+		 * Distributes edges to nodes.
+		 */
+		void distributeEdges();
 
 		/**
 		 * Transfers edge to it's destination.
 		 * @param edge Edge
 		 * @param memory allocated memory to send edge.
 		 */
-		void sendEdge(Edge *edge, int toRank);
+		void sendEdge(const Edge * const edge, int toRank);
 
 	};
 }

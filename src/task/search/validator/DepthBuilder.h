@@ -42,7 +42,7 @@ namespace dgmark {
 
 		Vertex *depth;
 		Graph *graph;
-		Vertex *parent;
+		const Vertex *parent;
 
 		short buildState;
 		static const short buildStateError = 0;

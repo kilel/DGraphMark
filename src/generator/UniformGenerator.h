@@ -14,33 +14,22 @@
  *   limitations under the License.
  */
 
-#ifndef SIMPLEGENERATOR_H
-#define	SIMPLEGENERATOR_H
+#ifndef UNIFORMGENERATOR_H
+#define	UNIFORMGENERATOR_H
 
-#include "GraphGenerator.h"
-#include "../util/Log.h"
-#include "../graph/GraphDistributor.h"
+#include "RandomGenerator.h"
 
 namespace dgmark {
 
-	using namespace MPI;
-
-	class SimpleGenerator : public GraphGenerator {
+	class UniformGenerator : public RandomGenerator {
 	public:
-		/**
-		 * Creates simple graph generator, distributed in communicator nodes.
-		 * @param communicator MPI intracomm.
-		 * @param grade Grade of vertices. Total number is 2^grade
-		 * @param density Density of edges. Avg amount of edges per vertex.
-		 */
-		SimpleGenerator(Intracomm *comm);
-		virtual ~SimpleGenerator();
-
-		virtual Graph* generate(int grade, int density);
-		virtual double getGenerationTime();
-		virtual double getDistributionTime();
+		UniformGenerator(Intracomm *comm);
+		virtual ~UniformGenerator();
 
 	protected:
+
+		void generateInternal(Graph *graph);
+
 		/**
 		 * Adds edges evenly with equal probabilities.
 		 * @param graph Graph to add in.
@@ -48,14 +37,8 @@ namespace dgmark {
 		 * @param numEdges num edges to add from vertex.
 		 */
 		virtual void addEdgeFromVertex(Graph *graph, Vertex localVertex, size_t numEdges);
-		Random *random;
-		Log log;
-
-	private:
-		double generationTime;
-		double distributionTime;
 	};
 }
 
-#endif	/* SIMPLEGENERATOR_H */
+#endif	/* UNIFORMGENERATOR_H */
 

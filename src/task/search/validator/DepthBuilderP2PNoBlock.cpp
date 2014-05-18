@@ -30,6 +30,7 @@ namespace dgmark {
 
 	void DepthBuilderP2PNoBlock::buildNextStep()
 	{
+		//printf("%d: step\n\n", rank);
 		buildState = buildStateSuccess;
 
 		for (size_t localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
@@ -40,21 +41,25 @@ namespace dgmark {
 				continue;
 			}
 
-			const Vertex currDepth = depth[localVertex];
-			const Vertex parentDepth = getDepth(currParent);
+			Vertex &currDepth = depth[localVertex];
 
-			if (currDepth == graph->numGlobalVertex && parentDepth != graph->numGlobalVertex) {
-				depth[localVertex] = parentDepth + 1;
+			const Vertex parentDepth = getDepth(currParent);
+			if (parentDepth == graph->numGlobalVertex) {
+				continue;
+			}
+
+			if (currDepth == graph->numGlobalVertex) {
+				currDepth = parentDepth + 1;
 				buildState = min(buildState, buildStateNextStepRequired);
-			} else if (currDepth != graph->numGlobalVertex && parentDepth != graph->numGlobalVertex) {
-				if (currDepth - parentDepth != 1 && currDepth != 0) {
-					buildState = buildStateError;
-				}
+			} else if (parentDepth != 0 && currDepth - parentDepth != 1) {
+				buildState = buildStateError;
+				break;
 			}
 			synchAction();
 		}
 
 		waitForOthersToEnd();
+
 		comm->Allreduce(IN_PLACE, &buildState, 1, SHORT, MIN);
 	}
 
@@ -107,10 +112,27 @@ namespace dgmark {
 	void DepthBuilderP2PNoBlock::synchAction()
 	{
 		Status status;
-		while (comm->Iprobe(ANY_SOURCE, LOCAL_SEND_TAG, status)) {
-			Vertex currParentLocal = waitVertex(status.Get_source(), LOCAL_SEND_TAG);
+
+		startRecv();
+
+		if (isRecvActive && recvRequest.Test(status)) {
 			//printf("%d: write depth (%d)\n", rank, status.Get_source());
-			sendVertex(depth[currParentLocal], status.Get_source(), DEPTH_SEND_TAG);
+			sendVertex(depth[requestedVertex], status.Get_source(), DEPTH_SEND_TAG);
+			isRecvActive = false;
+		}
+
+		startRecv();
+	}
+
+	void DepthBuilderP2PNoBlock::startRecv()
+	{
+		if (!isRecvActive) {
+			recvRequest = comm->Irecv(&requestedVertex,
+						1,
+						VERTEX_TYPE,
+						ANY_SOURCE,
+						LOCAL_SEND_TAG);
+			isRecvActive = true;
 		}
 	}
 
