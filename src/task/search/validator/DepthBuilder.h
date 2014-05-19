@@ -37,8 +37,8 @@ namespace dgmark {
 
 	protected:
 		static const int SYNCH_END_TAG = 24067;
-		static const int LOCAL_SEND_TAG = 467;
-		static const int DEPTH_SEND_TAG = 335;
+		static const int LOCAL_SEND_TAG = 4670;
+		static const int DEPTH_SEND_TAG = 3350;
 
 		Vertex *depth;
 		Graph *graph;

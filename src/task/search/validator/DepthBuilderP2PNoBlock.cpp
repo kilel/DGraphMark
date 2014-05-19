@@ -94,7 +94,7 @@ namespace dgmark {
 		if (tgtRank == rank) {
 			tgtDepth = depth[tgtLocal];
 		} else {
-			Request sendReq = comm->Isend(&tgtLocal, 1, VERTEX_TYPE, tgtRank, LOCAL_SEND_TAG);
+			sendVertex(tgtLocal, tgtRank, LOCAL_SEND_TAG);
 			Request recvReq = comm->Irecv(&tgtDepth, 1, VERTEX_TYPE, tgtRank, DEPTH_SEND_TAG);
 
 			while (!recvReq.Test()) {
@@ -110,18 +110,9 @@ namespace dgmark {
 	{
 		Status status;
 
-		startRecv();
-
 		if (isRecvActive && recvRequest.Test(status)) {
 			//printf("%d: write depth [ %ld] to %d\n", rank, depth[requestedVertex], status.Get_source());
-			if (status.Get_source() != ANY_SOURCE) {
-				//It really had happened to come here!
-				comm->Isend(&depth[requestedVertex],
-					1,
-					VERTEX_TYPE,
-					status.Get_source(),
-					DEPTH_SEND_TAG);
-			}
+			sendVertex(depth[requestedVertex], status.Get_source(), DEPTH_SEND_TAG);
 			isRecvActive = false;
 		}
 
