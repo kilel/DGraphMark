@@ -44,8 +44,7 @@ namespace dgmark {
 				//printf("%d: dist vertex, depth [%ld]\n", rank, depth[localVertex]);
 				distributeVertexDepth(localVertex);
 				vertexState[localVertex] = stateSent;
-				buildState = buildState == buildStateError ?
-					buildStateError : buildStateNextStepRequired;
+				buildState = min(buildState, buildStateNextStepRequired);
 			}
 
 			if (buildState == buildStateError) {
@@ -58,59 +57,68 @@ namespace dgmark {
 		flushBuffers();
 		waitForOthersToEnd();
 
-		if (isRecvRequestActive) {
-			recvRequest.Cancel();
-		}
-
 		comm->Allreduce(IN_PLACE, &buildState, 1, SHORT, MIN);
 	}
 
 	void DepthBuilderBuffered::distributeVertexDepth(Vertex localVertex)
 	{
-		for (int toRank = 0; toRank < size; ++toRank) {
-			const Vertex currGlobal = graph->vertexToGlobal(localVertex);
-			if (toRank == rank) {
-				updateDepth(currGlobal, depth[localVertex]);
+		const size_t startIndex = csrGraph->getStartIndex(localVertex);
+		const size_t endIndex = csrGraph->getEndIndex(localVertex);
+		for (size_t childIndex = startIndex; childIndex < endIndex; ++childIndex) {
+			const Vertex child = csrGraph->edges->at(childIndex)->to;
+			const Vertex childLocal = csrGraph->vertexToLocal(child);
+			const Vertex childRank = csrGraph->vertexRank(child);
+			const Vertex currGlobal = csrGraph->vertexToGlobal(localVertex);
+
+			if (childRank == rank) {
+				updateDepth(currGlobal, childLocal, depth[localVertex] + 1);
 				continue;
-			}
-			size_t &currCount = countToSend[toRank];
-			Vertex *&currBuffer = sendBuffer[toRank];
+			} else {
 
-			currBuffer[currCount] = currGlobal;
-			currBuffer[currCount + 1] = depth[localVertex];
-			currCount += elementSize;
+				while (isSendRequestActive[childRank]) {
+					probeSynchData();
+				}
 
-			if (currCount == sendPackageSize) {
-				sendData(toRank);
+				size_t &currCount = countToSend[childRank];
+				Vertex *&currBuffer = sendBuffer[childRank];
+
+				currBuffer[currCount] = currGlobal;
+				currBuffer[currCount + 1] = childLocal;
+				currBuffer[currCount + 2] = depth[localVertex] + 1;
+				currCount += elementSize;
+
+				if (currCount == sendPackageSize) {
+					sendData(childRank);
+				}
 			}
 		}
 	}
 
 	void DepthBuilderBuffered::processRecvData(size_t countToRead)
 	{
-		for (size_t index = 0; index < countToRead; index += 2) {
-			const Vertex currParent = recvBuffer[index];
-			const Vertex parentDepth = recvBuffer[index + 1];
-			updateDepth(currParent, parentDepth);
+		for (size_t index = 0; index < countToRead; index += elementSize) {
+			const Vertex parentGlobal = recvBuffer[index];
+			const Vertex localChild = recvBuffer[index + 1];
+			const Vertex newDepth = recvBuffer[index + 2];
+			updateDepth(parentGlobal, localChild, newDepth);
 		}
 	}
 
-	void DepthBuilderBuffered::updateDepth(Vertex currParent, Vertex parentDepth)
+	void DepthBuilderBuffered::updateDepth(Vertex parentGlobal, Vertex localVertex, Vertex newDepth)
 	{
-		for (Vertex currVertex = 0; currVertex < graph->numLocalVertex; ++currVertex) {
-			if (parent[currVertex] != currParent) {
-				continue;
-			}
-			Vertex &currDepth = depth[currVertex];
-			short &currState = vertexState[currVertex];
+		if (parent[localVertex] != parentGlobal) {
+			return;
+		}
 
-			if (currState == stateInitial) {
-				currDepth = parentDepth + 1;
-				currState = stateJustFilled;
-			} else if (parentDepth != 0 && currDepth - parentDepth != 1) {
-				buildState = buildStateError;
-				printf("%d: error found cd [%ld], pd [%ld]\n", rank, currDepth, parentDepth);
-			}
+		Vertex &currDepth = depth[localVertex];
+		short &currState = vertexState[localVertex];
+
+		if (currState == stateInitial) {
+			currDepth = newDepth;
+			currState = stateJustFilled;
+		} else if (newDepth != 1 && currDepth != newDepth) { // depth == 1 if parent is root.
+			buildState = buildStateError;
+			printf("%d: depth of %ld  is %ld. New is %ld\n", rank, localVertex, currDepth, newDepth);
 		}
 	}
 

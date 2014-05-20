@@ -142,5 +142,9 @@ namespace dgmark {
 			probeSynchData();
 		}
 		probeSynchData();
+		
+		if (isRecvRequestActive) {
+			recvRequest.Cancel();
+		}
 	}
 }

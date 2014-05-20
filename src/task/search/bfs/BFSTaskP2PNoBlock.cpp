@@ -45,10 +45,6 @@ namespace dgmark {
 		performBFSActualStep();
 		flushBuffers();
 		waitForOthersToEnd();
-
-		if (isRecvRequestActive) {
-			recvRequest.Cancel();
-		}
 	}
 
 	inline void BFSTaskP2PNoBlock::processGlobalChild(Vertex currVertex, Vertex child)

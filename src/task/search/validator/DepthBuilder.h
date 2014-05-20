@@ -24,7 +24,7 @@ namespace dgmark {
 	class DepthBuilder {
 	public:
 
-		DepthBuilder(Graph *graph);
+		DepthBuilder(const Graph *graph);
 		virtual ~DepthBuilder();
 
 		/**
@@ -41,8 +41,9 @@ namespace dgmark {
 		static const int DEPTH_SEND_TAG = 3350;
 
 		Vertex *depth;
-		Graph *graph;
+		const Graph * const graph;
 		const Vertex *parent;
+		const CSRGraph *csrGraph;
 
 		short buildState;
 		static const short buildStateError = 0;

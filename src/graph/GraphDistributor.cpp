@@ -76,6 +76,10 @@ namespace dgmark {
 
 	void GraphDistributor::sendEdgeExternal(Vertex from, Vertex to, int toRank)
 	{
+		while (isSendRequestActive[toRank]) {
+			probeSynchData();
+		}
+		
 		size_t &currCount = countToSend[toRank];
 		Vertex *&currBuffer = sendBuffer[toRank];
 
@@ -118,10 +122,6 @@ namespace dgmark {
 		isOpen = false;
 		flushBuffers();
 		waitForOthersToEnd();
-
-		if (isRecvRequestActive) {
-			recvRequest.Cancel();
-		}
 	}
 }
 

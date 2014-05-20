@@ -34,7 +34,7 @@ namespace dgmark {
 		virtual void prepare(Vertex root);
 		
 	private:
-		static const size_t ELEMENT_SIZE = 2;
+		static const size_t ELEMENT_SIZE = 3;
 		static const size_t BUFFERED_ELEMENTS = 256;
 		
 		short *vertexState;
@@ -43,7 +43,7 @@ namespace dgmark {
 		static const short stateSent = 2;
 
 		void distributeVertexDepth(Vertex localVertex);
-		void updateDepth(Vertex currParent, Vertex parentDepth);
+		void updateDepth(Vertex parentGlobal, Vertex currParent, Vertex parentDepth);
 	};
 }
 

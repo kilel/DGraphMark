@@ -18,7 +18,7 @@
 
 namespace dgmark {
 
-	DepthBuilder::DepthBuilder(Graph *graph) :
+	DepthBuilder::DepthBuilder(const Graph *graph) :
 	graph(graph)
 	{
 		depth = new Vertex[graph->numLocalVertex];
@@ -33,6 +33,7 @@ namespace dgmark {
 	{
 		prepare(parentTree->getRoot());
 		parent = parentTree->getParent();
+		csrGraph = parentTree->getInitialGraph();
 
 		while (buildState == buildStateNextStepRequired) {
 			buildNextStep();
