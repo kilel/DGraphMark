@@ -45,7 +45,6 @@ namespace dgmark {
 		performBFSActualStep();
 		flushBuffers();
 		waitForOthersToEnd();
-		swapQueues();
 
 		if (isRecvRequestActive) {
 			recvRequest.Cancel();

@@ -81,7 +81,6 @@ namespace dgmark {
 			}
 			comm->Barrier();
 		}
-		swapQueues();
 	}
 
 	void BFSTaskRMAFetch::performBFSSynchRMA()
@@ -98,8 +97,6 @@ namespace dgmark {
 					nextQWin->fenceClose(MODE_NOSTORE);
 					nextQWin->fenceOpen(MODE_NOPUT); //allow to put to the queue
 					nextQWin->fenceClose(MODE_NOSTORE);
-					nextQWin->fenceOpen(MODE_NOPUT); //allow to accumulate queue
-					nextQWin->fenceClose(MODE_NOSTORE);
 				}
 			} else { //if fence is not neaded mode
 				break;
@@ -112,7 +109,7 @@ namespace dgmark {
 		Vertex childLocal = graph->vertexToLocal(child);
 		const int childRank = graph->vertexRank(child);
 		Vertex parentOfChild;
-		
+
 		//printf("%d: Getting parent of child\n", rank);
 		requestSynch(true, childRank, BFS_SYNCH_TAG); //fence is needed now
 		pWin->fenceOpen(MODE_NOPUT);
@@ -141,16 +138,12 @@ namespace dgmark {
 			//printf("%d: Last queue index is %ld\n", rank, queueLastIndex);
 			assert(0 <= queueLastIndex && queueLastIndex <= getQueueSize());
 
-			//printf("%d: Putting child to the queue\n", rank);
+			
+			//printf("%d: Updating queue\n", rank);
 			nextQWin->fenceOpen(0);
-			nextQWin->put(&childLocal, 1, childRank, queueLastIndex + 1);
+			nextQWin->put(&childLocal, 1, childRank, ++queueLastIndex);
+			nextQWin->put(&queueLastIndex, 1, childRank, 0);
 			nextQWin->fenceClose(MODE_NOSTORE);
-
-			//printf("%d: Incrementing left edge of the queue\n", rank);
-			Vertex one = 1;
-			nextQWin->fenceOpen(0);
-			nextQWin->accumulate(&one, 1, childRank, 0, SUM); // queue[0] += 1
-			nextQWin->fenceClose(0);
 		}
 	}
 }

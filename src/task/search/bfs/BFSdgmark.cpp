@@ -54,6 +54,7 @@ namespace dgmark {
 		while (isNextStepNeeded()) {
 			performBFS();
 			comm->Barrier();
+			swapQueues();
 			stepCount++;
 		}
 

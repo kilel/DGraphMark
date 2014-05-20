@@ -49,7 +49,6 @@ namespace dgmark {
 			}
 			comm->Barrier();
 		}
-		swapQueues();
 	}
 
 	inline void BFSTaskP2P::processGlobalChild(Vertex currVertex, Vertex child)
