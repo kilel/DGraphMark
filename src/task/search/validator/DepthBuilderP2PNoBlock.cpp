@@ -31,36 +31,39 @@ namespace dgmark {
 	void DepthBuilderP2PNoBlock::buildNextStep()
 	{
 		//printf("%d: step\n\n", rank);
-		buildState = buildStateSuccess;
+		isNextStepRequired = false;
 
 		for (size_t localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
 			const Vertex currParent = parent[localVertex];
+			Vertex &currDepth = depth[localVertex];
 
-			//was not visited
-			if (currParent == graph->numGlobalVertex) {
+			//was not visited or depth is already built.
+			if (currParent == graph->numGlobalVertex
+			|| currDepth < graph->numGlobalVertex) {
 				continue;
 			}
 
-			Vertex &currDepth = depth[localVertex];
-
 			const Vertex parentDepth = getDepth(currParent);
+
 			if (parentDepth == graph->numGlobalVertex) {
 				continue;
 			}
 
 			if (currDepth == graph->numGlobalVertex) {
 				currDepth = parentDepth + 1;
-				buildState = min(buildState, buildStateNextStepRequired);
-			} else if (parentDepth != 0 && currDepth - parentDepth != 1) {
-				buildState = buildStateError;
-				break;
+				isNextStepRequired = true;
 			}
+
 			synchAction();
 		}
 
 		waitForOthersToEnd();
+		comm->Allreduce(IN_PLACE, &isNextStepRequired, 1, SHORT, LOR);
 
-		comm->Allreduce(IN_PLACE, &buildState, 1, SHORT, MIN);
+		if (isRecvActive) {
+			recvRequest.Cancel();
+			isRecvActive = false;
+		}
 	}
 
 	void DepthBuilderP2PNoBlock::prepare(Vertex root)
@@ -71,6 +74,7 @@ namespace dgmark {
 			Vertex rootLocal = graph->vertexToLocal(root);
 			depth[rootLocal] = 0;
 		}
+		isRecvActive = false;
 	}
 
 	void DepthBuilderP2PNoBlock::waitForOthersToEnd()
@@ -98,6 +102,7 @@ namespace dgmark {
 			Request recvReq = comm->Irecv(&tgtDepth, 1, VERTEX_TYPE, tgtRank, DEPTH_SEND_TAG);
 
 			while (!recvReq.Test()) {
+
 				synchAction();
 			}
 
@@ -111,6 +116,7 @@ namespace dgmark {
 		Status status;
 
 		if (isRecvActive && recvRequest.Test(status)) {
+			assert(0 <= requestedVertex && requestedVertex <= graph->numLocalVertex);
 			//printf("%d: write depth [ %ld] to %d\n", rank, depth[requestedVertex], status.Get_source());
 			sendVertex(depth[requestedVertex], status.Get_source(), DEPTH_SEND_TAG);
 			isRecvActive = false;

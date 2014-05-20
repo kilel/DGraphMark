@@ -35,12 +35,8 @@ namespace dgmark {
 		parent = parentTree->getParent();
 		csrGraph = parentTree->getInitialGraph();
 
-		while (buildState == buildStateNextStepRequired) {
+		while (isNextStepRequired) {
 			buildNextStep();
-		}
-
-		if (buildState == buildStateError) {
-			return 0;
 		}
 
 		return depth;
@@ -48,7 +44,7 @@ namespace dgmark {
 
 	void DepthBuilder::prepare(Vertex root)
 	{
-		buildState = buildStateNextStepRequired;
+		isNextStepRequired = true;
 
 		for (Vertex localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
 			depth[localVertex] = graph->numGlobalVertex;

@@ -45,10 +45,7 @@ namespace dgmark {
 		const Vertex *parent;
 		const CSRGraph *csrGraph;
 
-		short buildState;
-		static const short buildStateError = 0;
-		static const short buildStateNextStepRequired = 1;
-		static const short buildStateSuccess = 2;
+		bool isNextStepRequired;
 
 		virtual void buildNextStep() = 0;
 		virtual void prepare(Vertex root);

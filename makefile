@@ -27,7 +27,6 @@ IS_GRAPH_ORIENTED = false
 GRAPH_GENERATOR_TYPE = UNIFORM
 
 #Type of depth builder used in validator. Use BUFFERED of P2PNOBLOCK.
-#BUFFERED is faster.
 VALIDATOR_DEPTH_BUILDER_TYPE = BUFFERED
 
 #compile flags

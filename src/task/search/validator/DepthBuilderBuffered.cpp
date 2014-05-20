@@ -36,7 +36,7 @@ namespace dgmark {
 	void DepthBuilderBuffered::buildNextStep()
 	{
 		prepareBuffers();
-		buildState = buildStateSuccess;
+		isNextStepRequired = false;
 
 		//main action
 		for (Vertex localVertex = 0; localVertex < graph->numLocalVertex; ++localVertex) {
@@ -44,11 +44,6 @@ namespace dgmark {
 				//printf("%d: dist vertex, depth [%ld]\n", rank, depth[localVertex]);
 				distributeVertexDepth(localVertex);
 				vertexState[localVertex] = stateSent;
-				buildState = min(buildState, buildStateNextStepRequired);
-			}
-
-			if (buildState == buildStateError) {
-				break;
 			}
 
 			probeSynchData();
@@ -56,8 +51,7 @@ namespace dgmark {
 
 		flushBuffers();
 		waitForOthersToEnd();
-
-		comm->Allreduce(IN_PLACE, &buildState, 1, SHORT, MIN);
+		comm->Allreduce(IN_PLACE, &isNextStepRequired, 1, SHORT, LOR);
 	}
 
 	void DepthBuilderBuffered::distributeVertexDepth(Vertex localVertex)
@@ -113,12 +107,11 @@ namespace dgmark {
 		Vertex &currDepth = depth[localVertex];
 		short &currState = vertexState[localVertex];
 
+
 		if (currState == stateInitial) {
 			currDepth = newDepth;
 			currState = stateJustFilled;
-		} else if (newDepth != 1 && currDepth != newDepth) { // depth == 1 if parent is root.
-			buildState = buildStateError;
-			printf("%d: depth of %ld  is %ld. New is %ld\n", rank, localVertex, currDepth, newDepth);
+			isNextStepRequired = true;
 		}
 	}
 

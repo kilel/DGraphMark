@@ -172,17 +172,9 @@ namespace dgmark {
 
 	bool ParentTreeValidator::validateDepth(ParentTree *parentTree)
 	{
-		//no need to clean, array cached in depth builder.
-		Vertex *depth = builder->buildDepth(parentTree);
-
-		if (depth == 0) {
-			log << "\nError: cycle detected in result\n";
-			return false;
-		}
-
 		bool isValid = true;
-
 		const Vertex *parent = parentTree->getParent();
+		const Vertex *depth = builder->buildDepth(parentTree);
 
 		//Depth must be built, when vertex was visited, and not, if it was not;
 		//Depth is a value from [0, illegalDepth].
@@ -198,7 +190,7 @@ namespace dgmark {
 		comm->Allreduce(IN_PLACE, &isValid, 1, BOOL, LAND);
 
 		if (!isValid) {
-			log << "\nError: depths builded not for all visited verticies (or for some of unvisited)\n";
+			log << "\nError: parent tree contains cycle\n";
 		}
 
 		return isValid;
