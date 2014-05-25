@@ -59,7 +59,7 @@ namespace dgmark {
 
 	void Benchmark::run()
 	{
-		log << "Running " << task->getName() << " benchmark\n";
+		log << "Running " << getName() << " benchmark\n";
 		isSuccessfullyFinished = true;
 		task->open(graph);
 		log << "\n";
@@ -80,13 +80,17 @@ namespace dgmark {
 	{
 		return task->getTaskOpeningTime();
 	}
+	
+	string Benchmark::getName() {
+		return task->getName();
+	}
 
 	string Benchmark::getStatistics()
 	{
 		stringstream out;
 		out.precision(statisticsPrecision);
 		out.setf(ios::fixed, ios::floatfield);
-		string name = task->getName();
+		string name = getName();
 
 		out << "#\n";
 		out << "#" << name << " benchmark\n";
@@ -117,7 +121,7 @@ namespace dgmark {
 					const ios::fmtflags floatfieldFlag,
 					int precision)
 	{
-		statName = task->getName() + statName;
+		statName = getName() + statName;
 		Statistics* stat = new Statistics(data);
 
 		stringstream out;

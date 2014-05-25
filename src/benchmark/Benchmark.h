@@ -36,6 +36,7 @@ namespace dgmark {
 		void run();
 		double getTaskOpeningTime();
 		virtual string getStatistics();
+		string getName();
 
 	protected:
 		static const int statisticsPrecision = 5;

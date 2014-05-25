@@ -111,7 +111,7 @@ namespace dgmark {
 		Vertex parentOfChild;
 
 		//printf("%d: Getting parent of child\n", rank);
-		requestSynch(true, childRank, BFS_SYNCH_TAG); //fence is needed now
+		requestSynch(true, BFS_SYNCH_TAG); //fence is needed now
 		pWin->fenceOpen(MODE_NOPUT);
 		pWin->get(&parentOfChild, 1, childRank, childLocal);
 		pWin->fenceClose(0);
@@ -120,7 +120,7 @@ namespace dgmark {
 		assert(0 <= parentOfChild && parentOfChild <= graph->numGlobalVertex);
 
 		bool isInnerFenceNeeded = (parentOfChild == graph->numGlobalVertex);
-		requestSynch(isInnerFenceNeeded, childRank, BFS_SYNCH_TAG); // call for inner fence if it is needed
+		requestSynch(isInnerFenceNeeded, BFS_SYNCH_TAG); // call for inner fence if it is needed
 
 		if (isInnerFenceNeeded) {
 			//printf("%d: Putting child to the parent\n", rank);

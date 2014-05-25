@@ -17,6 +17,8 @@
 #include <assert.h>
 #include "../../util/Random.h"
 #include "SearchBenchmark.h"
+#include <cstdlib>
+#include <ctime>
 
 #include "../../task/search/ParentTreeValidator.h"
 

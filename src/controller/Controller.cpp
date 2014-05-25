@@ -101,6 +101,7 @@ namespace dgmark {
 
 		stringstream fileName;
 		fileName << "dgmarkStatistics/dgmark_stat_"
+			<< "g" << grade << "_d" << density << "_"
 			<< (date->tm_year + 1900) << "-"
 			<< (date->tm_mon + 1) << "-"
 			<< date->tm_mday << "_"

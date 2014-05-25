@@ -47,6 +47,7 @@ namespace dgmark {
 		double startTime = Wtime();
 
 		generateInternal(graph);
+		graph->edges->resize(graph->edges->size(), 0);
 
 		comm->Barrier();
 		generationTime = Wtime() - startTime;

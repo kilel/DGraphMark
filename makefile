@@ -20,7 +20,7 @@ OPENMP = false
 BUILD_GRAPH500_BFS = true
 
 #false to make graph unoriented
-IS_GRAPH_ORIENTED = false
+IS_GRAPH_ORIENTED = true
 
 #Type of used generator. Use KRONECKER or UNIFORM.
 #Illegal type will produce failure on start.
